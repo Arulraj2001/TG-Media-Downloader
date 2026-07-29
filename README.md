@@ -4,39 +4,47 @@
   <img src="assets/readme-banner.svg" alt="TG Media Downloader animated banner" width="100%" />
 </p>
 
-### Fast Telegram media downloader for groups, channels, and forum topics
-
 [![GitHub release](https://img.shields.io/github/v/release/Arulraj2001/TG-Downloader-?style=flat-square)](https://github.com/Arulraj2001/TG-Downloader-/releases/latest)
 [![GitHub downloads](https://img.shields.io/github/downloads/Arulraj2001/TG-Downloader-/total?style=flat-square)](https://github.com/Arulraj2001/TG-Downloader-/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-9562E3?style=flat-square)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-0071E3?style=flat-square)](https://www.python.org/)
 
-**TG Media Downloader** is an open-source desktop application for downloading videos, photos, documents, music, voice messages, GIFs, links, and chat exports from Telegram groups and channels. It includes bulk selection, fast concurrent downloads, live progress, pause and resume, duplicate protection, proxy support, and persistent download history.
+TG Media Downloader is a desktop application for downloading media from Telegram groups, channels, and forum topics. It helps you collect photos, videos, documents, audio, voice messages, links, and chat exports in a fast, organized, and resumable way.
 
-The app runs locally on Windows, macOS, and Linux. It uses your own Telegram API credentials and does not send your login details to a third-party server.
+It runs locally on Windows, macOS, and Linux, uses your own Telegram API credentials, and keeps your session data on your device.
 
 > Unofficial software. TG Media Downloader is not affiliated with or endorsed by Telegram.
 
-## Why use TG Media Downloader?
+## Table of contents
 
-- Download media from Telegram groups and channels in bulk.
-- Browse cached media while the latest content refreshes in the background.
-- Select individual files, categories, date ranges, or complete result sets.
-- Monitor live file progress, combined speed, and queue completion.
-- Pause, resume, cancel, reorder, and restore download tasks.
-- Continue interrupted downloads without starting again.
-- Prevent accidental overwrites with duplicate-file renaming.
-- Organize Telegram forum topics into separate folders.
-- Use SOCKS4, SOCKS5, or HTTP proxy connections.
-- Choose light or dark mode in a modern desktop interface.
+- [Why use this tool](#why-use-this-tool)
+- [Supported content](#supported-content)
+- [Quick start](#quick-start)
+- [How it works](#how-it-works)
+- [Features](#features)
+- [Build from source](#build-from-source)
+- [Contributing](#contributing)
+- [Support](#support)
+- [License](#license)
 
-## Supported Telegram content
+## Why use this tool
 
-| Content | Support |
+- Download large batches of Telegram media without manually saving each item.
+- Browse cached media while new results are refreshed in the background.
+- Filter by category, date, or selection set before downloading.
+- Monitor queue progress, speed, and completion in real time.
+- Resume interrupted downloads without restarting from the beginning.
+- Avoid overwriting existing files with smart duplicate handling.
+- Organize output folders using custom naming patterns.
+- Use proxies and dark/light themes for better control and comfort.
+
+## Supported content
+
+| Content type | Supported |
 | --- | --- |
 | Photos and images | Yes |
 | Videos and round videos | Yes |
-| Documents and PDF files | Yes |
+| Documents and PDFs | Yes |
 | Music and audio | Yes |
 | Voice messages | Yes |
 | GIFs and animations | Yes |
@@ -45,26 +53,28 @@ The app runs locally on Windows, macOS, and Linux. It uses your own Telegram API
 | Groups and channels | Yes |
 | Forum topics | Yes |
 
-## Download the app
+## Quick start
 
-Download the latest build from [GitHub Releases](https://github.com/Arulraj2001/TG-Downloader-/releases/latest).
+### Download the app
 
-Release files use names such as:
+Get the latest release from [GitHub Releases](https://github.com/Arulraj2001/TG-Downloader-/releases/latest).
+
+Example release names:
 
 - `TG-Media-Downloader-v1.0.0-Windows-x64.exe`
 - `TG-Media-Downloader-v1.0.0-Linux-x64`
 - `TG-Media-Downloader-v1.0.0-macOS-arm64.dmg`
 
-Windows may warn about an unsigned application. Review the release source and build workflow before choosing **More info > Run anyway**.
+Windows may show a security warning for unsigned builds. Review the source and build workflow before choosing **More info > Run anyway**.
 
-## Run from source
+### Run from source
 
-### Requirements
+#### Requirements
 
 - Python 3.8 or newer
 - A Telegram API ID and API hash from [my.telegram.org](https://my.telegram.org/)
 
-### Installation
+#### Installation
 
 ```bash
 git clone https://github.com/Arulraj2001/TG-Downloader-.git
@@ -84,7 +94,7 @@ Activate the environment:
 source venv/bin/activate
 ```
 
-Install dependencies:
+Install the dependencies:
 
 ```bash
 python -m pip install -r requirements.txt
@@ -97,74 +107,59 @@ API_ID=your_api_id
 API_HASH=your_api_hash
 ```
 
-Start TG Media Downloader:
+Launch the application:
 
 ```bash
 python src/gui.py
 ```
 
-## How to download Telegram media
+## How it works
 
 1. Sign in with your Telegram phone number, verification code, and 2FA password if enabled.
-2. Enter a Telegram username, group or channel ID, invite link, or forum-topic link.
+2. Enter a username, group/channel ID, invite link, or forum topic link.
 3. Select **Fetch media**.
-4. Filter and select the files you want.
+4. Filter and choose the files you want to save.
 5. Select **Download selected**.
-6. Follow live speed and file progress from the Queue page.
+6. Track the queue from the live progress view.
 
-Progress and download history are stored locally in SQLite. Restarting the app restores unfinished tasks and skips completed files.
+Progress and history are stored locally in SQLite, so unfinished downloads can be resumed later.
 
-## Main features
+## Features
 
-### Bulk Telegram downloads
+### Bulk media downloads
+Fetch multiple media categories in parallel and queue them in one action.
 
-Fetch multiple media categories in parallel and add selected files to the download queue in one action.
+### Live progress tracking
+See total progress, file progress, speed, downloaded bytes, completed files, and failures as they update.
 
-### Live download status
-
-See total progress, current file progress, transfer speed, downloaded bytes, completed files, and failed files as they update.
-
-### Reliable resume
-
-Incomplete tasks are saved locally. Downloads can continue after pausing, closing, or restarting the application.
+### Reliable resume support
+Interruptions are handled smoothly with saved task state and recovery.
 
 ### Smart file handling
-
-Already downloaded files are detected by file name and size. Optional duplicate renaming prevents existing files from being replaced.
+Downloaded files are detected by name and size, and duplicate renaming helps prevent overwrites.
 
 ### Flexible folder organization
-
-Build download paths with `{channel}`, `{username}`, `{channel_id}`, `{category}`, `{year}`, `{month}`, and `{day}` variables.
+Build output paths using variables such as `{channel}`, `{username}`, `{channel_id}`, `{category}`, `{year}`, `{month}`, and `{day}`.
 
 ### Local privacy
+Telegram sessions, configuration, cache files, and history remain on your computer. Keep `.env`, `.session`, and database files private.
 
-Telegram sessions, configuration, cached metadata, and download history remain on your computer. Keep `.env`, `.session`, and database files private.
-
-## Settings
-
-- Download folder and folder-name template
-- Forum-topic separation
-- Duplicate-file renaming
+### Settings and customization
+- Download folder and naming templates
+- Forum topic separation
+- Duplicate file handling
 - Telegram message timestamps
 - Concurrent download limit
-- Download speed limit
+- Speed limit
 - Media scan limit
 - SOCKS4, SOCKS5, and HTTP proxies
 - Light and dark themes
 
-## Technology
+## Build from source
 
-- [Python](https://www.python.org/)
-- [Telethon](https://github.com/LonamiWebs/Telethon)
-- [PySide6](https://pypi.org/project/PySide6/)
-- SQLite
-- [cryptg](https://github.com/LonamiWebs/cryptg)
+GitHub Actions can build Windows, Linux, Apple Silicon macOS, and Intel macOS packages. Tagged commits matching `v*` publish build artifacts to GitHub Releases.
 
-## Build executables
-
-GitHub Actions builds Windows, Linux, Apple Silicon macOS, and Intel macOS releases. Tagged commits matching `v*` publish build artifacts to GitHub Releases.
-
-To create a local Windows build:
+To build locally on Windows:
 
 ```powershell
 python -m pip install pyinstaller
@@ -173,7 +168,7 @@ python -m PyInstaller TG-Media-Downloader.spec
 
 ## Contributing
 
-Bug reports, fixes, and documentation improvements are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+Bug reports, feature ideas, and documentation improvements are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 - [Report a bug](https://github.com/Arulraj2001/TG-Downloader-/issues/new)
 - [Suggest a feature](https://github.com/Arulraj2001/TG-Downloader-/discussions)
@@ -182,7 +177,7 @@ Bug reports, fixes, and documentation improvements are welcome. Read [CONTRIBUTI
 
 If TG Media Downloader helps you:
 
-- Star the GitHub repository so more people can find it.
+- Star the repository to help more people discover it.
 - Support the project on [Buy Me a Coffee](https://buymeacoffee.com/x4kqsd0lka).
 - [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/x4kqsd0lka)
 
@@ -193,7 +188,3 @@ Use TG Media Downloader only for content you own or have permission to access. R
 ## License
 
 TG Media Downloader is available under the [MIT License](LICENSE).
-
-## Search terms
-
-TG Media Downloader, Telegram media downloader, Telegram video downloader, Telegram group downloader, Telegram channel downloader, Telegram bulk downloader, Telegram file downloader, Telegram photo downloader, Telegram archive tool, and desktop Telegram downloader.
