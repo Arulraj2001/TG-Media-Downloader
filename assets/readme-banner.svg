@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-label="TG Media Downloader animated banner">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="50%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#38bdf8" />
+      <animate attributeName="x1" values="0%;30%;0%" dur="8s" repeatCount="indefinite" />
+      <animate attributeName="x2" values="100%;70%;100%" dur="8s" repeatCount="indefinite" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#fb923c" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="320" rx="28" fill="url(#bg)" />
+
+  <circle cx="1040" cy="80" r="90" fill="#ffffff" opacity="0.12">
+    <animate attributeName="r" values="90;110;90" dur="6s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="190" cy="250" r="70" fill="#ffffff" opacity="0.12">
+    <animate attributeName="cy" values="250;220;250" dur="5s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="940" cy="240" r="40" fill="#ffffff" opacity="0.10" />
+
+  <rect x="80" y="90" width="260" height="140" rx="24" fill="#0b1120" opacity="0.8" />
+  <rect x="110" y="120" width="120" height="18" rx="9" fill="url(#accent)" />
+  <rect x="110" y="150" width="180" height="12" rx="6" fill="#ffffff" opacity="0.75" />
+  <rect x="110" y="174" width="150" height="12" rx="6" fill="#ffffff" opacity="0.55" />
+
+  <text x="390" y="142" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="54" font-weight="700">
+    TG Media Downloader
+    <animate attributeName="opacity" values="0.95;1;0.95" dur="4s" repeatCount="indefinite" />
+  </text>
+  <text x="390" y="182" fill="#e2e8f0" font-family="Segoe UI, Arial, sans-serif" font-size="24">
+    Fast • Secure • Bulk Telegram media downloads
+  </text>
+
+  <rect x="390" y="210" width="250" height="40" rx="20" fill="url(#accent)" />
+  <text x="515" y="236" fill="#111827" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">
+    Download with confidence
+  </text>
+</svg>

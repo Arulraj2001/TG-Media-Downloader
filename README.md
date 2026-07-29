@@ -1,5 +1,9 @@
 # TG Media Downloader
 
+<p align="center">
+  <img src="assets/readme-banner.svg" alt="TG Media Downloader animated banner" width="100%" />
+</p>
+
 ### Fast Telegram media downloader for groups, channels, and forum topics
 
 [![GitHub release](https://img.shields.io/github/v/release/Arulraj2001/TG-Downloader-?style=flat-square)](https://github.com/Arulraj2001/TG-Downloader-/releases/latest)
@@ -179,7 +183,8 @@ Bug reports, fixes, and documentation improvements are welcome. Read [CONTRIBUTI
 If TG Media Downloader helps you:
 
 - Star the GitHub repository so more people can find it.
-- [Buy me a coffee](https://buymeacoffee.com/x4kqsd0lka).
+- Support the project on [Buy Me a Coffee](https://buymeacoffee.com/x4kqsd0lka).
+- [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/x4kqsd0lka)
 
 ## Responsible use
 
