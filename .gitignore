@@ -1,0 +1,21 @@
+venv/
+.env
+.env.local
+*.session
+*.session-journal
+active_tasks.json
+download_state.json
+downloads/
+__pycache__/
+*.pyc
+*.patch
+*.pyi
+
+# 🗄️ Database & Snapshots
+downloader.db
+*.db
+*.db-journal
+*.bak
+config.json
+dist/
+build
