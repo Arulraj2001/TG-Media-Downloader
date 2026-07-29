@@ -13,9 +13,9 @@ TG Media Downloader is a desktop application for downloading media from Telegram
 
 It runs locally on Windows, macOS, and Linux, uses your own Telegram API credentials, and keeps your session data on your device.
 
-> Unofficial software. TG Media Downloader is not affiliated with or endorsed by Telegram.
+> ✨ Unofficial software. TG Media Downloader is not affiliated with or endorsed by Telegram.
 
-## Table of contents
+## ✨ Table of contents
 
 - [Why use this tool](#why-use-this-tool)
 - [Supported content](#supported-content)
@@ -27,7 +27,7 @@ It runs locally on Windows, macOS, and Linux, uses your own Telegram API credent
 - [Support](#support)
 - [License](#license)
 
-## Why use this tool
+## 🚀 Why use this tool
 
 - Download large batches of Telegram media without manually saving each item.
 - Browse cached media while new results are refreshed in the background.
@@ -38,7 +38,7 @@ It runs locally on Windows, macOS, and Linux, uses your own Telegram API credent
 - Organize output folders using custom naming patterns.
 - Use proxies and dark/light themes for better control and comfort.
 
-## Supported content
+## 📦 Supported content
 
 | Content type | Supported |
 | --- | --- |
@@ -53,7 +53,7 @@ It runs locally on Windows, macOS, and Linux, uses your own Telegram API credent
 | Groups and channels | Yes |
 | Forum topics | Yes |
 
-## Quick start
+## ⚡ Quick start
 
 ### Download the app
 
@@ -113,7 +113,7 @@ Launch the application:
 python src/gui.py
 ```
 
-## How it works
+## 🔄 How it works
 
 1. Sign in with your Telegram phone number, verification code, and 2FA password if enabled.
 2. Enter a username, group/channel ID, invite link, or forum topic link.
@@ -124,7 +124,7 @@ python src/gui.py
 
 Progress and history are stored locally in SQLite, so unfinished downloads can be resumed later.
 
-## Features
+## 🎯 Features
 
 ### Bulk media downloads
 Fetch multiple media categories in parallel and queue them in one action.
@@ -155,7 +155,7 @@ Telegram sessions, configuration, cache files, and history remain on your comput
 - SOCKS4, SOCKS5, and HTTP proxies
 - Light and dark themes
 
-## Build from source
+## 🛠️ Build from source
 
 GitHub Actions can build Windows, Linux, Apple Silicon macOS, and Intel macOS packages. Tagged commits matching `v*` publish build artifacts to GitHub Releases.
 
@@ -166,14 +166,14 @@ python -m pip install pyinstaller
 python -m PyInstaller TG-Media-Downloader.spec
 ```
 
-## Contributing
+## 🤝 Contributing
 
 Bug reports, feature ideas, and documentation improvements are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 - [Report a bug](https://github.com/Arulraj2001/TG-Downloader-/issues/new)
 - [Suggest a feature](https://github.com/Arulraj2001/TG-Downloader-/discussions)
 
-## Support
+## 💖 Support
 
 If TG Media Downloader helps you:
 
@@ -181,10 +181,10 @@ If TG Media Downloader helps you:
 - Support the project on [Buy Me a Coffee](https://buymeacoffee.com/x4kqsd0lka).
 - [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/x4kqsd0lka)
 
-## Responsible use
+## ⚠️ Responsible use
 
 Use TG Media Downloader only for content you own or have permission to access. Respect copyright, privacy, Telegram's Terms of Service, and the rules of each group or channel. The application does not bypass Telegram access controls.
 
-## License
+## 📄 License
 
 TG Media Downloader is available under the [MIT License](LICENSE).
