@@ -307,21 +307,29 @@ class TelegramWorker(QThread):
         clean_input, topic_id = parse_channel_input(channel_input)
         print(f"DEBUG: Starting download for input='{channel_input}' -> clean='{clean_input}', topic='{topic_id}', media='{media_id}'")
         ch_clean = str(clean_input or "").replace("-100", "", 1)
+        clean_task_id = str(task_id or "").replace("-100", "", 1) if task_id else None
+
         for t in tasks:
             if not isinstance(t, dict): continue
-            # Match by explicit ID or by the same rule we use to generate task_id
             tk_chan = str(t.get("channel_input", "")).replace("-100", "", 1)
             tk_media = t.get("media_id")
             tk_topic = t.get("topic_id")
             
             # Reconstruct ID for comparison
-            generated_id = f"{tk_chan}_{tk_topic}_{tk_media}" if tk_topic else f"{tk_chan}_{tk_media}"
-            
-            if task_id == generated_id or (task_id and t.get("task_id") == task_id):
+            generated_id = f"{tk_chan}_{tk_topic}_{tk_media}" if tk_topic is not None else f"{tk_chan}_{tk_media}"
+            db_task_id = str(t.get("task_id", "")).replace("-100", "", 1) if t.get("task_id") else None
+
+            # Match by normalized task_id (stripping -100) or by exact parameters
+            if clean_task_id and (clean_task_id == generated_id or clean_task_id == db_task_id):
                 found_task = t
                 break
             
-            if not task_id and tk_chan == ch_clean and tk_media == media_id and tk_topic == topic_id:
+            if tk_chan == ch_clean and tk_media == media_id and (topic_id is None or tk_topic == topic_id):
+                found_task = t
+                break
+
+            # Fallback match for selective tasks on the same channel/topic
+            if tk_chan == ch_clean and (topic_id is None or tk_topic == topic_id) and t.get("selected_message_ids"):
                 found_task = t
                 break
         
@@ -335,7 +343,8 @@ class TelegramWorker(QThread):
             if selected_message_ids is not None:
                 t["selected_message_ids"] = selected_message_ids
                 t["total_items"] = len(selected_message_ids)
-                t["topic_id"] = topic_id # Ensure topic_id is updated
+                if topic_id is not None:
+                    t["topic_id"] = topic_id
             else:
                 selected_message_ids = t.get("selected_message_ids")
         if not bool(found_task):
@@ -399,9 +408,9 @@ class TelegramWorker(QThread):
         except Exception:
             pass
 
-    def resume_download(self, channel_input, media_id, download_path, download_limit, max_speed_kb):
-        # Explicitly pass is_paused=False to resume
-        self.start_download(channel_input, media_id, download_path, download_limit, max_speed_kb, is_paused=False, selected_message_ids=None)
+    def resume_download(self, channel_input, media_id, download_path, download_limit, max_speed_kb, selected_message_ids=None, task_id=None):
+        # Explicitly pass is_paused=False to resume while preserving task_id and selected_message_ids
+        self.start_download(channel_input, media_id, download_path, download_limit, max_speed_kb, is_paused=False, selected_message_ids=selected_message_ids, task_id=task_id)
         
     def cancel_download(self, task_id):
         self.pause_download(task_id)
@@ -527,7 +536,7 @@ class TelegramWorker(QThread):
             self.signals.channel_fetched.emit({
                 "task_id": task_id,
                 "title": f"⏳ Loading... ({title})",
-                "total_items": 0,
+                "total_items": len(selected_message_ids) if selected_message_ids else 0,
                 "completed": 0,
                 "folder_name": download_path,
                 "channel_input": resolved_chan_id,
@@ -537,11 +546,12 @@ class TelegramWorker(QThread):
                 "download_path": download_path,
                 "download_limit": download_limit,
                 "max_speed_kb": max_speed_kb,
+                "selected_message_ids": selected_message_ids,
                 "files_metadata": []
-            }, 0)
+            }, len(selected_message_ids) if selected_message_ids else 0)
 
             # 3. Fetch real messages (this takes time)
-            if selected_message_ids is not None:
+            if selected_message_ids is not None and len(selected_message_ids) > 0:
                 # Fast path: directly fetch selected messages
                 raw_messages = await self.client.get_messages(channel, ids=selected_message_ids)
                 # Client.get_messages with ids can return None for deleted/inaccessible messages

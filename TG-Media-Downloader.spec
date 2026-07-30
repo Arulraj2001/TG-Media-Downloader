@@ -3,10 +3,10 @@
 
 a = Analysis(
     ['src\\gui.py'],
-    pathex=[],
+    pathex=['src'],
     binaries=[],
     datas=[('src\\assets', 'assets'), ('src\\ui', 'ui')],
-    hiddenimports=['core_downloader', 'telethon', 'PySide6.QtCore', 'PySide6.QtGui', 'PySide6.QtWidgets'],
+    hiddenimports=['core_downloader', 'telethon', 'PySide6.QtCore', 'PySide6.QtGui', 'PySide6.QtWidgets', 'workers', 'workers.telegram_worker', 'utils', 'utils.update_checker'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

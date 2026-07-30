@@ -693,7 +693,7 @@ class MainWindow(QMainWindow):
             deduped = []
             for t in tasks:
                 if not isinstance(t, dict): continue
-                key = (str(t.get("channel_input")), t.get("media_id"))
+                key = (str(t.get("channel_input")).replace("-100", "", 1), t.get("topic_id"), t.get("media_id"))
                 if key not in seen:
                     seen.add(key)
                     deduped.append(t)
@@ -714,12 +714,12 @@ class MainWindow(QMainWindow):
                 
                 # If it's paused, just show the card (no network)
                 if is_paused:
-                    # In UI, we don't 'clean' the ID anymore, we use what's in the task
-                    # but ensure we handle the -100 prefix consistently.
                     ch_id_full = str(chan)
                     m_id = t.get('media_id', 6)
+                    top_id = t.get('topic_id')
+                    task_id_str = f"{ch_id_full}_{top_id}_{m_id}" if top_id is not None else f"{ch_id_full}_{m_id}"
                     self.add_download_card({
-                        "task_id": f"{ch_id_full}_{m_id}",
+                        "task_id": task_id_str,
                         "title": t.get("title") or f"Saved Task: {chan}",
                         "is_paused": True,
                         "download_path": t.get("download_path", "downloads"),
@@ -727,7 +727,8 @@ class MainWindow(QMainWindow):
                         "max_speed_kb": t.get("max_speed_kb", 0),
                         "media_type": m_id,
                         "completed": t.get("completed", 0),
-                        "folder_name": t.get("folder_name") or t.get("download_path", "downloads")
+                        "folder_name": t.get("folder_name") or t.get("download_path", "downloads"),
+                        "selected_message_ids": t.get("selected_message_ids", None)
                     }, t.get("total_items", 0))
                 else:
                     # Stagger starts to avoid UI choking
@@ -1003,7 +1004,8 @@ class MainWindow(QMainWindow):
                 total_items=total_items,
                 completed=data.get("completed", 0),
                 files_metadata=data.get("files_metadata", []),
-                is_paused=data.get("is_paused", card.is_paused) # Maintain local state if not provided
+                is_paused=data.get("is_paused", card.is_paused), # Maintain local state if not provided
+                selected_message_ids=data.get("selected_message_ids", None)
             )
             return
             
@@ -1021,7 +1023,8 @@ class MainWindow(QMainWindow):
             download_path=data.get("download_path", "downloads"),
             download_limit=data.get("download_limit", 5),
             max_speed_kb=data.get("max_speed_kb", 0),
-            files_metadata=data.get("files_metadata", [])
+            files_metadata=data.get("files_metadata", []),
+            selected_message_ids=data.get("selected_message_ids", None)
         )
         self.page_queue.active_layout.addWidget(card)
         self.card_widgets[task_id] = card

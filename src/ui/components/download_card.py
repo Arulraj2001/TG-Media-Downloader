@@ -11,7 +11,7 @@ import os
 class DownloadCard(QWidget):
     def __init__(self, task_id, title, total_items, folder_name, media_type, parent_worker,
                  completed=0, is_paused=False, download_path="downloads", download_limit=5,
-                 max_speed_kb=0, files_metadata=None):
+                 max_speed_kb=0, files_metadata=None, selected_message_ids=None):
         super().__init__()
         self.task_id       = task_id
         self.title         = title
@@ -23,6 +23,7 @@ class DownloadCard(QWidget):
         self.download_limit= download_limit
         self.max_speed_kb  = max_speed_kb
         self.files_metadata= files_metadata or []
+        self.selected_message_ids = selected_message_ids or []
         self.file_rows     = {}
         self.is_expanded   = False
         self.is_paused     = is_paused
@@ -246,7 +247,7 @@ class DownloadCard(QWidget):
         self.open_folder()
         super().mouseDoubleClickEvent(event)
 
-    def refresh_from_metadata(self, title, total_items, completed, files_metadata, is_paused=None):
+    def refresh_from_metadata(self, title, total_items, completed, files_metadata, is_paused=None, selected_message_ids=None):
         if total_items is None:
             total_items = 0
             
@@ -254,6 +255,8 @@ class DownloadCard(QWidget):
         self.total_items   = total_items
         self.completed     = completed
         self.files_metadata= files_metadata or []
+        if selected_message_ids:
+            self.selected_message_ids = selected_message_ids
         self.lbl_title.setText(title)
         self._refresh_aggregate_progress()
         
@@ -497,7 +500,9 @@ class DownloadCard(QWidget):
             self.parent_worker.start_download(
                 channel_input=channel_input, media_id=media_id,
                 download_path=self.download_path, download_limit=self.download_limit,
-                max_speed_kb=self.max_speed_kb, task_id=self.task_id)
+                max_speed_kb=self.max_speed_kb,
+                selected_message_ids=self.selected_message_ids if self.selected_message_ids else None,
+                task_id=self.task_id)
             self.btn_pause.setText("Pause")
             self.lbl_status_text.setText("Downloading...")
             self.lbl_status_text.setProperty("state", "active")
