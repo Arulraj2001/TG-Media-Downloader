@@ -6,10 +6,10 @@ import {
   FileText, Image, Film, Music, Archive, Link as LinkIcon, 
   Smile, MessageSquare, CheckSquare, Square, RefreshCw, Layers,
   ChevronDown, ChevronUp, Pause, Play, Trash2, ShieldCheck, Sparkles, FolderDown, Terminal, Cpu,
-  Key, Phone, CheckCircle2, LogOut, Lock, UserCheck
+  Key, Phone, CheckCircle2, LogOut, Lock, UserCheck, RotateCcw
 } from 'lucide-react'
 
-// Mock Telegram channel data with all 9 desktop categories
+// Mock Telegram channel messages matching Desktop Telethon schema 100%
 const MOCK_CHANNEL_MESSAGES = [
   { id: 101, title: 'Python_Data_Science_Handbook_2026.pdf', size: 15485760, date: '2026-03-15', type: 'files', category: 'PDF Document', ext: 'pdf' },
   { id: 102, title: 'Fullstack_Web_Development_Masterclass.mp4', size: 452428800, date: '2026-03-20', type: 'media', category: 'Video', ext: 'mp4' },
@@ -25,11 +25,12 @@ const MOCK_CHANNEL_MESSAGES = [
 export default function DownloaderView() {
   const { requireAuth, consumeFetch, tgSession, startTelegramConnect, verifyTelegramCode, disconnectTelegram } = useAuth()
   
-  // Telegram Login Input Form State
+  // Telegram Login Form State (Exact Desktop LoginView Fields)
   const [inpApiId, setInpApiId] = useState(tgSession.apiId || '')
   const [inpApiHash, setInpApiHash] = useState(tgSession.apiHash || '')
   const [inpPhone, setInpPhone] = useState(tgSession.phone || '')
   const [inpOtpCode, setInpOtpCode] = useState('')
+  const [inp2faPassword, setInp2faPassword] = useState('')
   const [tgError, setTgError] = useState('')
 
   // Channel & Search State
@@ -38,18 +39,21 @@ export default function DownloaderView() {
   const [isFetching, setIsFetching] = useState(false)
   const [hasFetched, setHasFetched] = useState(false)
   
-  // Tab State
+  // Tab State (Exact 9 Category Tabs from Desktop MediaBrowserDialog)
   const [activeTab, setActiveTab] = useState('all')
   
-  // Search & Filter State
+  // Advanced Filter State (Exact Desktop MediaBrowserDialog Fields)
   const [searchQuery, setSearchQuery] = useState('')
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(true)
+  const [dateStart, setDateStart] = useState('2016-01-01')
+  const [dateEnd, setDateEnd] = useState(new Date().toISOString().split('T')[0])
   const [minSizeMB, setMinSizeMB] = useState('')
   const [maxSizeMB, setMaxSizeMB] = useState('')
+  const [regexPattern, setRegexPattern] = useState('')
   
-  // Sorting State
-  const [sortBy, setSortBy] = useState('Date')
-  const [sortDesc, setSortDesc] = useState(true)
+  // Sorting State (Exact Desktop Sort Options: Date, File Size, File Name)
+  const [sortBy, setSortBy] = useState('Date') // "Date", "File Size", "File Name"
+  const [sortDesc, setSortDesc] = useState(true) // true = Descending, false = Ascending
   
   // Selection State
   const [selectedIds, setSelectedIds] = useState([])
@@ -57,7 +61,7 @@ export default function DownloaderView() {
   // Active Queue State
   const [downloadQueue, setDownloadQueue] = useState([])
 
-  // Step 1: Send Verification Code
+  // Step 1: Send Verification Code (Desktop App Login Step 1)
   const handleSendCode = (e) => {
     e.preventDefault()
     if (!inpApiId || !inpApiHash || !inpPhone) {
@@ -68,7 +72,7 @@ export default function DownloaderView() {
     startTelegramConnect(inpApiId, inpApiHash, inpPhone)
   }
 
-  // Step 2: Verify Code
+  // Step 2: Verify Login Code (Desktop App Login Step 2)
   const handleVerifyCode = (e) => {
     e.preventDefault()
     if (!inpOtpCode) {
@@ -95,19 +99,32 @@ export default function DownloaderView() {
     })
   }
 
-  // Filter & Sort Logic
+  // Filter & Sort Logic (Matching Desktop filter_rows & sort exact logic)
   const getFilteredAndSortedMessages = () => {
     let list = [...MOCK_CHANNEL_MESSAGES]
     
+    // Category tab filter
     if (activeTab !== 'all') {
       list = list.filter(m => m.type === activeTab)
     }
 
+    // Search query filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()
       list = list.filter(m => m.title.toLowerCase().includes(q))
     }
 
+    // Date range filter
+    if (dateStart) {
+      const startMs = new Date(dateStart).getTime()
+      list = list.filter(m => new Date(m.date).getTime() >= startMs)
+    }
+    if (dateEnd) {
+      const endMs = new Date(dateEnd).getTime() + (24 * 60 * 60 * 1000 - 1)
+      list = list.filter(m => new Date(m.date).getTime() <= endMs)
+    }
+
+    // Size range filter (MB)
     if (minSizeMB) {
       const minBytes = parseFloat(minSizeMB) * 1024 * 1024
       list = list.filter(m => m.size >= minBytes)
@@ -117,15 +134,26 @@ export default function DownloaderView() {
       list = list.filter(m => m.size <= maxBytes)
     }
 
+    // Regex pattern filter
+    if (regexPattern.trim()) {
+      try {
+        const regex = new RegExp(regexPattern, 'i')
+        list = list.filter(m => regex.test(m.title))
+      } catch (err) {
+        // Invalid regex ignore
+      }
+    }
+
+    // Sorting logic matching desktop sort
     list.sort((a, b) => {
       let valA, valB
       if (sortBy === 'Date') {
         valA = new Date(a.date).getTime()
         valB = new Date(b.date).getTime()
-      } else if (sortBy === 'Size') {
+      } else if (sortBy === 'File Size') {
         valA = a.size
         valB = b.size
-      } else if (sortBy === 'Name') {
+      } else if (sortBy === 'File Name') {
         valA = a.title.toLowerCase()
         valB = b.title.toLowerCase()
       }
@@ -154,7 +182,16 @@ export default function DownloaderView() {
     setSelectedIds([])
   }
 
-  // Start Direct Download
+  const resetFilters = () => {
+    setSearchQuery('')
+    setDateStart('2016-01-01')
+    setDateEnd(new Date().toISOString().split('T')[0])
+    setMinSizeMB('')
+    setMaxSizeMB('')
+    setRegexPattern('')
+  }
+
+  // Start Direct Download Queue (Desktop Add selected to queue)
   const handleStartDownload = () => {
     requireAuth(() => {
       const idsToDownload = selectedIds.length > 0 ? selectedIds : filteredMessages.map(m => m.id)
@@ -233,45 +270,48 @@ export default function DownloaderView() {
         description="Download files, videos, music, archives, and forum topics directly from Telegram channels. High speed, direct local downloads, and topic filtering."
       />
 
-      {/* Hero Section */}
+      {/* Hero Header */}
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[6px] bg-[#635BFF]/10 border border-[#635BFF]/30 text-[#635BFF] text-xs font-mono font-bold">
-          <Terminal className="w-3.5 h-3.5" />
-          <span>TELEGRAM MTPROTO ACCOUNT CONNECT API</span>
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-[6px] bg-[#635BFF]/10 border border-[#635BFF]/30 text-[#635BFF] text-xs font-mono font-bold">
+          <Terminal className="w-4 h-4 text-[#635BFF]" />
+          <span>LOCAL TELEGRAM MEDIA TOOL v2.7</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          Telegram Channel Media Downloader
+          TG Media Downloader
         </h1>
-        <p className="text-slate-600 dark:text-slate-300 text-sm max-w-2xl">
-          Connect your Telegram account API credentials, pick from your joined channels, and stream media files directly into your browser.
+        <p className="text-slate-600 dark:text-slate-300 text-base max-w-2xl">
+          Connect your Telegram account API credentials, select your joined chats or enter a channel name, choose exact files by category, and watch live progress.
         </p>
       </div>
 
-      {/* ── STEP 1 & 2: TELEGRAM ACCOUNT CONNECTION CARD (Matching Desktop App 100%) ── */}
+      {/* ── STEP 1: CONNECT TELEGRAM ACCOUNT (Exact Desktop LoginView Fields) ── */}
       <div className="glass-panel p-6 rounded-[12px] space-y-6">
         <div className="flex items-center justify-between border-b border-[#CBD5E1] dark:border-[#E6E6E6]/10 pb-3">
-          <div className="flex items-center gap-2">
-            <Key className="w-4 h-4 text-[#635BFF]" />
-            <h2 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm font-mono uppercase">
-              1. Telegram MTProto Client Session
+          <div className="space-y-1">
+            <span className="text-xs font-mono font-bold text-[#635BFF] uppercase">STEP 1 OF 3</span>
+            <h2 className="font-bold text-slate-900 dark:text-white text-lg sm:text-xl tracking-tight">
+              Connect Telegram
             </h2>
+            <p className="text-xs font-mono text-slate-600 dark:text-slate-400">
+              Enter the API details for your Telegram account.
+            </p>
           </div>
 
           {tgSession.connected ? (
             <div className="flex items-center gap-3">
               <span className="badge-mono bg-[#00C48C]/10 text-[#00C48C] border border-[#00C48C]/30 flex items-center gap-1.5 font-bold">
-                <CheckCircle2 className="w-3.5 h-3.5" /> CONNECTED ({tgSession.phone})
+                <CheckCircle2 className="w-4 h-4" /> CONNECTED ({tgSession.phone})
               </span>
               <button
                 onClick={disconnectTelegram}
-                className="py-1 px-3 rounded-[6px] bg-[#FF4B4B]/10 hover:bg-[#FF4B4B]/20 text-[#FF4B4B] text-xs font-mono font-bold transition"
+                className="py-1.5 px-3.5 rounded-[6px] bg-[#FF4B4B]/10 hover:bg-[#FF4B4B]/20 text-[#FF4B4B] text-xs font-mono font-bold transition border border-[#FF4B4B]/30"
               >
                 Disconnect
               </button>
             </div>
           ) : (
             <span className="badge-mono bg-[#FFC700]/10 text-[#FFC700] border border-[#FFC700]/30 font-bold">
-              STEP {tgSession.step} OF 2: NOT CONNECTED
+              STEP {tgSession.step} OF 3
             </span>
           )}
         </div>
@@ -285,75 +325,75 @@ export default function DownloaderView() {
             )}
 
             {tgSession.step === 1 ? (
-              /* Step 1: API ID, API Hash, Phone */
-              <form onSubmit={handleSendCode} className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono">
+              /* Desktop Login Page 1: API ID, API Hash, Phone */
+              <form onSubmit={handleSendCode} className="grid grid-cols-1 sm:grid-cols-3 gap-5 text-sm font-mono">
                 <div>
-                  <label className="block text-slate-600 dark:text-slate-400 font-bold mb-1">API ID *</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">API ID</label>
                   <input
                     type="text"
-                    placeholder="e.g. 12345678"
+                    placeholder="Example: 12345678"
                     value={inpApiId}
                     onChange={(e) => setInpApiId(e.target.value)}
                     required
-                    className="w-full px-3 py-2 rounded-[6px] glass-input text-slate-900 dark:text-white focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-[6px] glass-input text-slate-900 dark:text-white focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 dark:text-slate-400 font-bold mb-1">API HASH *</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">API hash</label>
                   <input
                     type="text"
                     placeholder="32-character API hash"
                     value={inpApiHash}
                     onChange={(e) => setInpApiHash(e.target.value)}
                     required
-                    className="w-full px-3 py-2 rounded-[6px] glass-input text-slate-900 dark:text-white focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-[6px] glass-input text-slate-900 dark:text-white focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 dark:text-slate-400 font-bold mb-1">PHONE NUMBER WITH COUNTRY CODE *</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Phone number with country code</label>
                   <input
                     type="text"
                     placeholder="+91 98765 43210"
                     value={inpPhone}
                     onChange={(e) => setInpPhone(e.target.value)}
                     required
-                    className="w-full px-3 py-2 rounded-[6px] glass-input text-slate-900 dark:text-white focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-[6px] glass-input text-slate-900 dark:text-white focus:outline-none"
                   />
                 </div>
 
                 <div className="sm:col-span-3 pt-2">
-                  <button type="submit" className="btn-fintech-primary text-xs w-full sm:w-auto">
-                    Send Verification Code to Telegram App
+                  <button type="submit" className="btn-fintech-primary text-sm font-semibold w-full sm:w-auto">
+                    Send verification code
                   </button>
                 </div>
               </form>
             ) : (
-              /* Step 2: Verification OTP Code */
-              <form onSubmit={handleVerifyCode} className="space-y-4 text-xs font-mono max-w-md">
+              /* Desktop Login Page 2: Login Code OTP */
+              <form onSubmit={handleVerifyCode} className="space-y-4 text-sm font-mono max-w-md">
                 <p className="text-slate-600 dark:text-slate-300 text-xs">
-                  A verification login code was sent to your Telegram app on phone number <strong className="text-slate-900 dark:text-white">{tgSession.phone}</strong>.
+                  Check your Telegram app for the login code sent to <strong className="text-slate-900 dark:text-white">{tgSession.phone}</strong>.
                 </p>
                 <div>
-                  <label className="block text-slate-600 dark:text-slate-400 font-bold mb-1">LOGIN CODE (OTP) *</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Login code</label>
                   <input
                     type="text"
-                    placeholder="Enter login code"
+                    placeholder="Enter the code"
                     value={inpOtpCode}
                     onChange={(e) => setInpOtpCode(e.target.value)}
                     required
-                    className="w-full px-3 py-2 rounded-[6px] glass-input text-slate-900 dark:text-white focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-[6px] glass-input text-slate-900 dark:text-white focus:outline-none"
                   />
                 </div>
-                <div className="flex items-center gap-3">
-                  <button type="submit" className="btn-fintech-primary text-xs">
-                    Verify and Connect Telegram
+                <div className="flex items-center gap-3 pt-1">
+                  <button type="submit" className="btn-fintech-primary text-sm font-semibold">
+                    Verify and log in
                   </button>
                   <button
                     type="button"
                     onClick={disconnectTelegram}
-                    className="btn-fintech-secondary text-xs"
+                    className="btn-fintech-secondary text-sm font-semibold"
                   >
                     Back
                   </button>
@@ -363,22 +403,22 @@ export default function DownloaderView() {
           </div>
         ) : (
           <div className="text-xs text-slate-600 dark:text-slate-300 font-mono space-y-1">
-            <p>Session Active for <strong className="text-slate-900 dark:text-white">{tgSession.phone}</strong>. Pre-fetched <strong className="text-[#635BFF]">{tgSession.chats.length} joined chats & channels</strong>.</p>
+            <p>Your Telegram session is active. Pre-fetched <strong className="text-[#635BFF]">{tgSession.chats.length} joined channels & groups</strong>.</p>
           </div>
         )}
       </div>
 
-      {/* ── STEP 3: SEARCH CHATS & FETCH MEDIA ── */}
-      <div className="glass-panel p-5 rounded-[12px] space-y-4">
+      {/* ── STEP 2: CHAT SELECTOR & MEDIA FETCH (Exact Desktop MainWindow Controls) ── */}
+      <div className="glass-panel p-6 rounded-[12px] space-y-4">
         <div className="flex flex-col sm:flex-row gap-3">
           
-          {/* Pre-fetched Telegram Joined Chats Dropdown OR Manual Input */}
+          {/* Pre-fetched Joined Chats Dropdown OR Manual Channel Link Input */}
           <div className="relative flex-1">
             {tgSession.connected && tgSession.chats.length > 0 ? (
               <select
                 value={channelInput}
                 onChange={(e) => setChannelInput(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-[6px] glass-input text-xs font-mono text-slate-900 dark:text-white focus:outline-none"
+                className="w-full px-3.5 py-2.5 rounded-[6px] glass-input text-sm font-mono text-slate-900 dark:text-white focus:outline-none"
               >
                 <option value="" className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">-- Select Chat from Your Telegram Account --</option>
                 {tgSession.chats.map(chat => (
@@ -392,11 +432,11 @@ export default function DownloaderView() {
                 <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
                   type="text"
-                  placeholder="Enter channel username (e.g. @study_notes) or public/private link..."
+                  placeholder="Enter channel username (e.g. @study_notes) or link..."
                   value={channelInput}
                   onChange={(e) => setChannelInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleFetch()}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-[6px] glass-input text-xs text-slate-900 dark:text-white focus:outline-none"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-[6px] glass-input text-sm text-slate-900 dark:text-white focus:outline-none"
                 />
               </div>
             )}
@@ -406,7 +446,7 @@ export default function DownloaderView() {
           <select
             value={selectedTopic}
             onChange={(e) => setSelectedTopic(e.target.value)}
-            className="px-3.5 py-2.5 rounded-[6px] glass-input text-xs font-mono text-slate-900 dark:text-white focus:outline-none"
+            className="px-3.5 py-2.5 rounded-[6px] glass-input text-sm font-mono text-slate-900 dark:text-white focus:outline-none"
           >
             <option value="all" className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">TOPIC: ALL (Main Feed)</option>
             <option value="101" className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">TOPIC #1: PDF Textbooks</option>
@@ -417,37 +457,54 @@ export default function DownloaderView() {
           <button
             onClick={handleFetch}
             disabled={isFetching}
-            className="btn-fintech-primary text-xs flex items-center justify-center gap-2 whitespace-nowrap"
+            className="btn-fintech-primary text-sm font-semibold flex items-center justify-center gap-2 whitespace-nowrap"
           >
             {isFetching ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                <span>FETCHING...</span>
+                <span>Fetching...</span>
               </>
             ) : (
               <>
                 <Download className="w-4 h-4" />
-                <span>FETCH MEDIA</span>
+                <span>Fetch media</span>
               </>
             )}
           </button>
         </div>
       </div>
 
-      {/* Media Browser & Filters Area */}
+      {/* ── STEP 3: MEDIA BROWSER DIALOG & FILTERS (Exact Desktop MediaBrowserDialog) ── */}
       {hasFetched && (
         <div className="glass-panel rounded-[12px] p-6 space-y-6">
           
-          {/* Header Controls: Search & Toggle Advanced Filters */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-[#CBD5E1] dark:border-[#E6E6E6]/10 pb-4">
+          {/* Desktop MediaBrowserDialog Hero Header */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#CBD5E1] dark:border-[#E6E6E6]/10 pb-4">
+            <div>
+              <span className="text-xs font-mono font-bold text-[#635BFF] uppercase">MEDIA SELECTION</span>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                {channelInput || 'Telegram Channel'}
+              </h2>
+              <p className="text-xs font-mono text-slate-600 dark:text-slate-400">
+                Choose categories now or load the file list for exact selection.
+              </p>
+            </div>
+
+            <div className="badge-mono bg-[#635BFF]/10 text-[#635BFF] border border-[#635BFF]/30 font-bold text-sm">
+              {selectedIds.length} files selected
+            </div>
+          </div>
+
+          {/* Desktop Search Toolbar */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="relative w-full md:w-80">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               <input
                 type="text"
                 placeholder="Search by file name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 rounded-[6px] glass-input text-xs text-slate-900 dark:text-white focus:outline-none"
+                className="w-full pl-10 pr-3 py-2 rounded-[6px] glass-input text-sm text-slate-900 dark:text-white focus:outline-none"
               />
             </div>
 
@@ -455,46 +512,105 @@ export default function DownloaderView() {
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
               className="btn-fintech-secondary text-xs flex items-center gap-2"
             >
-              <Filter className="w-3.5 h-3.5 text-[#635BFF]" />
-              <span>{showAdvancedFilters ? 'Hide Advanced Filters' : 'Show Advanced Filters'}</span>
+              <Filter className="w-4 h-4 text-[#635BFF]" />
+              <span>{showAdvancedFilters ? 'Hide advanced settings' : 'Show advanced settings'}</span>
             </button>
           </div>
 
-          {/* Advanced Filter Panel */}
+          {/* Exact Desktop FilterPanel (Date range, Size MB, Regex pattern, Reset filters, Sort by) */}
           {showAdvancedFilters && (
-            <div className="p-4 rounded-[6px] glass-card grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
+            <div className="p-5 rounded-[6px] glass-card grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 text-xs font-mono">
+              
+              {/* Date Range */}
               <div>
-                <label className="block text-slate-600 dark:text-slate-400 mb-1 font-mono text-[11px]">MIN SIZE (MB)</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Date range</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={dateStart}
+                    onChange={(e) => setDateStart(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-[6px] glass-input text-slate-900 dark:text-white focus:outline-none"
+                  />
+                  <span className="text-slate-500">to</span>
+                  <input
+                    type="date"
+                    value={dateEnd}
+                    onChange={(e) => setDateEnd(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-[6px] glass-input text-slate-900 dark:text-white focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Size (MB) */}
+              <div>
+                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Size (MB)</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    placeholder="Min MB"
+                    value={minSizeMB}
+                    onChange={(e) => setMinSizeMB(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-[6px] glass-input focus:outline-none"
+                  />
+                  <span className="text-slate-500">-</span>
+                  <input
+                    type="number"
+                    placeholder="Max MB"
+                    value={maxSizeMB}
+                    onChange={(e) => setMaxSizeMB(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-[6px] glass-input focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* File name pattern Regex */}
+              <div>
+                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">File name pattern</label>
                 <input
-                  type="number"
-                  placeholder="e.g. 5"
-                  value={minSizeMB}
-                  onChange={(e) => setMinSizeMB(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-[6px] glass-input focus:outline-none font-mono"
+                  type="text"
+                  placeholder="e.g. ^IMG_.*\.jpg$"
+                  value={regexPattern}
+                  onChange={(e) => setRegexPattern(e.target.value)}
+                  className="w-full px-3 py-1.5 rounded-[6px] glass-input focus:outline-none"
                 />
               </div>
-              <div>
-                <label className="block text-slate-600 dark:text-slate-400 mb-1 font-mono text-[11px]">MAX SIZE (MB)</label>
-                <input
-                  type="number"
-                  placeholder="e.g. 500"
-                  value={maxSizeMB}
-                  onChange={(e) => setMaxSizeMB(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-[6px] glass-input focus:outline-none font-mono"
-                />
-              </div>
-              <div className="flex items-end">
+
+              {/* Reset Filters & Sort Controls */}
+              <div className="sm:col-span-3 flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-[#CBD5E1] dark:border-white/10">
                 <button
-                  onClick={() => { setMinSizeMB(''); setMaxSizeMB(''); setSearchQuery(''); }}
-                  className="w-full py-1.5 px-3 rounded-[6px] bg-[#FF4B4B]/10 text-[#FF4B4B] hover:bg-[#FF4B4B]/20 transition font-semibold text-xs border border-[#FF4B4B]/20"
+                  onClick={resetFilters}
+                  className="btn-fintech-secondary text-xs flex items-center gap-1.5 py-1.5 px-3"
                 >
-                  Reset Filters
+                  <RotateCcw className="w-3.5 h-3.5 text-[#FF4B4B]" />
+                  <span>Reset filters</span>
                 </button>
+
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-700 dark:text-slate-300 font-bold">Sort by</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="px-3 py-1.5 rounded-[6px] glass-input text-xs font-mono text-slate-900 dark:text-white focus:outline-none"
+                  >
+                    <option value="Date" className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">Date</option>
+                    <option value="File Size" className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">File Size</option>
+                    <option value="File Name" className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">File Name</option>
+                  </select>
+
+                  <button
+                    onClick={() => setSortDesc(!sortDesc)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] bg-[#635BFF]/10 text-[#635BFF] border border-[#635BFF]/30 hover:bg-[#635BFF]/20 transition font-mono text-xs font-bold"
+                  >
+                    <ArrowUpDown className="w-3.5 h-3.5" />
+                    <span>{sortDesc ? '⬇ Descending' : '⬆ Ascending'}</span>
+                  </button>
+                </div>
               </div>
+
             </div>
           )}
 
-          {/* 9 Category Tabs */}
+          {/* Exact 9 Desktop Media Category Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-[#CBD5E1] dark:border-[#E6E6E6]/10 text-xs font-medium no-scrollbar">
             {[
               { id: 'all', label: 'All Files', icon: Layers },
@@ -515,66 +631,24 @@ export default function DownloaderView() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-[6px] transition whitespace-nowrap text-xs font-semibold ${
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-[6px] transition whitespace-nowrap text-xs sm:text-sm font-semibold ${
                     activeTab === tab.id
                       ? 'bg-[#635BFF] text-white shadow-sm'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/5'
+                      : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/5'
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className="w-4 h-4" />
                   <span>{tab.label}</span>
-                  <span className="font-mono text-[10px] opacity-80">({count})</span>
+                  <span className="font-mono text-xs opacity-80">({count})</span>
                 </button>
               )
             })}
           </div>
 
-          {/* Tool Headers: Selectors + Sorting Controls */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={selectAll}
-                className="btn-fintech-secondary text-xs py-1 px-3"
-              >
-                Select Visible ({filteredMessages.length})
-              </button>
-              <button
-                onClick={clearSelection}
-                className="btn-fintech-secondary text-xs py-1 px-3"
-              >
-                Clear All
-              </button>
-              <span className="text-slate-600 dark:text-slate-400 ml-2 text-xs font-mono">
-                SELECTED: <strong className="text-[#635BFF]">{selectedIds.length}</strong>
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-slate-600 dark:text-slate-400 text-xs font-mono">SORT BY:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-1 rounded-[6px] glass-input text-xs font-mono focus:outline-none text-slate-900 dark:text-white"
-              >
-                <option value="Date" className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">Date</option>
-                <option value="Size" className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">File Size</option>
-                <option value="Name" className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">File Name</option>
-              </select>
-
-              <button
-                onClick={() => setSortDesc(!sortDesc)}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-[6px] bg-[#635BFF]/10 text-[#635BFF] border border-[#635BFF]/30 hover:bg-[#635BFF]/20 transition font-mono text-xs"
-              >
-                <ArrowUpDown className="w-3.5 h-3.5" />
-                <span>{sortDesc ? 'DESC' : 'ASC'}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* File List Cards */}
-          <div className="space-y-2 max-h-[450px] overflow-y-auto pr-1">
+          {/* File Rows List */}
+          <div className="space-y-2.5 max-h-[480px] overflow-y-auto pr-1">
             {filteredMessages.length === 0 ? (
-              <div className="text-center py-12 text-slate-500 dark:text-slate-400 text-xs font-mono">
+              <div className="text-center py-12 text-slate-500 dark:text-slate-400 text-sm font-mono">
                 No matching media files found for current filter.
               </div>
             ) : (
@@ -584,7 +658,7 @@ export default function DownloaderView() {
                   <div
                     key={item.id}
                     onClick={() => toggleSelect(item.id)}
-                    className={`flex items-center gap-4 p-3.5 rounded-[6px] border transition cursor-pointer ${
+                    className={`flex items-center gap-4 p-4 rounded-[6px] border transition cursor-pointer ${
                       isSelected 
                         ? 'bg-[#635BFF]/10 border-[#635BFF]' 
                         : 'glass-card hover:border-[#635BFF]/40'
@@ -592,35 +666,33 @@ export default function DownloaderView() {
                   >
                     <button className="text-slate-400 hover:text-[#635BFF]">
                       {isSelected ? (
-                        <CheckSquare className="w-4 h-4 text-[#635BFF]" />
+                        <CheckSquare className="w-5 h-5 text-[#635BFF]" />
                       ) : (
-                        <Square className="w-4 h-4 text-slate-400" />
+                        <Square className="w-5 h-5 text-slate-400" />
                       )}
                     </button>
 
-                    <div className="w-8 h-8 rounded-[4px] bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-slate-300 shrink-0">
-                      {item.type === 'files' && <FileText className="w-4 h-4 text-[#635BFF]" />}
-                      {item.type === 'media' && <Film className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
-                      {item.type === 'zips' && <Archive className="w-4 h-4 text-amber-600 dark:text-amber-400" />}
-                      {item.type === 'music' && <Music className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
-                      {item.type === 'voice' && <Sparkles className="w-4 h-4 text-sky-600 dark:text-sky-400" />}
-                      {item.type === 'links' && <LinkIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
-                      {item.type === 'gifs' && <Smile className="w-4 h-4 text-pink-600 dark:text-pink-400" />}
-                      {item.type === 'chat' && <MessageSquare className="w-4 h-4 text-teal-600 dark:text-teal-400" />}
+                    <div className="w-9 h-9 rounded-[4px] bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-slate-300 shrink-0 font-mono font-bold text-xs">
+                      {item.type === 'files' && 'DOC'}
+                      {item.type === 'media' && 'MED'}
+                      {item.type === 'zips' && 'ZIP'}
+                      {item.type === 'music' && 'AUD'}
+                      {item.type === 'voice' && 'VOC'}
+                      {item.type === 'links' && 'URL'}
+                      {item.type === 'gifs' && 'GIF'}
+                      {item.type === 'chat' && 'TXT'}
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-xs sm:text-sm text-slate-900 dark:text-white truncate">{item.title}</p>
-                      <div className="flex items-center gap-3 text-xs font-mono text-slate-600 dark:text-slate-400 mt-0.5">
-                        <span>{item.category}</span>
-                        <span>•</span>
-                        <span>{formatSize(item.size)}</span>
+                      <p className="font-semibold text-sm sm:text-base text-slate-900 dark:text-white truncate">{item.title}</p>
+                      <div className="flex items-center gap-3 text-xs font-mono text-slate-600 dark:text-slate-400 mt-1">
+                        <span className="badge-mono py-0.5 px-2 bg-slate-200 dark:bg-white/10 text-current">{formatSize(item.size)}</span>
                         <span>•</span>
                         <span>{item.date}</span>
                       </div>
                     </div>
 
-                    <span className="badge-mono bg-[#635BFF]/10 text-[#635BFF] border border-[#635BFF]/20 uppercase">
+                    <span className="badge-mono bg-[#635BFF]/10 text-[#635BFF] border border-[#635BFF]/20 uppercase font-bold text-xs">
                       {item.ext}
                     </span>
                   </div>
@@ -629,18 +701,30 @@ export default function DownloaderView() {
             )}
           </div>
 
-          {/* Action Bar Footer */}
-          <div className="flex items-center justify-between pt-4 border-t border-[#CBD5E1] dark:border-[#E6E6E6]/10">
-            <span className="text-xs font-mono text-slate-600 dark:text-slate-400">
-              DIRECT LOCAL STREAMING • ZERO SERVER STORAGE
-            </span>
+          {/* Desktop Dialog Bottom Actions */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-[#CBD5E1] dark:border-[#E6E6E6]/10">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={selectAll}
+                className="btn-fintech-secondary text-xs py-1.5 px-3.5"
+              >
+                Select visible ({filteredMessages.length})
+              </button>
+              <button
+                onClick={clearSelection}
+                className="btn-fintech-secondary text-xs py-1.5 px-3.5"
+              >
+                Clear selection
+              </button>
+            </div>
+
             <button
               onClick={handleStartDownload}
-              className="btn-fintech-primary text-xs flex items-center gap-2"
+              className="btn-fintech-primary text-sm font-bold flex items-center gap-2"
             >
               <FolderDown className="w-4 h-4" />
               <span>
-                Download {selectedIds.length > 0 ? `Selected (${selectedIds.length})` : 'All Visible'}
+                Add {selectedIds.length > 0 ? `${selectedIds.length} files` : 'visible'} to queue
               </span>
             </button>
           </div>
@@ -648,20 +732,20 @@ export default function DownloaderView() {
         </div>
       )}
 
-      {/* Active Download Queue Manager */}
+      {/* Active Download Queue Manager (Desktop Queue Card) */}
       {downloadQueue.length > 0 && (
         <div className="glass-panel rounded-[12px] p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-[#CBD5E1] dark:border-[#E6E6E6]/10 pb-3">
-            <h3 className="font-bold text-slate-900 dark:text-white text-xs font-mono uppercase flex items-center gap-2">
+            <h3 className="font-bold text-slate-900 dark:text-white text-sm font-mono uppercase flex items-center gap-2">
               <Cpu className="w-4 h-4 text-[#635BFF]" />
-              <span>Active Streams Queue ({downloadQueue.length})</span>
+              <span>Active Download Queue ({downloadQueue.length})</span>
             </h3>
           </div>
 
           <div className="space-y-3">
             {downloadQueue.map(job => (
               <div key={job.id} className="glass-card p-4 rounded-[6px] space-y-2">
-                <div className="flex items-center justify-between text-xs font-mono">
+                <div className="flex items-center justify-between text-xs sm:text-sm font-mono">
                   <div>
                     <span className="font-bold text-slate-900 dark:text-white">{job.channel}</span>
                     <span className="text-slate-600 dark:text-slate-400 ml-2">
@@ -671,21 +755,21 @@ export default function DownloaderView() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => toggleJobPause(job.id)}
-                      className="p-1 rounded-[4px] bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20"
+                      className="p-1.5 rounded-[4px] bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20"
                     >
-                      {job.status === 'downloading' ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                      {job.status === 'downloading' ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                     </button>
                     <button
                       onClick={() => removeJob(job.id)}
-                      className="p-1 rounded-[4px] bg-[#FF4B4B]/20 text-[#FF4B4B]"
+                      className="p-1.5 rounded-[4px] bg-[#FF4B4B]/20 text-[#FF4B4B]"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
 
                 {/* Progress bar */}
-                <div className="w-full h-1.5 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
                   <div
                     className={`h-full transition-all duration-300 ${
                       job.status === 'completed' ? 'bg-[#00C48C]' : 'bg-[#635BFF]'
