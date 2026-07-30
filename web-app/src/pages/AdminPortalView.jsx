@@ -68,14 +68,87 @@ export default function AdminPortalView() {
   const [newBlogCategory, setNewBlogCategory] = useState('Guides')
   const [newBlogContent, setNewBlogContent] = useState('')
 
-  if (!isAdmin) {
+  // Admin Auth Gate State
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
+    return localStorage.getItem('tg_admin_authed') === 'true' || isAdmin
+  })
+  const [adminEmailInput, setAdminEmailInput] = useState('')
+  const [adminPasswordInput, setAdminPasswordInput] = useState('')
+  const [adminAuthError, setAdminAuthError] = useState('')
+
+  const PREBUILT_ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'admin@tgdownloader.com'
+  const PREBUILT_ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'admin12345'
+
+  const handleAdminLogin = (e) => {
+    e.preventDefault()
+    if (
+      adminEmailInput.trim().toLowerCase() === PREBUILT_ADMIN_EMAIL.toLowerCase() &&
+      adminPasswordInput === PREBUILT_ADMIN_PASSWORD
+    ) {
+      setIsAdminAuthenticated(true)
+      localStorage.setItem('tg_admin_authed', 'true')
+      setAdminAuthError('')
+    } else {
+      setAdminAuthError('Invalid Admin Email or Password')
+    }
+  }
+
+  const handleAdminLogout = () => {
+    setIsAdminAuthenticated(false)
+    localStorage.removeItem('tg_admin_authed')
+  }
+
+  if (!isAdminAuthenticated) {
     return (
-      <div className="max-w-xl mx-auto px-4 py-20 text-center space-y-4">
-        <div className="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto">
-          <Shield className="w-6 h-6" />
+      <div className="max-w-md mx-auto px-4 py-20">
+        <div className="glass-panel p-8 rounded-2xl border border-rose-500/30 shadow-glow space-y-6 text-slate-100">
+          <div className="text-center space-y-2">
+            <div className="w-14 h-14 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-400 flex items-center justify-center mx-auto shadow-glow">
+              <Shield className="w-7 h-7" />
+            </div>
+            <h2 className="text-2xl font-extrabold text-white">Admin Authentication</h2>
+            <p className="text-xs text-slate-400">Enter your prebuilt admin credentials to access the master portal.</p>
+          </div>
+
+          {adminAuthError && (
+            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-semibold text-center">
+              {adminAuthError}
+            </div>
+          )}
+
+          <form onSubmit={handleAdminLogin} className="space-y-4 text-xs">
+            <div>
+              <label className="block text-slate-300 font-semibold mb-1">Admin Email Address</label>
+              <input
+                type="email"
+                placeholder="admin@tgdownloader.com"
+                value={adminEmailInput}
+                onChange={(e) => setAdminEmailInput(e.target.value)}
+                required
+                className="w-full px-4 py-2.5 rounded-xl glass-input text-white focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-semibold mb-1">Admin Password</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={adminPasswordInput}
+                onChange={(e) => setAdminPasswordInput(e.target.value)}
+                required
+                className="w-full px-4 py-2.5 rounded-xl glass-input text-white focus:outline-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-xs shadow-glow transition"
+            >
+              Sign In to Admin Portal
+            </button>
+          </form>
         </div>
-        <h2 className="text-2xl font-bold text-white">Admin Authentication Required</h2>
-        <p className="text-slate-400 text-sm">You need administrator permissions to view the Admin Portal.</p>
       </div>
     )
   }
@@ -129,6 +202,12 @@ export default function AdminPortalView() {
           <div className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-300">
             Unread Contact: <strong className="text-brand-400">{contactMessages.filter(c => c.status === 'unread').length}</strong>
           </div>
+          <button
+            onClick={handleAdminLogout}
+            className="py-1.5 px-3 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold border border-rose-500/30 transition"
+          >
+            Admin Sign Out
+          </button>
         </div>
       </div>
 

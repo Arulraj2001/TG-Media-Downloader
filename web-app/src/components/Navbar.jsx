@@ -81,17 +81,6 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* Admin Link if admin */}
-            {isAdmin && (
-              <Link
-                to="/admin"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-semibold transition"
-              >
-                <Shield className="w-3.5 h-3.5" />
-                <span>Admin Panel</span>
-              </Link>
-            )}
-
             {/* User Profile / Auth State */}
             {user ? (
               <div className="relative">
@@ -184,16 +173,6 @@ export default function Navbar() {
           >
             Contact Us
           </Link>
-
-          {isAdmin && (
-            <Link
-              to="/admin"
-              onClick={() => setMenuOpen(false)}
-              className="block py-2 text-rose-400 font-medium text-sm"
-            >
-              Admin Panel
-            </Link>
-          )}
 
           <div className="pt-3 border-t border-white/10 flex items-center justify-between">
             {user ? (
