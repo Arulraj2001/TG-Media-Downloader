@@ -2,101 +2,135 @@ import React, { createContext, useContext, useState, useEffect } from 'react'
 
 const AppContext = createContext()
 
+const INITIAL_BLOG_POSTS = [
+  {
+    id: 1,
+    title: 'How to Download Telegram Channel Files in Bulk (2026 Step-by-Step Guide)',
+    slug: 'download-telegram-channel-files-bulk-guide',
+    category: 'Guides',
+    readTime: 6,
+    author: 'TG Downloader Team',
+    date: '2026-03-28',
+    cover: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+    excerpt: 'Learn how to connect your Telegram MTProto API ID and Hash to batch stream and download videos, PDFs, and ZIP archives directly into your browser.',
+    content: `## Complete Guide to Bulk Downloading Telegram Media
+
+Telegram channels and public groups contain valuable learning materials, video courses, research datasets, and audio archives. Downloading these files individually through desktop or mobile apps can be extremely tedious.
+
+### Step 1: Obtain Your Telegram API Credentials
+1. Go to **my.telegram.org** in your browser.
+2. Sign in with your Telegram account phone number (with country code).
+3. Click on **API Development Tools**.
+4. Fill in the app creation form (App title and short name).
+5. Copy your **API ID** (numerical value) and **API Hash** (32-character string).
+
+### Step 2: Connect Your MTProto Session in TG Downloader
+1. Open **TG Media Downloader** web edition.
+2. In the Downloader Tool tab, enter your **API ID**, **API Hash**, and **Phone Number**.
+3. Click **Send verification code**.
+4. Check your official Telegram mobile or desktop app for the login code and enter it into the tool.
+
+### Step 3: Filter, Sort & Stream Local Browser Downloads
+1. Select a chat from your **pre-fetched joined channels dropdown** or paste a public channel link.
+2. Switch across the **9 Category Tabs** (Documents, Media, Archives, Music, etc.).
+3. Filter by **Min/Max MB size** or apply **Regex file name patterns**.
+4. Click **Add selected to queue** to begin direct browser downloads with max MTProto speeds!`
+  },
+  {
+    id: 2,
+    title: 'How to Download Media from Specific Telegram Forum Topics',
+    slug: 'download-telegram-forum-topics-guide',
+    category: 'Tutorials',
+    readTime: 5,
+    author: 'TG Downloader Technical Team',
+    date: '2026-03-25',
+    cover: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80',
+    excerpt: 'Discover how to isolate specific sub-forum topics inside large Telegram channels and extract files without downloading unrelated channel noise.',
+    content: `## Telegram Forum Topics Isolation Guide
+
+Large Telegram communities use **Forum Topics** to separate discussions into sub-channels (e.g. #PDFs, #Video-Courses, #Announcements).
+
+### Why Isolate Forum Topics?
+Standard Telegram downloaders pull files indiscriminately from the main channel feed. TG Media Downloader includes a dedicated **Forum Topic Picker** that allows you to target exact sub-channels.
+
+### How to Target Specific Topics
+1. Connect your Telegram account credentials.
+2. Select your target channel.
+3. Open the **Topic Selector Dropdown** next to the channel search input.
+4. Select the specific topic ID (e.g., Topic #1: PDF Textbooks).
+5. Click **Fetch Media**. The tool will isolate only messages sent within that sub-forum thread.`
+  },
+  {
+    id: 3,
+    title: 'Telegram API ID & Hash: Where to Find & How to Connect Safely',
+    slug: 'telegram-api-id-hash-safety-guide',
+    category: 'Security',
+    readTime: 4,
+    author: 'Security Research Team',
+    date: '2026-03-20',
+    cover: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1200&q=80',
+    excerpt: 'Understand why Telegram MTProto API ID and Hash credentials are required, where to generate them, and how local session storage protects your privacy.',
+    content: `## Understanding Telegram MTProto API Credentials
+
+### What is an API ID and API Hash?
+Telegram requires applications connecting to its official MTProto network to identify themselves via an **API ID** and **API Hash**. These credentials grant client applications permission to read your authorized channels and request media chunks.
+
+### How Session Security Works
+- **Local Storage Only**: Your API credentials and MTProto session state are saved exclusively in your browser's local storage.
+- **Zero Server Caching**: No media files, photos, videos, or documents pass through or get saved on third-party servers. All data transfers happen directly between Telegram servers and your local device.`
+  },
+  {
+    id: 4,
+    title: 'How to Download Telegram Videos & PDFs Without Saving to Server',
+    slug: 'download-telegram-videos-pdfs-direct-local-stream',
+    category: 'Guides',
+    readTime: 5,
+    author: 'TG Downloader Team',
+    date: '2026-03-15',
+    cover: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1200&q=80',
+    excerpt: 'Learn about direct browser local streaming architecture and why zero-server storage ensures maximum download speed and complete privacy.',
+    content: `## Direct Browser Local Streaming Architecture
+
+Traditional web downloaders download files onto their cloud server first and then send a download link to the user. This approach creates privacy bottlenecks and bandwidth limits.
+
+### The TG Downloader Advantage
+TG Media Downloader uses a **Direct Browser Local Streaming Engine**:
+1. Your browser establishes a direct HTTP stream with Telegram MTProto endpoints.
+2. File chunks stream progressively straight into your browser's downloads manager.
+3. Downloads execute at maximum network connection speed with 0 GB server storage overhead.`
+  }
+]
+
 export function AppProvider({ children }) {
-  // System Settings State
   const [systemSettings, setSystemSettings] = useState(() => {
     const saved = localStorage.getItem('tg_system_settings')
     return saved ? JSON.parse(saved) : {
       freeFetchLimit: 5,
       adsFreeUsers: true,
       adsPaidUsers: false,
-      paymentQrCodeUrl: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=400&q=80',
       paymentUpiId: 'admin@upi',
       paymentPaypalMe: 'https://paypal.me/admin',
-      paymentBankDetails: 'Bank: Global Bank | Acc: 1234567890 | IFSC/SWIFT: GBNK001',
-      paymentCryptoWallet: 'USDT TRC20: T9xXXxxxxxxxxxxxxxxxxxxxxxxxx',
       plan3mPrice: 14.99,
       plan6mPrice: 24.99,
       plan12mPrice: 39.99
     }
   })
 
-  // Payment Verification Requests State
   const [payments, setPayments] = useState(() => {
     const saved = localStorage.getItem('tg_payment_verifications')
-    return saved ? JSON.parse(saved) : [
-      {
-        id: 'pv-001',
-        userName: 'John Doe',
-        userEmail: 'john@example.com',
-        planName: '6 Months Pass',
-        planId: 'plan_6m',
-        amount: '$24.99',
-        method: 'QR Code / UPI',
-        refId: 'UTR9876543210',
-        proofUrl: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=600&q=80',
-        date: '2026-03-29 10:45 AM',
-        status: 'pending' // pending, approved, rejected
-      }
-    ]
+    return saved ? JSON.parse(saved) : []
   })
 
-  // Contact Messages State
   const [contactMessages, setContactMessages] = useState(() => {
     const saved = localStorage.getItem('tg_contact_messages')
-    return saved ? JSON.parse(saved) : [
-      {
-        id: 'cm-001',
-        name: 'Sarah Connor',
-        email: 'sarah@example.com',
-        subject: 'Payment Verification Support',
-        message: 'Hi, I paid via PayPal and submitted my transaction ref. Please verify my 12-month VIP subscription.',
-        date: '2026-03-29 11:30 AM',
-        status: 'unread' // unread, read, replied
-      }
-    ]
+    return saved ? JSON.parse(saved) : []
   })
 
-  // Blog Posts State
   const [blogPosts, setBlogPosts] = useState(() => {
     const saved = localStorage.getItem('tg_blog_posts')
-    return saved ? JSON.parse(saved) : [
-      {
-        id: 'post-1',
-        title: 'How to Download Telegram Media Files Directly in Your Browser',
-        slug: 'how-to-download-telegram-media-files-directly',
-        excerpt: 'A complete step-by-step guide on how to browse, filter, and download videos, documents, music, and zip files from any Telegram channel directly in your browser.',
-        category: 'Guides',
-        tags: ['Telegram', 'Downloader', 'Tutorial'],
-        date: '2026-03-25',
-        author: 'TG Downloader Team',
-        readTime: 5,
-        cover: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
-        content: `# How to Download Telegram Media Files Directly in Your Browser\n\nTelegram has become one of the most popular platforms for sharing media, documents, educational content, and archives.\n\n## Key Features:\n- Direct browser downloads\n- 9 Category Tabs\n- Topic Picker selector\n- Date & Size Filters`
-      },
-      {
-        id: 'post-2',
-        title: 'Understanding Telegram Forum Topics and Categorized Downloads',
-        slug: 'understanding-telegram-forum-topics-and-categorized-downloads',
-        excerpt: 'Learn how Telegram Forum Topics work and how to easily isolate and download media from specific sub-topics.',
-        category: 'Tutorials',
-        tags: ['Telegram Forum', 'Topics', 'Media Filtering'],
-        date: '2026-03-20',
-        author: 'TG Downloader Team',
-        readTime: 4,
-        cover: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80',
-        content: `# Understanding Telegram Forum Topics\n\nTelegram Forum Topics allow large communities to organize discussions into sub-channels.\n\n## Benefits:\n- Isolate study materials\n- Avoid fetching unnecessary messages\n- Download specific sub-topics`
-      }
-    ]
+    return saved ? JSON.parse(saved) : INITIAL_BLOG_POSTS
   })
 
-  // Active Subscription State
-  const [activeSubscription, setActiveSubscription] = useState(() => {
-    const saved = localStorage.getItem('tg_user_subscription')
-    return saved ? JSON.parse(saved) : null
-  })
-
-  // Sync to LocalStorage
   useEffect(() => {
     localStorage.setItem('tg_system_settings', JSON.stringify(systemSettings))
   }, [systemSettings])
@@ -113,66 +147,56 @@ export function AppProvider({ children }) {
     localStorage.setItem('tg_blog_posts', JSON.stringify(blogPosts))
   }, [blogPosts])
 
-  useEffect(() => {
-    if (activeSubscription) {
-      localStorage.setItem('tg_user_subscription', JSON.stringify(activeSubscription))
-    } else {
-      localStorage.removeItem('tg_user_subscription')
-    }
-  }, [activeSubscription])
-
-  // Public Actions
-  const submitContactForm = (messageData) => {
-    const newMsg = {
-      id: `cm-${Date.now()}`,
-      ...messageData,
-      date: new Date().toLocaleString(),
-      status: 'unread'
-    }
-    setContactMessages(prev => [newMsg, ...prev])
-  }
-
-  const submitPaymentVerification = (paymentData) => {
-    const newPayment = {
-      id: `pv-${Date.now()}`,
-      ...paymentData,
-      date: new Date().toLocaleString(),
+  const submitPaymentVerification = (verificationData) => {
+    const newRecord = {
+      id: `pay-${Date.now()}`,
+      userName: verificationData.userName || 'User Account',
+      userEmail: verificationData.userEmail || 'user@example.com',
+      planName: verificationData.planName,
+      planId: verificationData.planId,
+      amount: verificationData.amount,
+      method: verificationData.method,
+      refId: verificationData.refId,
+      proofUrl: verificationData.proofUrl || '',
+      date: new Date().toISOString().split('T')[0],
       status: 'pending'
     }
-    setPayments(prev => [newPayment, ...prev])
+    setPayments(prev => [newRecord, ...prev])
   }
 
-  // Admin CRUD Actions
   const approvePaymentAdmin = (paymentId) => {
-    setPayments(prev => prev.map(p => {
-      if (p.id === paymentId) {
-        const approved = { ...p, status: 'approved' }
-        // Activate subscription for user
-        setActiveSubscription({
-          planName: p.planName || 'PRO Plan',
-          durationMonths: p.planId === 'plan_12m' ? 12 : p.planId === 'plan_6m' ? 6 : 3,
-          startsAt: new Date().toISOString(),
-          expiresAt: new Date(Date.now() + 90 * 86400000).toISOString(),
-          status: 'active'
-        })
-        return approved
-      }
-      return p
-    }))
+    setPayments(prev => prev.map(p => p.id === paymentId ? { ...p, status: 'approved' } : p))
   }
 
   const rejectPaymentAdmin = (paymentId) => {
     setPayments(prev => prev.map(p => p.id === paymentId ? { ...p, status: 'rejected' } : p))
   }
 
+  const submitContactForm = (messageData) => {
+    const newMsg = {
+      id: `msg-${Date.now()}`,
+      name: messageData.name,
+      email: messageData.email,
+      subject: messageData.subject || 'General Inquiry',
+      message: messageData.message,
+      date: new Date().toISOString().split('T')[0],
+      status: 'unread'
+    }
+    setContactMessages(prev => [newMsg, ...prev])
+  }
+
   const addBlogPostAdmin = (postData) => {
     const newPost = {
-      id: `post-${Date.now()}`,
-      ...postData,
-      slug: postData.slug || postData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      id: Date.now(),
+      title: postData.title,
+      slug: postData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+      category: postData.category || 'Guides',
+      readTime: postData.readTime || 5,
+      author: postData.author || 'TG Downloader Team',
       date: new Date().toISOString().split('T')[0],
-      author: 'Admin',
-      readTime: Math.ceil(postData.content.length / 500) || 3
+      cover: postData.cover || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+      excerpt: postData.excerpt || postData.content.slice(0, 150) + '...',
+      content: postData.content
     }
     setBlogPosts(prev => [newPost, ...prev])
   }
@@ -181,23 +205,18 @@ export function AppProvider({ children }) {
     setSystemSettings(prev => ({ ...prev, ...newSettings }))
   }
 
-  const markContactReadAdmin = (msgId) => {
-    setContactMessages(prev => prev.map(c => c.id === msgId ? { ...c, status: 'read' } : c))
-  }
-
   const value = {
     systemSettings,
     payments,
     contactMessages,
     blogPosts,
-    activeSubscription,
-    submitContactForm,
     submitPaymentVerification,
     approvePaymentAdmin,
     rejectPaymentAdmin,
+    submitContactForm,
     addBlogPostAdmin,
     updateSystemSettingsAdmin,
-    markContactReadAdmin
+    activeSubscription: payments.find(p => p.status === 'approved') || null
   }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

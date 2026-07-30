@@ -27,8 +27,9 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">Features</h4>
+            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">Features & Tech</h4>
             <ul className="space-y-2 text-xs">
+              <li><Link to="/about" className="hover:text-[#635BFF] transition-colors">About & Technology</Link></li>
               <li><Link to="/downloader" className="hover:text-[#635BFF] transition-colors">Channel Downloader</Link></li>
               <li><Link to="/downloader" className="hover:text-[#635BFF] transition-colors">Forum Topics Browser</Link></li>
               <li><Link to="/downloader" className="hover:text-[#635BFF] transition-colors">Media Filter & Sort</Link></li>
@@ -63,6 +64,7 @@ export default function Footer() {
         <div className="pt-8 border-t border-[#CBD5E1] dark:border-[#E6E6E6]/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono">
           <p>© {new Date().getFullYear()} TG Media Downloader Web Edition. All rights reserved.</p>
           <div className="flex items-center gap-4">
+            <Link to="/about" className="hover:text-[#635BFF] transition-colors">About Us</Link>
             <Link to="/privacy" className="hover:text-[#635BFF] transition-colors">Privacy</Link>
             <Link to="/terms" className="hover:text-[#635BFF] transition-colors">Terms</Link>
             <Link to="/contact" className="hover:text-[#635BFF] transition-colors">Contact</Link>

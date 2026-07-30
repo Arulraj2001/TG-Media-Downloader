@@ -4,15 +4,82 @@ import SeoMeta from '../components/SeoMeta'
 import { 
   Download, Terminal, ShieldCheck, Zap, Layers, FolderDown, 
   ArrowRight, CheckCircle2, Film, FileText, Music, Archive, 
-  Globe, Sparkles, Cpu, Lock, HelpCircle
+  Globe, Sparkles, Cpu, Lock, HelpCircle, Key, Phone, Search, ArrowDownRight, Check
 } from 'lucide-react'
 
 export default function HomeLandingView() {
+  // Schema.org Structured Data for Google Rich Snippets
+  const landingJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "TG Media Downloader",
+        "operatingSystem": "Web, Windows, macOS, Linux",
+        "applicationCategory": "UtilitiesApplication",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "ratingCount": "1250"
+        }
+      },
+      {
+        "@type": "HowTo",
+        "name": "How to Download Telegram Channel Media Files in Bulk",
+        "description": "Step-by-step guide to connecting your Telegram account API credentials, choosing channels or sub-forum topics, filtering files by category, and streaming direct browser downloads.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Connect Telegram API Credentials",
+            "text": "Get your API ID and API Hash from my.telegram.org and enter your phone number to authorize via MTProto login code."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Select Channel or Sub-Forum Topic",
+            "text": "Pick from your joined channels dropdown or enter any public/private Telegram channel link or @username."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Filter & Stream Local Downloads",
+            "text": "Filter files across 9 category tabs (Documents, Videos, Archives, Music, etc.), apply regex and size filters, and stream directly into your browser."
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How do I get my Telegram API ID and API Hash?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Log in to my.telegram.org using your phone number, click on 'API Development Tools', create an application, and copy your API ID and API Hash."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does TG Media Downloader store my Telegram files on a server?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. All media downloads are streamed directly from Telegram MTProto servers straight to your browser's local downloads folder with zero server caching."
+            }
+          }
+        ]
+      }
+    ]
+  }
+
   return (
     <div className="space-y-20 pb-16">
       <SeoMeta
         title="TG Media Downloader - Fast, Bulk & Direct Telegram Downloader"
-        description="Stream and download videos, documents, music, zip archives, and forum topics directly from Telegram channels into your browser."
+        description="Stream and download videos, documents, music, zip archives, and forum topics directly from Telegram channels into your browser with zero server caching."
+        jsonLd={landingJsonLd}
       />
 
       {/* Hero Section - Split Screen */}
@@ -23,7 +90,7 @@ export default function HomeLandingView() {
           <div className="lg:col-span-7 space-y-6">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-[6px] bg-[#635BFF]/10 border border-[#635BFF]/30 text-[#635BFF] text-xs font-mono font-bold tracking-tight">
               <Terminal className="w-4 h-4 text-[#635BFF]" />
-              <span>DIRECT LOCAL STREAMING API ENGINE</span>
+              <span>DIRECT LOCAL STREAMING MTPROTO ENGINE</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-current tracking-tight leading-[1.1]">
@@ -123,6 +190,71 @@ export default function HomeLandingView() {
                 <span className="text-[#635BFF] font-bold">100% SUCCESS</span>
               </div>
 
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS: 3-STEP MEDIA DOWNLOADING WORKFLOW (Detailed & Clear) ── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 pt-6">
+        <div className="text-center space-y-3 max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-[6px] bg-[#635BFF]/10 text-[#635BFF] text-xs font-mono font-bold">
+            <Zap className="w-4 h-4" />
+            <span>HOW IT WORKS - SIMPLE 3-STEP WORKFLOW</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-current tracking-tight">
+            How TG Media Downloader Works
+          </h2>
+          <p className="text-slate-600 dark:text-slate-300 text-base">
+            Follow this simple 3-step workflow to extract and stream Telegram channel files directly to your device.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          
+          {/* Step 1 Card */}
+          <div className="glass-panel p-8 rounded-[12px] space-y-4 relative border-t-4 border-t-[#635BFF]">
+            <div className="w-12 h-12 rounded-[8px] bg-[#635BFF]/10 text-[#635BFF] flex items-center justify-center font-bold text-xl font-mono">
+              01
+            </div>
+            <h3 className="text-xl font-bold text-current">Connect Telegram Account</h3>
+            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+              Enter your **API ID**, **API Hash**, and **Phone Number with country code** (obtained for free from <code className="text-[#635BFF]">my.telegram.org</code>). Input the OTP verification code sent to your Telegram app to establish a secure MTProto session.
+            </p>
+            <div className="pt-2 flex items-center gap-2 text-xs font-mono text-[#00C48C] font-bold">
+              <Check className="w-4 h-4" />
+              <span>Session Stored Locally in Browser</span>
+            </div>
+          </div>
+
+          {/* Step 2 Card */}
+          <div className="glass-panel p-8 rounded-[12px] space-y-4 relative border-t-4 border-t-[#00C48C]">
+            <div className="w-12 h-12 rounded-[8px] bg-[#00C48C]/10 text-[#00C48C] flex items-center justify-center font-bold text-xl font-mono">
+              02
+            </div>
+            <h3 className="text-xl font-bold text-current">Select Channel & Sub-Topic</h3>
+            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+              Pick from your **pre-fetched joined channels dropdown** or enter any public/private channel link or username (e.g. <code className="text-[#635BFF]">@study_notes</code>). Select specific **Forum Sub-Topics** to isolate sub-channels.
+            </p>
+            <div className="pt-2 flex items-center gap-2 text-xs font-mono text-[#00C48C] font-bold">
+              <Check className="w-4 h-4" />
+              <span>Supports Channels, Groups & Topics</span>
+            </div>
+          </div>
+
+          {/* Step 3 Card */}
+          <div className="glass-panel p-8 rounded-[12px] space-y-4 relative border-t-4 border-t-[#FFC700]">
+            <div className="w-12 h-12 rounded-[8px] bg-[#FFC700]/10 text-[#FFC700] flex items-center justify-center font-bold text-xl font-mono">
+              03
+            </div>
+            <h3 className="text-xl font-bold text-current">Filter, Sort & Download</h3>
+            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+              Browse across **9 Category Tabs** (Documents, Videos, Archives, Music, Voice, Links, GIFs, Chat Logs). Filter by date range, size (MB), or **regex patterns**, sort in ascending/descending order, and stream files straight to your device.
+            </p>
+            <div className="pt-2 flex items-center gap-2 text-xs font-mono text-[#00C48C] font-bold">
+              <Check className="w-4 h-4" />
+              <span>Direct Local Streaming Engine</span>
             </div>
           </div>
 
@@ -235,16 +367,23 @@ export default function HomeLandingView() {
         </div>
 
         <div className="space-y-4">
-          <div className="glass-panel p-5 rounded-[12px] space-y-2">
-            <h3 className="font-bold text-current text-sm">How does direct browser downloading work?</h3>
-            <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed">
+          <div className="glass-panel p-6 rounded-[12px] space-y-2">
+            <h3 className="font-bold text-current text-base">How do I get my Telegram API ID and API Hash?</h3>
+            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+              Log in to <code className="text-[#635BFF]">my.telegram.org</code> using your phone number, click on 'API Development Tools', create an application, and copy your API ID and API Hash into the downloader tool.
+            </p>
+          </div>
+
+          <div className="glass-panel p-6 rounded-[12px] space-y-2">
+            <h3 className="font-bold text-current text-base">How does direct browser downloading work?</h3>
+            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
               Files are streamed directly from Telegram servers into your browser's local downloads folder. We do not store or cache your files on our server.
             </p>
           </div>
 
-          <div className="glass-panel p-5 rounded-[12px] space-y-2">
-            <h3 className="font-bold text-current text-sm">What payment options do you accept for Pro passes?</h3>
-            <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed">
+          <div className="glass-panel p-6 rounded-[12px] space-y-2">
+            <h3 className="font-bold text-current text-base">What payment options do you accept for Pro passes?</h3>
+            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
               We accept QR Code / UPI, PayPal, Bank Transfer, and Crypto Wallets with 1-click admin verification. You can also toggle currencies between USD ($), INR (₹), EUR (€), and GBP (£).
             </p>
           </div>
@@ -257,14 +396,14 @@ export default function HomeLandingView() {
           <h2 className="text-3xl sm:text-4xl font-extrabold text-current tracking-tight">
             Ready to Start Extracting Media?
           </h2>
-          <p className="text-slate-600 dark:text-slate-300 text-sm max-w-xl mx-auto">
+          <p className="text-slate-600 dark:text-slate-300 text-base max-w-xl mx-auto">
             Try 5 free fetches right now or get a 3, 6, or 12-month pass for unlimited downloads.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link to="/downloader" className="btn-fintech-primary text-base">
+            <Link to="/downloader" className="btn-fintech-primary text-base font-semibold">
               Launch Downloader Now
             </Link>
-            <Link to="/pricing" className="btn-fintech-secondary text-base">
+            <Link to="/pricing" className="btn-fintech-secondary text-base font-semibold">
               View Pricing Passes
             </Link>
           </div>

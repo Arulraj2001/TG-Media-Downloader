@@ -13,6 +13,7 @@ import UserProfileView from './pages/UserProfileView'
 import PublicBlogView from './pages/PublicBlogView'
 import ContactUsView from './pages/ContactUsView'
 import LegalPolicyView from './pages/LegalPolicyView'
+import AboutView from './pages/AboutView'
 import AdminPortalView from './pages/AdminPortalView'
 
 export default function App() {
@@ -32,6 +33,7 @@ export default function App() {
                 <Route path="/profile" element={<UserProfileView />} />
                 <Route path="/blog" element={<PublicBlogView />} />
                 <Route path="/contact" element={<ContactUsView />} />
+                <Route path="/about" element={<AboutView />} />
                 
                 {/* AdSense Legal Compliance Pages */}
                 <Route path="/privacy" element={<LegalPolicyView type="privacy" />} />
