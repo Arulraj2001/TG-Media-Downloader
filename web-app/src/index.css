@@ -30,14 +30,14 @@ html.dark {
   html {
     background-color: var(--bg-main);
     color: var(--text-main);
-    font-size: 15px; /* Comfortable font size */
+    font-size: 17px; /* Increased base font size */
   }
 
   body {
     background-color: var(--bg-main);
     color: var(--text-main);
     font-family: 'Inter', sans-serif;
-    @apply antialiased transition-colors duration-300 min-h-screen text-sm sm:text-base;
+    @apply antialiased transition-colors duration-300 min-h-screen text-base sm:text-lg;
   }
 
   code, pre, .font-mono {
@@ -71,6 +71,7 @@ html.dark {
   border-color: var(--border-subtle);
   color: var(--text-main);
   border-radius: 6px;
+  font-size: 0.95rem;
   @apply border transition-colors duration-300;
 }
 
@@ -86,9 +87,10 @@ html.dark {
   color: #FFFFFF;
   border-radius: 6px;
   font-weight: 600;
-  padding: 12px 22px;
+  padding: 12px 24px;
+  font-size: 0.95rem;
   transition: all 200ms ease-out;
-  @apply inline-flex items-center justify-center cursor-pointer shadow-sm text-sm sm:text-base;
+  @apply inline-flex items-center justify-center cursor-pointer shadow-sm;
 }
 
 .btn-fintech-primary:hover {
@@ -107,9 +109,10 @@ html.dark {
   color: var(--text-main);
   border-radius: 6px;
   font-weight: 600;
-  padding: 10px 20px;
+  padding: 10px 22px;
+  font-size: 0.95rem;
   transition: all 200ms ease-out;
-  @apply inline-flex items-center justify-center cursor-pointer shadow-sm text-sm;
+  @apply inline-flex items-center justify-center cursor-pointer shadow-sm;
 }
 
 .btn-fintech-secondary:hover {
@@ -119,9 +122,9 @@ html.dark {
 /* Technical Monospace Badges */
 .badge-mono {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   letter-spacing: -0.02em;
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: 6px;
   background-color: var(--badge-bg);
 }
