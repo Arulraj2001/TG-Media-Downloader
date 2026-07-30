@@ -19,7 +19,7 @@ export default function App() {
     <AppProvider>
       <AuthProvider>
         <Router>
-        <div className="flex flex-col min-h-screen bg-[#0F0F12] text-slate-100">
+        <div className="flex flex-col min-h-screen transition-colors duration-300">
           <Navbar />
           <ActionGateModal />
           
