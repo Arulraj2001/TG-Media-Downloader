@@ -5,7 +5,8 @@ import {
   Search, Download, Filter, ArrowUpDown, Calendar, HardDrive, 
   FileText, Image, Film, Music, Archive, Link as LinkIcon, 
   Smile, MessageSquare, CheckSquare, Square, RefreshCw, Layers,
-  ChevronDown, ChevronUp, Pause, Play, Trash2, ShieldCheck, Sparkles, FolderDown, Terminal, Cpu
+  ChevronDown, ChevronUp, Pause, Play, Trash2, ShieldCheck, Sparkles, FolderDown, Terminal, Cpu,
+  Key, Phone, CheckCircle2, LogOut, Lock, UserCheck
 } from 'lucide-react'
 
 // Mock Telegram channel data with all 9 desktop categories
@@ -22,7 +23,16 @@ const MOCK_CHANNEL_MESSAGES = [
 ]
 
 export default function DownloaderView() {
-  const { requireAuth, consumeFetch, freeFetchesRemaining, subscription } = useAuth()
+  const { requireAuth, consumeFetch, tgSession, startTelegramConnect, verifyTelegramCode, disconnectTelegram } = useAuth()
+  
+  // Telegram Login Input Form State
+  const [inpApiId, setInpApiId] = useState(tgSession.apiId || '')
+  const [inpApiHash, setInpApiHash] = useState(tgSession.apiHash || '')
+  const [inpPhone, setInpPhone] = useState(tgSession.phone || '')
+  const [inpOtpCode, setInpOtpCode] = useState('')
+  const [tgError, setTgError] = useState('')
+
+  // Channel & Search State
   const [channelInput, setChannelInput] = useState('')
   const [selectedTopic, setSelectedTopic] = useState('all')
   const [isFetching, setIsFetching] = useState(false)
@@ -38,14 +48,36 @@ export default function DownloaderView() {
   const [maxSizeMB, setMaxSizeMB] = useState('')
   
   // Sorting State
-  const [sortBy, setSortBy] = useState('Date') // Date, Size, Name
-  const [sortDesc, setSortDesc] = useState(true) // true = Descending, false = Ascending
+  const [sortBy, setSortBy] = useState('Date')
+  const [sortDesc, setSortDesc] = useState(true)
   
   // Selection State
   const [selectedIds, setSelectedIds] = useState([])
   
   // Active Queue State
   const [downloadQueue, setDownloadQueue] = useState([])
+
+  // Step 1: Send Verification Code
+  const handleSendCode = (e) => {
+    e.preventDefault()
+    if (!inpApiId || !inpApiHash || !inpPhone) {
+      setTgError('Please enter your Telegram API ID, API Hash, and Phone Number.')
+      return
+    }
+    setTgError('')
+    startTelegramConnect(inpApiId, inpApiHash, inpPhone)
+  }
+
+  // Step 2: Verify Code
+  const handleVerifyCode = (e) => {
+    e.preventDefault()
+    if (!inpOtpCode) {
+      setTgError('Please enter the verification code sent to your Telegram app.')
+      return
+    }
+    setTgError('')
+    verifyTelegramCode(inpOtpCode)
+  }
 
   const handleFetch = () => {
     requireAuth(() => {
@@ -67,18 +99,15 @@ export default function DownloaderView() {
   const getFilteredAndSortedMessages = () => {
     let list = [...MOCK_CHANNEL_MESSAGES]
     
-    // Category tab filter
     if (activeTab !== 'all') {
       list = list.filter(m => m.type === activeTab)
     }
 
-    // Search query filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()
       list = list.filter(m => m.title.toLowerCase().includes(q))
     }
 
-    // Size filters
     if (minSizeMB) {
       const minBytes = parseFloat(minSizeMB) * 1024 * 1024
       list = list.filter(m => m.size >= minBytes)
@@ -88,7 +117,6 @@ export default function DownloaderView() {
       list = list.filter(m => m.size <= maxBytes)
     }
 
-    // Sorting
     list.sort((a, b) => {
       let valA, valB
       if (sortBy === 'Date') {
@@ -209,29 +237,169 @@ export default function DownloaderView() {
       <div className="space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[6px] bg-[#635BFF]/10 border border-[#635BFF]/30 text-[#635BFF] text-xs font-mono font-bold">
           <Terminal className="w-3.5 h-3.5" />
-          <span>DIRECT STREAMING API ENGINE</span>
+          <span>TELEGRAM MTPROTO ACCOUNT CONNECT API</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
           Telegram Channel Media Downloader
         </h1>
         <p className="text-slate-600 dark:text-slate-300 text-sm max-w-2xl">
-          Enter any channel username or link to browse, filter, sort, and stream files directly to your device.
+          Connect your Telegram account API credentials, pick from your joined channels, and stream media files directly into your browser.
         </p>
       </div>
 
-      {/* Input / Control Card */}
+      {/* ── STEP 1 & 2: TELEGRAM ACCOUNT CONNECTION CARD (Matching Desktop App 100%) ── */}
+      <div className="glass-panel p-6 rounded-[12px] space-y-6">
+        <div className="flex items-center justify-between border-b border-[#CBD5E1] dark:border-[#E6E6E6]/10 pb-3">
+          <div className="flex items-center gap-2">
+            <Key className="w-4 h-4 text-[#635BFF]" />
+            <h2 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm font-mono uppercase">
+              1. Telegram MTProto Client Session
+            </h2>
+          </div>
+
+          {tgSession.connected ? (
+            <div className="flex items-center gap-3">
+              <span className="badge-mono bg-[#00C48C]/10 text-[#00C48C] border border-[#00C48C]/30 flex items-center gap-1.5 font-bold">
+                <CheckCircle2 className="w-3.5 h-3.5" /> CONNECTED ({tgSession.phone})
+              </span>
+              <button
+                onClick={disconnectTelegram}
+                className="py-1 px-3 rounded-[6px] bg-[#FF4B4B]/10 hover:bg-[#FF4B4B]/20 text-[#FF4B4B] text-xs font-mono font-bold transition"
+              >
+                Disconnect
+              </button>
+            </div>
+          ) : (
+            <span className="badge-mono bg-[#FFC700]/10 text-[#FFC700] border border-[#FFC700]/30 font-bold">
+              STEP {tgSession.step} OF 2: NOT CONNECTED
+            </span>
+          )}
+        </div>
+
+        {!tgSession.connected ? (
+          <div className="space-y-4">
+            {tgError && (
+              <div className="p-3 rounded-[6px] bg-[#FF4B4B]/10 border border-[#FF4B4B]/30 text-[#FF4B4B] text-xs font-mono font-semibold">
+                {tgError}
+              </div>
+            )}
+
+            {tgSession.step === 1 ? (
+              /* Step 1: API ID, API Hash, Phone */
+              <form onSubmit={handleSendCode} className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono">
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-bold mb-1">API ID *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 12345678"
+                    value={inpApiId}
+                    onChange={(e) => setInpApiId(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 rounded-[6px] glass-input text-slate-900 dark:text-white focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-bold mb-1">API HASH *</label>
+                  <input
+                    type="text"
+                    placeholder="32-character API hash"
+                    value={inpApiHash}
+                    onChange={(e) => setInpApiHash(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 rounded-[6px] glass-input text-slate-900 dark:text-white focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-bold mb-1">PHONE NUMBER WITH COUNTRY CODE *</label>
+                  <input
+                    type="text"
+                    placeholder="+91 98765 43210"
+                    value={inpPhone}
+                    onChange={(e) => setInpPhone(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 rounded-[6px] glass-input text-slate-900 dark:text-white focus:outline-none"
+                  />
+                </div>
+
+                <div className="sm:col-span-3 pt-2">
+                  <button type="submit" className="btn-fintech-primary text-xs w-full sm:w-auto">
+                    Send Verification Code to Telegram App
+                  </button>
+                </div>
+              </form>
+            ) : (
+              /* Step 2: Verification OTP Code */
+              <form onSubmit={handleVerifyCode} className="space-y-4 text-xs font-mono max-w-md">
+                <p className="text-slate-600 dark:text-slate-300 text-xs">
+                  A verification login code was sent to your Telegram app on phone number <strong className="text-slate-900 dark:text-white">{tgSession.phone}</strong>.
+                </p>
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-bold mb-1">LOGIN CODE (OTP) *</label>
+                  <input
+                    type="text"
+                    placeholder="Enter login code"
+                    value={inpOtpCode}
+                    onChange={(e) => setInpOtpCode(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 rounded-[6px] glass-input text-slate-900 dark:text-white focus:outline-none"
+                  />
+                </div>
+                <div className="flex items-center gap-3">
+                  <button type="submit" className="btn-fintech-primary text-xs">
+                    Verify and Connect Telegram
+                  </button>
+                  <button
+                    type="button"
+                    onClick={disconnectTelegram}
+                    className="btn-fintech-secondary text-xs"
+                  >
+                    Back
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        ) : (
+          <div className="text-xs text-slate-600 dark:text-slate-300 font-mono space-y-1">
+            <p>Session Active for <strong className="text-slate-900 dark:text-white">{tgSession.phone}</strong>. Pre-fetched <strong className="text-[#635BFF]">{tgSession.chats.length} joined chats & channels</strong>.</p>
+          </div>
+        )}
+      </div>
+
+      {/* ── STEP 3: SEARCH CHATS & FETCH MEDIA ── */}
       <div className="glass-panel p-5 rounded-[12px] space-y-4">
         <div className="flex flex-col sm:flex-row gap-3">
+          
+          {/* Pre-fetched Telegram Joined Chats Dropdown OR Manual Input */}
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-            <input
-              type="text"
-              placeholder="Enter channel username (e.g. @study_notes) or link..."
-              value={channelInput}
-              onChange={(e) => setChannelInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleFetch()}
-              className="w-full pl-10 pr-4 py-2.5 rounded-[6px] glass-input text-xs text-slate-900 dark:text-white focus:outline-none"
-            />
+            {tgSession.connected && tgSession.chats.length > 0 ? (
+              <select
+                value={channelInput}
+                onChange={(e) => setChannelInput(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-[6px] glass-input text-xs font-mono text-slate-900 dark:text-white focus:outline-none"
+              >
+                <option value="" className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">-- Select Chat from Your Telegram Account --</option>
+                {tgSession.chats.map(chat => (
+                  <option key={chat.id} value={`@${chat.username}`} className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">
+                    {chat.title} (@{chat.username}) - {chat.unread} unread
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="relative">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <input
+                  type="text"
+                  placeholder="Enter channel username (e.g. @study_notes) or public/private link..."
+                  value={channelInput}
+                  onChange={(e) => setChannelInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleFetch()}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-[6px] glass-input text-xs text-slate-900 dark:text-white focus:outline-none"
+                />
+              </div>
+            )}
           </div>
 
           {/* Forum Topic Picker */}
@@ -326,7 +494,7 @@ export default function DownloaderView() {
             </div>
           )}
 
-          {/* 9 Category Tabs (Matching Desktop App 100%) */}
+          {/* 9 Category Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-[#CBD5E1] dark:border-[#E6E6E6]/10 text-xs font-medium no-scrollbar">
             {[
               { id: 'all', label: 'All Files', icon: Layers },
@@ -363,8 +531,6 @@ export default function DownloaderView() {
 
           {/* Tool Headers: Selectors + Sorting Controls */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
-            
-            {/* Selection Controls */}
             <div className="flex items-center gap-2">
               <button
                 onClick={selectAll}
@@ -383,7 +549,6 @@ export default function DownloaderView() {
               </span>
             </div>
 
-            {/* Sorting Controls */}
             <div className="flex items-center gap-2">
               <span className="text-slate-600 dark:text-slate-400 text-xs font-mono">SORT BY:</span>
               <select
