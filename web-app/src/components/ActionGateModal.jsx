@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { X, Mail, Lock, ShieldCheck, Sparkles } from 'lucide-react'
+import { X, Mail, Lock, ShieldCheck, Terminal } from 'lucide-react'
 
 export default function ActionGateModal() {
   const { showAuthModal, setShowAuthModal, signInWithGoogle, signInWithEmail } = useAuth()
@@ -28,32 +28,32 @@ export default function ActionGateModal() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-md bg-[#18181D] border border-white/10 rounded-2xl p-6 md:p-8 shadow-glow text-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div className="relative w-full max-w-md glass-panel border-white/20 rounded-[12px] p-6 md:p-8 shadow-lift text-current">
         
         {/* Close Button */}
         <button
           onClick={() => setShowAuthModal(false)}
-          className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5 transition"
+          className="absolute top-4 right-4 text-slate-400 hover:text-current p-1 rounded-[4px] hover:bg-white/10 transition"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header Badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-semibold mb-4">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Sign in Required</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[6px] bg-[#635BFF]/10 border border-[#635BFF]/30 text-[#635BFF] text-xs font-mono font-medium mb-4">
+          <Terminal className="w-3.5 h-3.5" />
+          <span>AUTHENTICATION REQUIRED</span>
         </div>
 
-        <h2 className="text-2xl font-bold text-white mb-2">
-          {isSignUp ? 'Create your Account' : 'Welcome to TG Downloader'}
+        <h2 className="text-xl font-bold text-current mb-2">
+          {isSignUp ? 'Create your Account' : 'Sign in to TG Downloader'}
         </h2>
-        <p className="text-slate-400 text-sm mb-6">
+        <p className="text-slate-400 text-xs mb-6">
           Sign in to fetch channels, search forum topics, and stream downloads directly to your device.
         </p>
 
         {errorMsg && (
-          <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium">
+          <div className="mb-4 p-3 rounded-[6px] bg-[#FF4B4B]/10 border border-[#FF4B4B]/30 text-[#FF4B4B] text-xs font-semibold font-mono">
             {errorMsg}
           </div>
         )}
@@ -61,9 +61,9 @@ export default function ActionGateModal() {
         {/* 1-Click Google OAuth */}
         <button
           onClick={signInWithGoogle}
-          className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-white text-slate-900 font-semibold hover:bg-slate-100 transition shadow-md text-sm mb-4"
+          className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-[6px] bg-white text-slate-900 font-semibold hover:bg-slate-100 transition border border-slate-200 text-xs mb-4 shadow-sm"
         >
-          <svg className="w-5 h-5" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
@@ -73,22 +73,22 @@ export default function ActionGateModal() {
         </button>
 
         <div className="flex items-center gap-3 my-4">
-          <div className="h-px bg-white/10 flex-1"></div>
-          <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Or with Email</span>
-          <div className="h-px bg-white/10 flex-1"></div>
+          <div className="h-px bg-[#E6E6E6]/10 flex-1"></div>
+          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-mono">Or with Email</span>
+          <div className="h-px bg-[#E6E6E6]/10 flex-1"></div>
         </div>
 
         {/* Email Form */}
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
             <div className="relative">
-              <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               <input
                 type="email"
                 placeholder="email@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-sm text-white focus:outline-none"
+                className="w-full pl-9 pr-4 py-2.5 rounded-[6px] glass-input text-xs text-current focus:outline-none"
                 required
               />
             </div>
@@ -96,13 +96,13 @@ export default function ActionGateModal() {
 
           <div>
             <div className="relative">
-              <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+              <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               <input
                 type="password"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-sm text-white focus:outline-none"
+                className="w-full pl-9 pr-4 py-2.5 rounded-[6px] glass-input text-xs text-current focus:outline-none"
                 required
               />
             </div>
@@ -111,9 +111,9 @@ export default function ActionGateModal() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 text-white font-semibold hover:from-brand-500 hover:to-brand-400 transition shadow-glow text-sm"
+            className="w-full btn-fintech-primary text-xs"
           >
-            {loading ? 'Processing...' : isSignUp ? 'Sign Up with Email' : 'Sign In with Email'}
+            {loading ? 'PROCESSING...' : isSignUp ? 'Sign Up with Email' : 'Sign In with Email'}
           </button>
         </form>
 
@@ -122,16 +122,16 @@ export default function ActionGateModal() {
           {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
           <button
             onClick={() => { setIsSignUp(!isSignUp); setErrorMsg(''); }}
-            className="text-brand-400 font-semibold hover:underline"
+            className="text-[#635BFF] font-semibold hover:underline"
           >
             {isSignUp ? 'Sign In' : 'Sign Up'}
           </button>
         </div>
 
         {/* Privacy Note */}
-        <div className="mt-4 flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Zero media stored. Direct local browser downloads.</span>
+        <div className="mt-4 flex items-center justify-center gap-1.5 text-[11px] font-mono text-slate-400">
+          <ShieldCheck className="w-3.5 h-3.5 text-[#00C48C]" />
+          <span>ZERO MEDIA STORED • DIRECT BROWSER DOWNLOADS</span>
         </div>
 
       </div>

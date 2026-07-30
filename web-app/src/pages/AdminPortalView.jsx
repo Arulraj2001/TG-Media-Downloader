@@ -4,7 +4,7 @@ import { useApp } from '../context/AppContext'
 import { 
   Shield, Check, X, Eye, FileText, DollarSign, MessageSquare, 
   Settings, PenTool, LayoutDashboard, Sliders, CheckCircle2, Clock, 
-  AlertCircle, Sparkles, Image as ImageIcon, Plus, Edit3, Trash2
+  AlertCircle, Sparkles, Image as ImageIcon, Plus, Edit3, Trash2, Terminal
 } from 'lucide-react'
 
 export default function AdminPortalView() {
@@ -64,61 +64,6 @@ export default function AdminPortalView() {
     localStorage.removeItem('tg_admin_authed')
   }
 
-  if (!isAdminAuthenticated) {
-    return (
-      <div className="max-w-md mx-auto px-4 py-20">
-        <div className="glass-panel p-8 rounded-2xl border border-rose-500/30 shadow-glow space-y-6 text-slate-100">
-          <div className="text-center space-y-2">
-            <div className="w-14 h-14 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-400 flex items-center justify-center mx-auto shadow-glow">
-              <Shield className="w-7 h-7" />
-            </div>
-            <h2 className="text-2xl font-extrabold text-white">Admin Authentication</h2>
-            <p className="text-xs text-slate-400">Enter your prebuilt admin credentials to access the master portal.</p>
-          </div>
-
-          {adminAuthError && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-semibold text-center">
-              {adminAuthError}
-            </div>
-          )}
-
-          <form onSubmit={handleAdminLogin} className="space-y-4 text-xs">
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Admin Email Address</label>
-              <input
-                type="email"
-                placeholder="admin@tgdownloader.com"
-                value={adminEmailInput}
-                onChange={(e) => setAdminEmailInput(e.target.value)}
-                required
-                className="w-full px-4 py-2.5 rounded-xl glass-input text-white focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Admin Password</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={adminPasswordInput}
-                onChange={(e) => setAdminPasswordInput(e.target.value)}
-                required
-                className="w-full px-4 py-2.5 rounded-xl glass-input text-white focus:outline-none"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-xs shadow-glow transition"
-            >
-              Sign In to Admin Portal
-            </button>
-          </form>
-        </div>
-      </div>
-    )
-  }
-
   // 1-Click Approve Payment
   const approvePayment = (id) => {
     approvePaymentAdmin(id)
@@ -158,41 +103,96 @@ export default function AdminPortalView() {
     alert('System settings & subscription prices updated across the web app!')
   }
 
+  if (!isAdminAuthenticated) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-20">
+        <div className="glass-panel p-8 rounded-[12px] shadow-lift space-y-6 text-current">
+          <div className="text-center space-y-2">
+            <div className="w-12 h-12 rounded-[6px] bg-[#FF4B4B]/10 border border-[#FF4B4B]/30 text-[#FF4B4B] flex items-center justify-center mx-auto">
+              <Shield className="w-6 h-6" />
+            </div>
+            <h2 className="text-xl font-bold text-current">Admin Authentication</h2>
+            <p className="text-xs text-slate-400 font-mono">ENTER PREBUILT ADMIN CREDENTIALS</p>
+          </div>
+
+          {adminAuthError && (
+            <div className="p-3 rounded-[6px] bg-[#FF4B4B]/10 border border-[#FF4B4B]/30 text-[#FF4B4B] text-xs font-semibold font-mono text-center">
+              {adminAuthError}
+            </div>
+          )}
+
+          <form onSubmit={handleAdminLogin} className="space-y-4 text-xs">
+            <div>
+              <label className="block text-slate-400 font-medium mb-1">Admin Email Address</label>
+              <input
+                type="email"
+                placeholder="admin@tgdownloader.com"
+                value={adminEmailInput}
+                onChange={(e) => setAdminEmailInput(e.target.value)}
+                required
+                className="w-full px-3.5 py-2.5 rounded-[6px] glass-input text-current focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-400 font-medium mb-1">Admin Password</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={adminPasswordInput}
+                onChange={(e) => setAdminPasswordInput(e.target.value)}
+                required
+                className="w-full px-3.5 py-2.5 rounded-[6px] glass-input text-current focus:outline-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full btn-fintech-primary text-xs"
+            >
+              Sign In to Admin Portal
+            </button>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-10 space-y-8">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel p-6 rounded-2xl border border-rose-500/20 shadow-glow">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel p-6 rounded-[12px]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-400 flex items-center justify-center font-bold">
+          <div className="w-9 h-9 rounded-[6px] bg-[#635BFF] text-white flex items-center justify-center font-bold">
             <Shield className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">Admin Master Control Portal</h1>
-            <p className="text-slate-400 text-xs">Manage payments, subscriptions, blog posts, contact inbox, and system limits.</p>
+            <h1 className="text-xl font-bold text-current">Admin Master Control Portal</h1>
+            <p className="text-slate-400 text-xs font-mono">SYSTEM & PAYMENT MANAGEMENT API</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 text-xs">
-          <div className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-300">
-            Pending Payments: <strong className="text-amber-400">{pendingPayments.filter(p => p.status === 'pending').length}</strong>
+        <div className="flex items-center gap-3 text-xs font-mono">
+          <div className="px-3 py-1.5 rounded-[6px] glass-card">
+            Pending Payments: <strong className="text-[#FFC700]">{payments.filter(p => p.status === 'pending').length}</strong>
           </div>
-          <div className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-300">
-            Unread Contact: <strong className="text-brand-400">{contactMessages.filter(c => c.status === 'unread').length}</strong>
+          <div className="px-3 py-1.5 rounded-[6px] glass-card">
+            Unread Inbox: <strong className="text-[#635BFF]">{contactMessages.filter(c => c.status === 'unread').length}</strong>
           </div>
           <button
             onClick={handleAdminLogout}
-            className="py-1.5 px-3 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold border border-rose-500/30 transition"
+            className="py-1.5 px-3 rounded-[6px] bg-[#FF4B4B]/10 hover:bg-[#FF4B4B]/20 text-[#FF4B4B] font-semibold border border-[#FF4B4B]/30 transition"
           >
-            Admin Sign Out
+            Sign Out
           </button>
         </div>
       </div>
 
       {/* Admin Module Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-white/10 text-xs font-semibold no-scrollbar">
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-[#E6E6E6]/10 text-xs font-semibold font-mono no-scrollbar">
         {[
-          { id: 'payments', label: 'Payment Verifications', icon: DollarSign, badge: pendingPayments.filter(p => p.status === 'pending').length },
+          { id: 'payments', label: 'Payment Verifications', icon: DollarSign, badge: payments.filter(p => p.status === 'pending').length },
           { id: 'blog', label: 'Blog Manager', icon: PenTool, badge: 0 },
           { id: 'contact', label: 'Contact Messages Inbox', icon: MessageSquare, badge: contactMessages.filter(c => c.status === 'unread').length },
           { id: 'pricing', label: 'Pricing & Plans', icon: Sliders, badge: 0 },
@@ -203,16 +203,16 @@ export default function AdminPortalView() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition whitespace-nowrap ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-[6px] transition whitespace-nowrap ${
                 activeTab === tab.id
-                  ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-glow font-bold'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-[#635BFF] text-white shadow-subtle'
+                  : 'text-slate-400 hover:text-current hover:bg-white/5'
               }`}
             >
               <Icon className="w-4 h-4" />
               <span>{tab.label}</span>
               {tab.badge > 0 && (
-                <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-extrabold">
+                <span className="px-2 py-0.5 rounded-full bg-[#FF4B4B] text-white text-[10px] font-bold">
                   {tab.badge}
                 </span>
               )}
@@ -223,70 +223,56 @@ export default function AdminPortalView() {
 
       {/* TAB 1: PAYMENT VERIFICATIONS */}
       {activeTab === 'payments' && (
-        <div className="glass-panel p-6 rounded-2xl space-y-6 shadow-glow border border-white/10">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
-            <h2 className="font-bold text-white text-base">Pending Payment Verification Requests</h2>
-            <span className="text-xs text-slate-400">Inspect proof screenshots & 1-Click Approve</span>
+        <div className="glass-panel p-6 rounded-[12px] space-y-6">
+          <div className="flex items-center justify-between border-b border-[#E6E6E6]/10 pb-3">
+            <h2 className="font-bold text-current text-xs font-mono uppercase">Pending Payment Requests</h2>
+            <span className="text-xs text-slate-400 font-mono">1-CLICK VERIFICATION</span>
           </div>
 
-          <div className="space-y-4">
-            {pendingPayments.map(p => (
-              <div key={p.id} className="glass-card p-5 rounded-xl border border-white/10 space-y-4 text-xs">
+          <div className="space-y-3">
+            {payments.map(p => (
+              <div key={p.id} className="glass-card p-4 rounded-[6px] space-y-3 text-xs">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  
-                  <div className="space-y-1">
+                  <div className="space-y-1 font-mono">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-white text-sm">{p.userName}</span>
+                      <span className="font-bold text-current text-sm">{p.userName}</span>
                       <span className="text-slate-400">({p.userEmail})</span>
-                      <span className="px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 font-bold text-[10px]">
+                      <span className="badge-mono bg-[#635BFF]/10 text-[#635BFF] border border-[#635BFF]/20">
                         {p.planName} - {p.amount}
                       </span>
                     </div>
 
-                    <p className="text-slate-400">
-                      Method: <strong className="text-slate-200">{p.method}</strong> • Ref / UTR ID: <strong className="text-amber-400 font-mono">{p.refId}</strong> • Date: {p.date}
+                    <p className="text-slate-400 text-[11px]">
+                      Method: <strong className="text-current">{p.method}</strong> • Ref ID: <strong className="text-[#FFC700]">{p.refId}</strong> • Date: {p.date}
                     </p>
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 font-mono">
                     {p.status === 'pending' ? (
                       <>
                         <button
                           onClick={() => approvePayment(p.id)}
-                          className="py-2 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs shadow-glow flex items-center gap-1.5"
+                          className="py-1.5 px-3.5 rounded-[6px] bg-[#00C48C] hover:bg-[#00B07D] text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
                         >
-                          <Check className="w-4 h-4" /> Approve & Activate Plan
+                          <Check className="w-4 h-4" /> Approve & Activate
                         </button>
                         <button
                           onClick={() => rejectPayment(p.id)}
-                          className="py-2 px-3 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-medium text-xs border border-rose-500/30"
+                          className="py-1.5 px-3 rounded-[6px] bg-[#FF4B4B]/10 hover:bg-[#FF4B4B]/20 text-[#FF4B4B] font-semibold border border-[#FF4B4B]/30"
                         >
                           Reject
                         </button>
                       </>
                     ) : (
-                      <span className={`px-3 py-1 rounded-full font-bold text-xs ${
-                        p.status === 'approved' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
+                      <span className={`px-3 py-1 rounded-[6px] font-bold text-xs ${
+                        p.status === 'approved' ? 'bg-[#00C48C]/10 text-[#00C48C] border border-[#00C48C]/30' : 'bg-[#FF4B4B]/10 text-[#FF4B4B] border border-[#FF4B4B]/30'
                       }`}>
-                        {p.status === 'approved' ? '✅ Approved' : '❌ Rejected'}
+                        {p.status === 'approved' ? 'APPROVED' : 'REJECTED'}
                       </span>
                     )}
                   </div>
-
                 </div>
-
-                {/* Proof Image Preview */}
-                {p.proofUrl && (
-                  <div className="pt-3 border-t border-white/10">
-                    <p className="text-[11px] text-slate-400 mb-2 flex items-center gap-1">
-                      <ImageIcon className="w-3.5 h-3.5 text-brand-400" /> Proof Screenshot Preview:
-                    </p>
-                    <div className="w-48 h-32 rounded-xl overflow-hidden border border-white/10 bg-black/40">
-                      <img src={p.proofUrl} alt="Proof" className="w-full h-full object-cover" />
-                    </div>
-                  </div>
-                )}
               </div>
             ))}
           </div>
@@ -295,31 +281,29 @@ export default function AdminPortalView() {
 
       {/* TAB 2: BLOG MANAGER */}
       {activeTab === 'blog' && (
-        <div className="glass-panel p-6 rounded-2xl space-y-6 shadow-glow border border-white/10">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
-            <h2 className="font-bold text-white text-base">Blog Posts & SEO Articles Manager</h2>
+        <div className="glass-panel p-6 rounded-[12px] space-y-6">
+          <div className="flex items-center justify-between border-b border-[#E6E6E6]/10 pb-3">
+            <h2 className="font-bold text-current text-xs font-mono uppercase">Blog Posts & SEO Manager</h2>
             <button
               onClick={() => setShowBlogModal(true)}
-              className="py-2 px-4 rounded-xl bg-brand-500 hover:bg-brand-400 text-white font-bold text-xs shadow-glow flex items-center gap-1.5"
+              className="btn-fintech-primary text-xs flex items-center gap-1.5"
             >
               <Plus className="w-4 h-4" /> Create New Post
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 font-mono">
             {blogPosts.map(bp => (
-              <div key={bp.id} className="glass-card p-4 rounded-xl flex items-center justify-between text-xs border border-white/10">
+              <div key={bp.id} className="glass-card p-4 rounded-[6px] flex items-center justify-between text-xs">
                 <div className="space-y-1">
-                  <span className="font-bold text-white text-sm">{bp.title}</span>
+                  <span className="font-bold text-current text-sm font-sans">{bp.title}</span>
                   <p className="text-slate-400 text-[11px]">
-                    Category: {bp.category} • Slug: <code className="text-brand-300">/blog/{bp.slug}</code> • Date: {bp.date}
+                    Category: {bp.category} • Slug: <code className="text-[#635BFF]">/blog/{bp.slug}</code>
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-[10px]">
-                    Published
-                  </span>
-                </div>
+                <span className="badge-mono bg-[#00C48C]/10 text-[#00C48C] border border-[#00C48C]/30">
+                  PUBLISHED
+                </span>
               </div>
             ))}
           </div>
@@ -328,23 +312,23 @@ export default function AdminPortalView() {
 
       {/* TAB 3: CONTACT INBOX */}
       {activeTab === 'contact' && (
-        <div className="glass-panel p-6 rounded-2xl space-y-6 shadow-glow border border-white/10">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
-            <h2 className="font-bold text-white text-base">Contact Form Messages Inbox</h2>
+        <div className="glass-panel p-6 rounded-[12px] space-y-6">
+          <div className="flex items-center justify-between border-b border-[#E6E6E6]/10 pb-3">
+            <h2 className="font-bold text-current text-xs font-mono uppercase">Contact Messages Inbox ({contactMessages.length})</h2>
           </div>
 
           <div className="space-y-3">
             {contactMessages.map(cm => (
-              <div key={cm.id} className="glass-card p-4 rounded-xl space-y-2 text-xs border border-white/10">
-                <div className="flex items-center justify-between border-b border-white/10 pb-2">
+              <div key={cm.id} className="glass-card p-4 rounded-[6px] space-y-2 text-xs">
+                <div className="flex items-center justify-between border-b border-[#E6E6E6]/10 pb-2 font-mono">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-white">{cm.name}</span>
+                    <span className="font-bold text-current">{cm.name}</span>
                     <span className="text-slate-400">({cm.email})</span>
                   </div>
                   <span className="text-slate-400 text-[11px]">{cm.date}</span>
                 </div>
-                <p className="font-semibold text-brand-300">Subject: {cm.subject}</p>
-                <p className="text-slate-300 bg-black/20 p-3 rounded-lg border border-white/5">{cm.message}</p>
+                <p className="font-semibold text-[#635BFF] font-mono">Subject: {cm.subject}</p>
+                <p className="text-current bg-white/5 p-3 rounded-[6px] border border-[#E6E6E6]/10">{cm.message}</p>
               </div>
             ))}
           </div>
@@ -353,46 +337,46 @@ export default function AdminPortalView() {
 
       {/* TAB 4: PRICING & SUBSCRIPTIONS */}
       {activeTab === 'pricing' && (
-        <div className="glass-panel p-6 rounded-2xl space-y-6 shadow-glow border border-white/10">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
-            <h2 className="font-bold text-white text-base">Subscription Plan Prices & Payment Details</h2>
+        <div className="glass-panel p-6 rounded-[12px] space-y-6">
+          <div className="flex items-center justify-between border-b border-[#E6E6E6]/10 pb-3">
+            <h2 className="font-bold text-current text-xs font-mono uppercase">Subscription Prices & Payment Setup</h2>
             <button
               onClick={handleSaveSettings}
-              className="py-2 px-4 rounded-xl bg-brand-500 hover:bg-brand-400 text-white font-bold text-xs shadow-glow"
+              className="btn-fintech-primary text-xs"
             >
               Save Pricing Settings
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs">
-            <div className="glass-card p-4 rounded-xl space-y-2">
-              <label className="block text-slate-300 font-bold">3 Months Pass Price ($ USD)</label>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs font-mono">
+            <div className="glass-card p-4 rounded-[6px] space-y-2">
+              <label className="block text-slate-400 font-bold">3 Months Pass Price ($ USD)</label>
               <input
                 type="number"
                 step="0.01"
                 value={plan3mPrice}
                 onChange={(e) => setPlan3mPrice(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl glass-input text-white focus:outline-none"
+                className="w-full px-3 py-2 rounded-[6px] glass-input focus:outline-none"
               />
             </div>
-            <div className="glass-card p-4 rounded-xl space-y-2">
-              <label className="block text-slate-300 font-bold">6 Months Pass Price ($ USD)</label>
+            <div className="glass-card p-4 rounded-[6px] space-y-2">
+              <label className="block text-slate-400 font-bold">6 Months Pass Price ($ USD)</label>
               <input
                 type="number"
                 step="0.01"
                 value={plan6mPrice}
                 onChange={(e) => setPlan6mPrice(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl glass-input text-white focus:outline-none"
+                className="w-full px-3 py-2 rounded-[6px] glass-input focus:outline-none"
               />
             </div>
-            <div className="glass-card p-4 rounded-xl space-y-2">
-              <label className="block text-slate-300 font-bold">12 Months VIP Pass Price ($ USD)</label>
+            <div className="glass-card p-4 rounded-[6px] space-y-2">
+              <label className="block text-slate-400 font-bold">12 Months VIP Pass Price ($ USD)</label>
               <input
                 type="number"
                 step="0.01"
                 value={plan12mPrice}
                 onChange={(e) => setPlan12mPrice(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl glass-input text-white focus:outline-none"
+                className="w-full px-3 py-2 rounded-[6px] glass-input focus:outline-none"
               />
             </div>
           </div>
@@ -401,49 +385,49 @@ export default function AdminPortalView() {
 
       {/* TAB 5: SYSTEM LIMITS & ADS */}
       {activeTab === 'settings' && (
-        <div className="glass-panel p-6 rounded-2xl space-y-6 shadow-glow border border-white/10">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
-            <h2 className="font-bold text-white text-base">Free Limits & AdSense Ad Controls</h2>
+        <div className="glass-panel p-6 rounded-[12px] space-y-6">
+          <div className="flex items-center justify-between border-b border-[#E6E6E6]/10 pb-3">
+            <h2 className="font-bold text-current text-xs font-mono uppercase">System Controls & AdSense Toggles</h2>
             <button
               onClick={handleSaveSettings}
-              className="py-2 px-4 rounded-xl bg-brand-500 hover:bg-brand-400 text-white font-bold text-xs shadow-glow"
+              className="btn-fintech-primary text-xs"
             >
               Save Controls
             </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
-            <div className="glass-card p-4 rounded-xl space-y-2">
-              <label className="block text-slate-300 font-bold">Default Free Fetch Limit</label>
+            <div className="glass-card p-4 rounded-[6px] space-y-2 font-mono">
+              <label className="block text-slate-400 font-bold">DEFAULT FREE FETCH LIMIT</label>
               <input
                 type="number"
                 value={freeFetchLimit}
                 onChange={(e) => setFreeFetchLimit(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl glass-input text-white focus:outline-none"
+                className="w-full px-3 py-2 rounded-[6px] glass-input focus:outline-none"
               />
-              <p className="text-[11px] text-slate-400">Number of free fetches granted to un-subscribed users.</p>
+              <p className="text-[11px] text-slate-400">Number of free fetches granted to non-paying users.</p>
             </div>
 
-            <div className="glass-card p-4 rounded-xl space-y-4">
-              <span className="block text-slate-300 font-bold">AdSense Ad Toggles</span>
+            <div className="glass-card p-4 rounded-[6px] space-y-4">
+              <span className="block text-slate-400 font-mono font-bold text-xs uppercase">AdSense Controls</span>
               
-              <label className="flex items-center justify-between text-slate-300 cursor-pointer">
+              <label className="flex items-center justify-between text-current cursor-pointer text-xs">
                 <span>Show Ads to Free Users</span>
                 <input
                   type="checkbox"
                   checked={adsFreeUsers}
                   onChange={(e) => setAdsFreeUsers(e.target.checked)}
-                  className="w-4 h-4 rounded text-brand-500 focus:ring-brand-500"
+                  className="w-4 h-4 rounded text-[#635BFF]"
                 />
               </label>
 
-              <label className="flex items-center justify-between text-slate-300 cursor-pointer">
+              <label className="flex items-center justify-between text-current cursor-pointer text-xs">
                 <span>Show Ads to Paid Subscribers</span>
                 <input
                   type="checkbox"
                   checked={adsPaidUsers}
                   onChange={(e) => setAdsPaidUsers(e.target.checked)}
-                  className="w-4 h-4 rounded text-brand-500 focus:ring-brand-500"
+                  className="w-4 h-4 rounded text-[#635BFF]"
                 />
               </label>
             </div>
@@ -454,35 +438,35 @@ export default function AdminPortalView() {
       {/* New Blog Post Modal */}
       {showBlogModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="relative w-full max-w-2xl bg-[#18181D] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-glow text-slate-100 space-y-4 text-xs">
+          <div className="relative w-full max-w-2xl glass-panel border-white/20 rounded-[12px] p-6 sm:p-8 shadow-lift text-current space-y-4 text-xs">
             <button
               onClick={() => setShowBlogModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg"
+              className="absolute top-4 right-4 text-slate-400 hover:text-current p-1"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-xl font-bold text-white">Create New SEO Blog Article</h3>
+            <h3 className="text-lg font-bold text-current">Create New Technical Article</h3>
 
             <form onSubmit={handleCreateBlogPost} className="space-y-4">
               <div>
-                <label className="block text-slate-300 font-medium mb-1">Article Title *</label>
+                <label className="block text-slate-400 font-medium mb-1">Article Title *</label>
                 <input
                   type="text"
                   placeholder="e.g. Complete Guide to Telegram Media Downloading"
                   value={newBlogTitle}
                   onChange={(e) => setNewBlogTitle(e.target.value)}
                   required
-                  className="w-full px-3 py-2 rounded-xl glass-input text-white focus:outline-none"
+                  className="w-full px-3 py-2 rounded-[6px] glass-input text-current focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-medium mb-1">Category</label>
+                <label className="block text-slate-400 font-medium mb-1">Category</label>
                 <select
                   value={newBlogCategory}
                   onChange={(e) => setNewBlogCategory(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl glass-input text-slate-200 bg-[#18181D] focus:outline-none"
+                  className="w-full px-3 py-2 rounded-[6px] glass-input text-current font-mono focus:outline-none"
                 >
                   <option value="Guides">Guides</option>
                   <option value="Tutorials">Tutorials</option>
@@ -491,20 +475,20 @@ export default function AdminPortalView() {
               </div>
 
               <div>
-                <label className="block text-slate-300 font-medium mb-1">Content (Markdown Supported) *</label>
+                <label className="block text-slate-400 font-medium mb-1">Content (Markdown Supported) *</label>
                 <textarea
                   rows={8}
-                  placeholder="# Article Heading\n\nWrite your blog article here..."
+                  placeholder="# Heading\n\nArticle body..."
                   value={newBlogContent}
                   onChange={(e) => setNewBlogContent(e.target.value)}
                   required
-                  className="w-full px-3 py-2 rounded-xl glass-input text-white focus:outline-none resize-none"
+                  className="w-full px-3 py-2 rounded-[6px] glass-input text-current font-mono text-xs focus:outline-none resize-none"
                 ></textarea>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 px-4 rounded-xl bg-brand-500 hover:bg-brand-400 text-white font-bold shadow-glow text-xs"
+                className="w-full btn-fintech-primary text-xs"
               >
                 Publish Article Now
               </button>

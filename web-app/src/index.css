@@ -3,52 +3,63 @@
 @tailwind utilities;
 
 :root {
-  --bg-main: #F8FAFC;
-  --bg-card: #FFFFFF;
-  --bg-panel: rgba(255, 255, 255, 0.85);
-  --bg-input: #FFFFFF;
-  --text-main: #0F172A;
-  --text-muted: #475569;
-  --border-subtle: #E2E8F0;
-  --card-hover: #F1F5F9;
+  --bg-main: #F1F5F9;         /* Slate-100 background for crisp structure */
+  --bg-card: #FFFFFF;         /* Pure White card */
+  --bg-panel: #FFFFFF;        /* Pure White panel */
+  --bg-input: #F8FAFC;        /* Light input */
+  --text-main: #0F172A;       /* Slate-900 high contrast dark text */
+  --text-muted: #334155;      /* Slate-700 high contrast muted text */
+  --border-subtle: #CBD5E1;   /* Slate-300 crisp border stroke */
+  --card-hover: #F8FAFC;
+  --badge-bg: #E2E8F0;
 }
 
-.dark {
-  --bg-main: #0F0F12;
-  --bg-card: #18181D;
-  --bg-panel: rgba(24, 24, 29, 0.85);
-  --bg-input: #121216;
-  --text-main: #F8FAFC;
-  --text-muted: #94A3B8;
-  --border-subtle: rgba(255, 255, 255, 0.1);
-  --card-hover: rgba(255, 255, 255, 0.05);
+html.dark {
+  --bg-main: #121215;         /* Deep Charcoal dark background */
+  --bg-card: #1C1C22;         /* Dark card background */
+  --bg-panel: #18181D;        /* Dark panel background */
+  --bg-input: #141418;        /* Dark input */
+  --text-main: #F8FAFC;       /* Light white text */
+  --text-muted: #94A3B8;      /* Light muted text */
+  --border-subtle: rgba(255, 255, 255, 0.12);
+  --card-hover: rgba(255, 255, 255, 0.04);
+  --badge-bg: rgba(255, 255, 255, 0.06);
 }
 
 @layer base {
+  html {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-size: 15px; /* Comfortable font size */
+  }
+
   body {
     background-color: var(--bg-main);
     color: var(--text-main);
-    @apply font-sans antialiased transition-colors duration-300 min-h-screen;
+    font-family: 'Inter', sans-serif;
+    @apply antialiased transition-colors duration-300 min-h-screen text-sm sm:text-base;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
   }
 }
 
-/* Glassmorphism utility classes adapted for Light & Dark Theme */
+/* Fintech Elegance Glass & Card Components */
 .glass-panel {
   background-color: var(--bg-panel);
   border-color: var(--border-subtle);
   color: var(--text-main);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  @apply border transition-colors duration-300;
+  border-radius: 12px;
+  @apply border transition-colors duration-300 shadow-sm;
 }
 
 .glass-card {
   background-color: var(--bg-card);
   border-color: var(--border-subtle);
   color: var(--text-main);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  @apply border transition-colors duration-300;
+  border-radius: 6px;
+  @apply border transition-colors duration-300 shadow-sm;
 }
 
 .glass-card:hover {
@@ -59,16 +70,63 @@
   background-color: var(--bg-input);
   border-color: var(--border-subtle);
   color: var(--text-main);
+  border-radius: 6px;
   @apply border transition-colors duration-300;
 }
 
 .glass-input:focus {
-  border-color: #9562E3;
-  box-shadow: 0 0 15px -3px rgba(149, 98, 227, 0.4);
+  border-color: #635BFF;
+  box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.25);
   outline: none;
 }
 
-/* Custom Scrollbar */
+/* Primary Fintech Button */
+.btn-fintech-primary {
+  background-color: #635BFF;
+  color: #FFFFFF;
+  border-radius: 6px;
+  font-weight: 600;
+  padding: 12px 22px;
+  transition: all 200ms ease-out;
+  @apply inline-flex items-center justify-center cursor-pointer shadow-sm text-sm sm:text-base;
+}
+
+.btn-fintech-primary:hover {
+  background-color: #5248FF;
+  transform: translateY(-1px);
+}
+
+.btn-fintech-primary:active {
+  transform: translateY(0);
+}
+
+/* Secondary Ghost Button */
+.btn-fintech-secondary {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  border-radius: 6px;
+  font-weight: 600;
+  padding: 10px 20px;
+  transition: all 200ms ease-out;
+  @apply inline-flex items-center justify-center cursor-pointer shadow-sm text-sm;
+}
+
+.btn-fintech-secondary:hover {
+  background-color: var(--card-hover);
+}
+
+/* Technical Monospace Badges */
+.badge-mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  letter-spacing: -0.02em;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background-color: var(--badge-bg);
+}
+
+/* Custom Minimalist Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -81,5 +139,5 @@
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #9562E3;
+  background-color: #635BFF;
 }

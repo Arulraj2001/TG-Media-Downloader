@@ -1,6 +1,6 @@
 import React from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { ShieldCheck, FileText, Lock } from 'lucide-react'
+import SeoMeta from '../components/SeoMeta'
+import { ShieldCheck, Terminal } from 'lucide-react'
 
 export default function LegalPolicyView({ type = 'privacy' }) {
   const titles = {
@@ -11,32 +11,36 @@ export default function LegalPolicyView({ type = 'privacy' }) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12 space-y-8">
-      
+    <div className="max-w-3xl mx-auto px-4 py-12 space-y-8">
+      <SeoMeta
+        title={`${titles[type] || 'Privacy Policy'} - TG Media Downloader`}
+        description="Legal and compliance documentation for TG Media Downloader Web Edition."
+      />
+
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-300 text-xs font-semibold">
-          <ShieldCheck className="w-3.5 h-3.5 text-brand-400" />
-          <span>Legal & Compliance</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[6px] bg-[#635BFF]/10 border border-[#635BFF]/30 text-[#635BFF] text-xs font-mono font-medium">
+          <Terminal className="w-3.5 h-3.5" />
+          <span>LEGAL & COMPLIANCE DOCUMENTATION</span>
         </div>
-        <h1 className="text-3xl font-extrabold text-white">{titles[type] || 'Privacy Policy'}</h1>
-        <p className="text-slate-400 text-xs">Last updated: March 2026</p>
+        <h1 className="text-3xl font-extrabold text-current">{titles[type] || 'Privacy Policy'}</h1>
+        <p className="text-slate-400 text-xs font-mono">REVISION 2026.1 • EFFECTIVE IMMEDIATELY</p>
       </div>
 
-      <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-white/10 text-slate-300 text-xs leading-relaxed space-y-6 shadow-glow">
+      <div className="glass-panel p-6 sm:p-8 rounded-[12px] text-current text-xs leading-relaxed space-y-6 max-w-[72ch]">
         
         {type === 'privacy' && (
           <>
             <section className="space-y-2">
-              <h2 className="text-base font-bold text-white">1. Information We Collect</h2>
-              <p>TG Media Downloader respects your privacy. We store only basic profile details (email address, full name, and subscription tier) required to maintain your user account and payment verification records.</p>
+              <h2 className="text-sm font-bold text-current font-mono">1. INFORMATION WE COLLECT</h2>
+              <p className="text-slate-400">TG Media Downloader respects user privacy. We store basic profile details (email address, full name, and subscription tier) required to maintain user account access and payment verification logs.</p>
             </section>
             <section className="space-y-2">
-              <h2 className="text-base font-bold text-white">2. Zero User Media Storage</h2>
-              <p>We do not host, store, or archive any Telegram media files, photos, videos, or documents on our servers or databases. All media files are streamed directly into your browser's local download directory.</p>
+              <h2 className="text-sm font-bold text-current font-mono">2. ZERO MEDIA SERVER STORAGE</h2>
+              <p className="text-slate-400">We do not host, store, or archive any Telegram media files, photos, videos, or documents on our servers. All media items are streamed directly to your local browser downloads.</p>
             </section>
             <section className="space-y-2">
-              <h2 className="text-base font-bold text-white">3. Third-Party Services & Google AdSense</h2>
-              <p>We use third-party tools such as Supabase for authentication and Google AdSense for serving advertisements. These vendors may use cookies to serve ads based on user visits.</p>
+              <h2 className="text-sm font-bold text-current font-mono">3. THIRD-PARTY SERVICES & GOOGLE ADSENSE</h2>
+              <p className="text-slate-400">We utilize Supabase for user authentication and Google AdSense for serving advertisements. These vendors may use cookies to serve ads based on user visits.</p>
             </section>
           </>
         )}
@@ -44,12 +48,12 @@ export default function LegalPolicyView({ type = 'privacy' }) {
         {type === 'terms' && (
           <>
             <section className="space-y-2">
-              <h2 className="text-base font-bold text-white">1. Acceptance of Terms</h2>
-              <p>By accessing or using TG Media Downloader Web Edition, you agree to comply with these Terms of Service. You are responsible for ensuring that your download actions adhere to Telegram's terms and legal copyrights.</p>
+              <h2 className="text-sm font-bold text-current font-mono">1. ACCEPTANCE OF TERMS</h2>
+              <p className="text-slate-400">By accessing or using TG Media Downloader Web Edition, you agree to comply with these Terms of Service. You are responsible for ensuring your actions adhere to Telegram legal terms.</p>
             </section>
             <section className="space-y-2">
-              <h2 className="text-base font-bold text-white">2. Use of Service</h2>
-              <p>Users are granted non-exclusive access to search, browse, and download media files from public Telegram channels or channels they have authorization to access.</p>
+              <h2 className="text-sm font-bold text-current font-mono">2. USE OF SERVICE</h2>
+              <p className="text-slate-400">Users are granted access to search, browse, and download media files from public Telegram channels or channels they are authorized to access.</p>
             </section>
           </>
         )}
@@ -57,8 +61,8 @@ export default function LegalPolicyView({ type = 'privacy' }) {
         {type === 'refund' && (
           <>
             <section className="space-y-2">
-              <h2 className="text-base font-bold text-white">1. Subscription Cancellation & Refunds</h2>
-              <p>Subscriptions (3, 6, and 12-month passes) grant immediate digital access to unlimited fetches and high-speed streaming. If you experience technical issues preventing service access, you may contact support within 7 days for review.</p>
+              <h2 className="text-sm font-bold text-current font-mono">1. SUBSCRIPTION CANCELLATIONS & REFUNDS</h2>
+              <p className="text-slate-400">Subscriptions (3, 6, and 12-month passes) grant immediate digital access to unlimited fetches and direct local streaming. If you experience technical issues, contact support within 7 days.</p>
             </section>
           </>
         )}
@@ -66,8 +70,8 @@ export default function LegalPolicyView({ type = 'privacy' }) {
         {type === 'disclaimer' && (
           <>
             <section className="space-y-2">
-              <h2 className="text-base font-bold text-white">1. DMCA & Copyright Policy</h2>
-              <p>TG Media Downloader operates as a client interface. We do not host or store any copyright-protected media content on our servers. Copyright holders can send inquiries directly to support@tgdownloader.com.</p>
+              <h2 className="text-sm font-bold text-current font-mono">1. DMCA & COPYRIGHT POLICY</h2>
+              <p className="text-slate-400">TG Media Downloader operates strictly as a client interface tool. We do not host or store copyright-protected media content on our servers. Inquiries can be sent to support@tgdownloader.com.</p>
             </section>
           </>
         )}

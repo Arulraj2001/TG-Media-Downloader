@@ -8,32 +8,29 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: '#F5EEFC',
-          100: '#EADCF9',
-          200: '#D5B7F3',
-          300: '#BF90EC',
-          400: '#AA68E6',
-          500: '#9562E3', // Primary purple accent
-          600: '#7E42D7',
-          700: '#642DC4',
-          800: '#4D1EA4',
-          900: '#381283',
-          950: '#210859',
-        },
-        dark: {
-          bg: '#0F0F12',
-          card: '#18181D',
-          border: '#2A2A32',
-          muted: '#8E8E93',
+        fintech: {
+          primary: '#635BFF', // Azul Fintech (Stripe Indigo)
+          dark: '#242424',    // Cinza Escuro (Charcoal background)
+          surface: '#1A1A1A', // Deep surface
+          light: '#FFFFFF',   // Branco
+          muted: '#E6E6E6',   // Cinza Claro
+          success: '#00C48C', // Verde
+          warning: '#FFC700', // Amarelo
+          error: '#FF4B4B',   // Vermelho
         }
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+      },
+      borderRadius: {
+        'sm': '6px',
+        'md': '12px',
+        'lg': '18px',
       },
       boxShadow: {
-        'glow': '0 0 25px -5px rgba(149, 98, 227, 0.4)',
-        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+        'subtle': '0 2px 12px rgba(0, 0, 0, 0.06)',
+        'lift': '0 4px 20px rgba(0, 0, 0, 0.12)',
       }
     },
   },
