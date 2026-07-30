@@ -31,6 +31,8 @@ class MainWindow(QMainWindow):
         self._tasks_loaded = False
         self._reselect_task_id = None # Current task being re-selected
         self._active_media_browser = None # Current open browser dialog
+        self._pending_channel_input = None # Channel input while waiting for topic fetch
+        self._pending_topic_id = None # Selected topic ID to pass to media fetch
 
         print("DEBUG: Setting up UI")
         self.setup_ui()
@@ -648,6 +650,7 @@ class MainWindow(QMainWindow):
         self.worker.signals.auth_error.connect(self.show_auth_error)
         
         self.worker.signals.media_list_fetched.connect(self.show_media_browser)
+        self.worker.signals.forum_topics_fetched.connect(self.on_forum_topics_fetched)
         self.worker.signals.channel_fetched.connect(self.add_download_card)
         self.worker.signals.download_progress.connect(self.update_progress)
         self.worker.signals.file_progress.connect(self.update_file_progress)
@@ -784,34 +787,99 @@ class MainWindow(QMainWindow):
         channel = self.input_channel.text().strip()
         if not channel: return
         
-        # 🚀 Instant Load to Bulk Mode or Cache
-        from database import get_cached_media
-        cached = get_cached_media(channel)
-        if cached:
-            # Reconstruct categorized dict from DB rows
-            c_dict = {k.lower(): [] for k in ["Media", "Files", "ZIPs", "Music", "Voice", "Links", "GIFs", "Chat", "All"]}
-            import collections
-            MockMsg = collections.namedtuple('MockMsg', ['id', 'message', 'date', 'size', 'media_type', 'is_mock'])
-            for row in cached:
-                m = MockMsg(id=row["msg_id"], message=row["title"], date=row["date"], size=row["size"], media_type=row["media_type"], is_mock=True)
-                cat = row["media_type"].lower()
-                if cat in c_dict:
-                    c_dict[cat].append(m)
-                
-                # ZIPs also belong in Files
-                if cat == 'zips':
-                    c_dict['files'].append(m)
-                    
-                c_dict["all"].append(m)
-                
-            for k in c_dict:
-                c_dict[k].sort(key=lambda x: x.id, reverse=True)
-            
-            # Show dialog immediately with cached data
-            self.show_media_browser(channel, None, c_dict)
-        else:
-            # Show dialog immediately in Bulk Download Mode
+        # 🟡 Step 1: Reset any pending topic state
+        self._pending_channel_input = None
+        self._pending_topic_id = None
+        
+        # 🟢 Step 2: Check if the input already contains a topic ID (e.g., "channel_123").
+        # If so, skip the forum topics check and go directly to media browser.
+        from core_downloader import parse_channel_input
+        _, existing_topic_id = parse_channel_input(channel)
+        if existing_topic_id is not None:
+            # Input already has a topic ID — skip topic check, go straight to media
+            self.btn_fetch.setText("Find media")
+            self.btn_fetch.setEnabled(True)
             self.show_media_browser(channel, None, None)
+            return
+        
+        # 🟢 Step 3: Update UI to show we're working
+        self.btn_fetch.setText("Checking...")
+        self.btn_fetch.setEnabled(False)
+        
+        # 🟡 Step 4: Check if this is a forum group by fetching topics.
+        # This ensures topic filtering works even when cached data exists.
+        self._pending_channel_input = channel
+        self.worker.fetch_forum_topics(channel)
+
+    def on_forum_topics_fetched(self, channel_input, channel_obj, topics):
+        """Callback when forum topics (or confirmation it's not a forum) are fetched."""
+        try:
+            # If the dialog was already shown via cache, channel_obj might be None
+            title = channel_input
+            if channel_obj:
+                title = getattr(channel_obj, 'title', None)
+                if not title:
+                    first = getattr(channel_obj, 'first_name', '') or ''
+                    last = getattr(channel_obj, 'last_name', '') or ''
+                    title = f"{first} {last}".strip()
+                if not title:
+                    title = getattr(channel_obj, 'username', None)
+                if not title:
+                    title = getattr(channel_obj, 'id', str(channel_input))
+                title = str(title)
+            
+            # 🟢 Check if this is a forum with topics
+            if topics and len(topics) > 0:
+                # Show topic picker dialog
+                from ui.views.settings_view import load_config
+                cfg = load_config()
+                is_dark = cfg.get("dark_mode", False)
+                
+                # Create a non-blocking topic dialog
+                from ui.components.topic_picker import TopicPickerDialog
+                topic_dialog = TopicPickerDialog(title, topics, self, is_dark=is_dark)
+                
+                # Store channel_input so we can use it after dialog closes
+                self._pending_channel_input = channel_input
+                
+                if topic_dialog.exec():
+                    selected_topic_id = topic_dialog.get_selected_topic_id()
+                    self._pending_topic_id = selected_topic_id
+                    
+                    # If a topic was selected, append it to the channel input
+                    # so the downstream fetch uses it
+                    if selected_topic_id is not None:
+                        topic_channel_input = f"{channel_input}_{selected_topic_id}"
+                        self.input_channel.setText(topic_channel_input)
+                        # Use the topic-appended input for the media browser so
+                        # the topic_id flows through to the download call
+                        self.show_media_browser(topic_channel_input, channel_obj, None)
+                    else:
+                        self.input_channel.setText(channel_input)
+                        # No topic filter, use original input
+                        self.show_media_browser(channel_input, channel_obj, None)
+                else:
+                    # User cancelled topic selection
+                    self.btn_fetch.setText("Find media")
+                    self.btn_fetch.setEnabled(True)
+                    self._pending_channel_input = None
+                    self._pending_topic_id = None
+            else:
+                # Not a forum (no topics), proceed directly to media browser
+                # Use the original pending input if we have it, otherwise use the input
+                ch_input = self._pending_channel_input or channel_input
+                
+                # Restore the input field with the original channel input
+                self.input_channel.setText(ch_input)
+                
+                # Proceed to show the media browser without topic filtering
+                self.show_media_browser(ch_input, channel_obj, None)
+        except Exception as e:
+            print(f"Error in on_forum_topics_fetched: {e}")
+            # Fallback: proceed without topic filtering
+            self.btn_fetch.setText("Find media")
+            self.btn_fetch.setEnabled(True)
+            self.show_media_browser(channel_input, channel_obj, None)
 
     def show_media_browser(self, channel_input, channel_obj, messages_dict):
         # 🔄 Update existing dialog if it's already open (Instant Loading Flow)

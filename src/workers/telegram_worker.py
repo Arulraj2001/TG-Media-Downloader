@@ -28,6 +28,7 @@ class WorkerSignals(QObject):
     
     # Download Signals
     media_list_fetched = Signal(str, object, object) # channel_input, channel_obj, messages_dict
+    forum_topics_fetched = Signal(str, object, list) # channel_input, channel_obj, list_of_topic_dicts
     channel_fetched = Signal(object, int) # channel, total_messages
     download_progress = Signal(str, int, int) # task_id, current_items, total_items
     file_progress = Signal(str, int, int, int, str) # task_id, msg_id, current_bytes, total_bytes, speed_str
@@ -259,6 +260,43 @@ class TelegramWorker(QThread):
             self.signals.media_list_fetched.emit(channel_input, channel, messages_dict)
         except Exception as e:
             self.signals.error_occurred.emit(channel_input, f"Fetch Error: {str(e)}")
+
+    def fetch_forum_topics(self, channel_input):
+        """Fetch forum topics for a channel/group. Emits forum_topics_fetched signal."""
+        asyncio.run_coroutine_threadsafe(self._fetch_forum_topics_coro(channel_input), self.loop)
+
+    async def _fetch_forum_topics_coro(self, channel_input):
+        try:
+            clean_input, _ = parse_channel_input(channel_input)
+            channel = await self._resolve_channel(clean_input)
+
+            # Check if this is a forum
+            if not getattr(channel, 'forum', False):
+                # Not a forum, emit empty list
+                self.signals.forum_topics_fetched.emit(channel_input, channel, [])
+                return
+
+            from telethon.tl.functions.channels import GetForumTopicsRequest
+            topics = []
+            forums = await self.client(GetForumTopicsRequest(
+                channel=channel,
+                offset_date=None,
+                offset_id=0,
+                offset_topic=0,
+                limit=500
+            ))
+            if forums and getattr(forums, 'topics', None):
+                for t_obj in forums.topics:
+                    topics.append({
+                        "id": t_obj.id,
+                        "title": t_obj.title
+                    })
+
+            self.signals.forum_topics_fetched.emit(channel_input, channel, topics)
+        except Exception as e:
+            # If fetching topics fails, emit empty list so the flow continues
+            print(f"Error fetching forum topics: {e}")
+            self.signals.forum_topics_fetched.emit(channel_input, None, [])
 
     def start_download(self, channel_input, media_id, download_path, download_limit, max_speed_kb, is_paused=False, selected_message_ids=None, task_id=None):
         """Called from Main UI Thread. Schedules download in asyncio loop."""

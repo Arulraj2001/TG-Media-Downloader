@@ -768,3 +768,80 @@ QSpinBox::down-arrow {
     width: 11px;
     height: 11px;
 }
+
+/* ── Topic Picker Dialog (Dark) ── */
+QDialog#TopicPickerDialog {
+    background: #161618;
+    border-radius: 12px;
+}
+QFrame#TopicHeader {
+    background: #161618;
+    border-bottom: 1px solid #303034;
+}
+QLabel#TopicTitle {
+    color: #FFFFFF;
+    font-size: 18px;
+    font-weight: 700;
+}
+QLabel#TopicDesc {
+    color: #98989F;
+    font-size: 13px;
+}
+QFrame#TopicListFrame {
+    background: #161618;
+}
+QListWidget#TopicList {
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 4px 0;
+}
+QListWidget#TopicList::item {
+    background: #222226;
+    color: #F5F5F7;
+    border: 1px solid #38383E;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin: 3px 0;
+    font-size: 14px;
+    font-weight: 500;
+}
+QListWidget#TopicList::item:hover {
+    background: #2B2B30;
+    border-color: #5D4A76;
+}
+QListWidget#TopicList::item:selected {
+    background: #9562E3;
+    border: 1px solid #9562E3;
+    color: #FFFFFF;
+    font-weight: 600;
+}
+QFrame#TopicFooter {
+    background: #161618;
+    border-top: 1px solid #303034;
+}
+QPushButton#TopicCancelBtn {
+    background: #27272B;
+    color: #E8E8ED;
+    border: 1px solid #46464D;
+    border-radius: 8px;
+    min-height: 34px;
+    font-size: 13px;
+    font-weight: 600;
+}
+QPushButton#TopicCancelBtn:hover {
+    background: #303035;
+    border-color: #73549A;
+}
+QPushButton#TopicContinueBtn {
+    background: #9562E3;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    min-height: 34px;
+    font-size: 13px;
+    font-weight: 600;
+}
+QPushButton#TopicContinueBtn:hover {
+    background: #8451D1;
+}

@@ -220,8 +220,9 @@ class MediaBrowserDialog(QDialog):
         self.inp_search.textChanged.connect(self.filter_rows)
         
         self.btn_toggle_filters = QToolButton()
-        self.btn_toggle_filters.setText("More filters")
+        self.btn_toggle_filters.setText("Show advanced settings")
         self.btn_toggle_filters.setCheckable(True)
+        self.btn_toggle_filters.setChecked(True)
         self.btn_toggle_filters.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.btn_toggle_filters.setMinimumHeight(40)
         self.btn_toggle_filters.clicked.connect(self.toggle_filters_area)
@@ -233,7 +234,7 @@ class MediaBrowserDialog(QDialog):
         # ⚙️ Advanced Filters Area (Collapsible)
         self.filters_area = QFrame(self)
         self.filters_area.setObjectName("FilterPanel")
-        self.filters_area.setVisible(False)
+        self.filters_area.setVisible(True)
         self.filters_area.setMinimumHeight(140) # Ensure it has enough room
         layout.addWidget(self.filters_area)
         
