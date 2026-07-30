@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-    QLineEdit, QPushButton, QStackedWidget, QFrame, QSizePolicy
+    QLineEdit, QPushButton, QStackedWidget, QFrame, QSizePolicy, QScrollArea
 )
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPixmap
@@ -21,15 +21,38 @@ class LoginView(QWidget):
         self.setObjectName("LoginView")
         self.setAttribute(Qt.WA_StyledBackground, True)
 
-        outer = QHBoxLayout(self)
-        outer.setContentsMargins(24, 28, 24, 28)
-        outer.setSpacing(16)
+        # Root layout fills the view
+        root_layout = QVBoxLayout(self)
+        root_layout.setContentsMargins(0, 0, 0, 0)
+        root_layout.setSpacing(0)
 
+        # Scroll area so nothing clips when window is small
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        # Scroll content host
+        scroll_host = QWidget()
+        scroll_host.setObjectName("LoginView")
+        scroll_host.setAttribute(Qt.WA_StyledBackground, True)
+
+        outer = QVBoxLayout(scroll_host)
+        outer.setContentsMargins(24, 32, 24, 32)
+        outer.setAlignment(Qt.AlignCenter)
+
+        # Horizontal centering row
+        row = QHBoxLayout()
+        row.setAlignment(Qt.AlignCenter)
+        row.setSpacing(24)
+
+        # ── Left brand panel ──────────────────────────────────────────
         brand_panel = QFrame()
         brand_panel.setObjectName("LoginBrandPanel")
-        brand_panel.setMinimumWidth(220)
+        brand_panel.setFixedWidth(320)
+        brand_panel.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         brand_layout = QVBoxLayout(brand_panel)
-        brand_layout.setContentsMargins(34, 34, 34, 34)
+        brand_layout.setContentsMargins(32, 32, 32, 32)
         brand_layout.setSpacing(12)
 
         logo_lbl = QLabel()
@@ -38,7 +61,7 @@ class LoginView(QWidget):
         ))
         if os.path.exists(logo_path):
             pix = QPixmap(logo_path).scaled(
-                76, 76, Qt.KeepAspectRatio, Qt.SmoothTransformation
+                64, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation
             )
             logo_lbl.setPixmap(pix)
         logo_lbl.setAlignment(Qt.AlignLeft)
@@ -74,6 +97,7 @@ class LoginView(QWidget):
             item_layout.setSpacing(10)
             index = QLabel(number)
             index.setObjectName("SectionIndex")
+            index.setAlignment(Qt.AlignCenter)
             text_layout = QVBoxLayout()
             text_layout.setSpacing(1)
             title_label = QLabel(title)
@@ -87,14 +111,16 @@ class LoginView(QWidget):
             item_layout.addLayout(text_layout, stretch=1)
             brand_layout.addWidget(item)
 
+        # ── Right form panel ──────────────────────────────────────────
         self.card = QFrame()
         self.card.setObjectName("LoginFormPanel")
-        self.card.setFixedWidth(400)
-        self.card.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        self.card.setFixedWidth(380)
+        self.card.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
         card_layout = QVBoxLayout(self.card)
-        card_layout.setContentsMargins(34, 32, 34, 32)
+        card_layout.setContentsMargins(32, 30, 32, 30)
         card_layout.setSpacing(0)
 
+        # Step indicator
         self.login_step_label = QLabel("STEP 1 OF 3")
         self.login_step_label.setObjectName("Eyebrow")
         self.login_step_title = QLabel("Connect Telegram")
@@ -102,16 +128,17 @@ class LoginView(QWidget):
         self.login_step_copy = QLabel("Enter the API details for your Telegram account.")
         self.login_step_copy.setObjectName("MutedText")
         self.login_step_copy.setWordWrap(True)
+
         card_layout.addWidget(self.login_step_label)
-        card_layout.addSpacing(8)
+        card_layout.addSpacing(6)
         card_layout.addWidget(self.login_step_title)
         card_layout.addWidget(self.login_step_copy)
-        card_layout.addSpacing(18)
+        card_layout.addSpacing(20)
 
         divider = QFrame()
         divider.setObjectName("DividerHorizontal")
         card_layout.addWidget(divider)
-        card_layout.addSpacing(18)
+        card_layout.addSpacing(20)
 
         self.stack = QStackedWidget()
 
@@ -120,6 +147,7 @@ class LoginView(QWidget):
             label.setObjectName("ControlLabel")
             return label
 
+        # Page 1: API credentials
         page1 = QWidget()
         page1_layout = QVBoxLayout(page1)
         page1_layout.setContentsMargins(0, 0, 0, 0)
@@ -134,7 +162,7 @@ class LoginView(QWidget):
             field.setMinimumHeight(40)
         self.btn_send_code = QPushButton("Send verification code")
         self.btn_send_code.setObjectName("PrimaryButtonLarge")
-        self.btn_send_code.setMinimumHeight(44)
+        self.btn_send_code.setMinimumHeight(42)
         self.btn_send_code.clicked.connect(self.on_send_code)
         page1_layout.addWidget(field_label("API ID"))
         page1_layout.addWidget(self.inp_api_id)
@@ -142,9 +170,10 @@ class LoginView(QWidget):
         page1_layout.addWidget(self.inp_api_hash)
         page1_layout.addWidget(field_label("Phone number with country code"))
         page1_layout.addWidget(self.inp_phone)
-        page1_layout.addSpacing(12)
+        page1_layout.addSpacing(10)
         page1_layout.addWidget(self.btn_send_code)
 
+        # Page 2: OTP
         page2 = QWidget()
         page2_layout = QVBoxLayout(page2)
         page2_layout.setContentsMargins(0, 0, 0, 0)
@@ -157,19 +186,20 @@ class LoginView(QWidget):
         self.inp_code.setMinimumHeight(40)
         self.btn_submit_code = QPushButton("Verify and log in")
         self.btn_submit_code.setObjectName("PrimaryButtonLarge")
-        self.btn_submit_code.setMinimumHeight(44)
+        self.btn_submit_code.setMinimumHeight(42)
         self.btn_submit_code.clicked.connect(self.on_submit_code)
         self.btn_back = QPushButton("Back")
         self.btn_back.setObjectName("LinkButton")
         self.btn_back.clicked.connect(self.reset_to_start)
         page2_layout.addWidget(code_hint)
-        page2_layout.addSpacing(8)
+        page2_layout.addSpacing(6)
         page2_layout.addWidget(field_label("Login code"))
         page2_layout.addWidget(self.inp_code)
-        page2_layout.addSpacing(12)
+        page2_layout.addSpacing(10)
         page2_layout.addWidget(self.btn_submit_code)
         page2_layout.addWidget(self.btn_back)
 
+        # Page 3: 2FA password
         page3 = QWidget()
         page3_layout = QVBoxLayout(page3)
         page3_layout.setContentsMargins(0, 0, 0, 0)
@@ -182,13 +212,13 @@ class LoginView(QWidget):
         self.inp_pwd.setMinimumHeight(40)
         self.btn_submit_pwd = QPushButton("Log in")
         self.btn_submit_pwd.setObjectName("PrimaryButtonLarge")
-        self.btn_submit_pwd.setMinimumHeight(44)
+        self.btn_submit_pwd.setMinimumHeight(42)
         self.btn_submit_pwd.clicked.connect(self.on_submit_pwd)
         page3_layout.addWidget(password_hint)
-        page3_layout.addSpacing(8)
+        page3_layout.addSpacing(6)
         page3_layout.addWidget(field_label("Password"))
         page3_layout.addWidget(self.inp_pwd)
-        page3_layout.addSpacing(12)
+        page3_layout.addSpacing(10)
         page3_layout.addWidget(self.btn_submit_pwd)
 
         self.stack.addWidget(page1)
@@ -197,8 +227,12 @@ class LoginView(QWidget):
         card_layout.addWidget(self.stack)
         card_layout.addStretch()
 
-        outer.addWidget(brand_panel, stretch=1)
-        outer.addWidget(self.card)
+        row.addWidget(brand_panel)
+        row.addWidget(self.card)
+        outer.addLayout(row)
+
+        scroll.setWidget(scroll_host)
+        root_layout.addWidget(scroll)
 
     def load_env_defaults(self):
         from dotenv import load_dotenv

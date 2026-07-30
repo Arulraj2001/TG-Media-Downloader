@@ -583,6 +583,65 @@ async def get_messages_by_type(client, channel, media_choice, min_id=None, max_i
         
     return messages
 
+def deduplicate_messages(msg_list):
+    """
+    Deduplicates a list of Telethon/mock message objects by:
+    1. Message ID (msg.id)
+    2. Document/Photo ID (msg.document.id / msg.photo.id)
+    3. File signature (filename + size) for documents/media
+    Preserves original order.
+    """
+    if not msg_list:
+        return []
+
+    seen_msg_ids = set()
+    seen_media_ids = set()
+    seen_file_sigs = set()
+    unique_msgs = []
+
+    for m in msg_list:
+        if not m:
+            continue
+
+        m_id = getattr(m, 'id', None)
+        if m_id is not None:
+            if m_id in seen_msg_ids:
+                continue
+            seen_msg_ids.add(m_id)
+
+        media_id = None
+        if getattr(m, 'document', None) and hasattr(m.document, 'id'):
+            media_id = f"doc_{m.document.id}"
+        elif getattr(m, 'photo', None) and hasattr(m.photo, 'id'):
+            media_id = f"photo_{m.photo.id}"
+
+        if media_id:
+            if media_id in seen_media_ids:
+                continue
+            seen_media_ids.add(media_id)
+
+        file_name = None
+        file_size = 0
+        if getattr(m, 'file', None) and getattr(m.file, 'name', None):
+            file_name = m.file.name.lower().strip()
+            file_size = getattr(m.file, 'size', 0)
+        elif getattr(m, 'document', None) and hasattr(m.document, 'attributes'):
+            for attr in getattr(m.document, 'attributes', []):
+                if hasattr(attr, 'file_name') and attr.file_name:
+                    file_name = attr.file_name.lower().strip()
+                    break
+            file_size = getattr(m.document, 'size', 0)
+
+        if file_name and file_size > 0:
+            sig = (file_name, file_size)
+            if sig in seen_file_sigs:
+                continue
+            seen_file_sigs.add(sig)
+
+        unique_msgs.append(m)
+
+    return unique_msgs
+
 async def fetch_categorized_media(client, channel, limit=None, topic_id=None):
     """
     Fetches up to `limit` messages for each distinct media category IN PARALLEL.
@@ -631,8 +690,6 @@ async def fetch_categorized_media(client, channel, limit=None, topic_id=None):
         # If we have a topic_id, try to get the topic title from the first message
         topic_title = None
         if topic_id and all_msgs:
-            # In Telethon, forum topics are technically replies.
-            # We can try to fetch the service message that created the topic or just use one message.
             pass
 
         # 🗄️ CACHE RESULTS IN SQLite for faster tab switching
@@ -640,14 +697,14 @@ async def fetch_categorized_media(client, channel, limit=None, topic_id=None):
         try:
             ch_id = get_peer_id(channel)
             m_dict = {
-                "Media": sorted(list(photos) + list(videos) + list(round_vids), key=lambda m: m.id, reverse=True),
-                "Files": list(docs),
-                "ZIPs": [m for m in docs if m.document and m.document.mime_type in ["application/zip", "application/x-rar-compressed", "application/x-7z-compressed"]],
-                "Music": list(music),
-                "Voice": list(voice),
-                "Links": list(links),
-                "GIFs": list(gifs),
-                "Chat": [m for m in all_msgs if getattr(m, 'media', None) is None and (m.message or "").strip()]
+                "Media": deduplicate_messages(sorted(list(photos) + list(videos) + list(round_vids), key=lambda m: m.id, reverse=True)),
+                "Files": deduplicate_messages(list(docs)),
+                "ZIPs": deduplicate_messages([m for m in docs if m.document and m.document.mime_type in ["application/zip", "application/x-rar-compressed", "application/x-7z-compressed"]]),
+                "Music": deduplicate_messages(list(music)),
+                "Voice": deduplicate_messages(list(voice)),
+                "Links": deduplicate_messages(list(links)),
+                "GIFs": deduplicate_messages(list(gifs)),
+                "Chat": deduplicate_messages([m for m in all_msgs if getattr(m, 'media', None) is None and (m.message or "").strip()])
             }
             cache_media_list(ch_id, m_dict)
         except Exception as cache_err:
@@ -663,23 +720,29 @@ async def fetch_categorized_media(client, channel, limit=None, topic_id=None):
     # "Chat" = messages with NO media at all
     chats = [m for m in all_msgs if getattr(m, 'media', None) is None and (m.message or "").strip()]
 
-    # Aggregate into "All" - Using a dict to deduplicate by message ID
-    all_dict = {}
+    # Aggregate into "All" and deduplicate every category
     all_raw = list(photos) + list(videos) + list(round_vids) + list(docs) + list(music) + list(voice) + list(links) + list(gifs) + list(chats)
-    for m in all_raw:
-        all_dict[m.id] = m
-    all_sorted = sorted(all_dict.values(), key=lambda x: x.id, reverse=True)
+    
+    all_deduped   = deduplicate_messages(all_raw)
+    media_deduped = deduplicate_messages(list(photos) + list(videos) + list(round_vids))
+    files_deduped = deduplicate_messages(list(docs))
+    zips_deduped  = deduplicate_messages(list(zips))
+    music_deduped = deduplicate_messages(list(music))
+    voice_deduped = deduplicate_messages(list(voice))
+    links_deduped = deduplicate_messages(list(links))
+    gifs_deduped  = deduplicate_messages(list(gifs))
+    chats_deduped = deduplicate_messages(list(chats))
 
     return {
-        "All":   all_sorted[:limit], # Limit the "All" tab to the most recent items
-        "Media": sorted(list(photos) + list(videos) + list(round_vids), key=lambda m: m.id, reverse=True)[:limit],
-        "Files": list(docs),
-        "ZIPs":  list(zips),
-        "Music": list(music),
-        "Voice": list(voice),
-        "Links": list(links),
-        "GIFs":  list(gifs),
-        "Chat":  list(chats),
+        "All":   sorted(all_deduped, key=lambda x: x.id, reverse=True)[:limit],
+        "Media": sorted(media_deduped, key=lambda m: m.id, reverse=True)[:limit],
+        "Files": files_deduped[:limit],
+        "ZIPs":  zips_deduped[:limit],
+        "Music": music_deduped[:limit],
+        "Voice": voice_deduped[:limit],
+        "Links": links_deduped[:limit],
+        "GIFs":  gifs_deduped[:limit],
+        "Chat":  chats_deduped[:limit],
     }
 
 def get_folder_name(media_choice):

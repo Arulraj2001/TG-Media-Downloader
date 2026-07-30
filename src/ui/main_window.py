@@ -205,16 +205,6 @@ class MainWindow(QMainWindow):
             self.activateWindow()
 
     def changeEvent(self, event):
-        if event.type() == event.Type.WindowStateChange:
-            if self.isMinimized():
-                # Minimize to tray logic
-                self.hide()
-                self.tray_icon.showMessage(
-                    "TG Media Downloader",
-                    "Application minimized to tray. Double-click icon to restore.",
-                    QSystemTrayIcon.Information,
-                    2000
-                )
         super().changeEvent(event)
 
     def force_quit(self):
@@ -246,33 +236,42 @@ class MainWindow(QMainWindow):
         main_widget = QWidget()
         main_widget.setObjectName("CentralWidget")
         self.setCentralWidget(main_widget)
-        main_layout = QVBoxLayout(main_widget)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
+        root_layout = QHBoxLayout(main_widget)
+        root_layout.setContentsMargins(0, 0, 0, 0)
+        root_layout.setSpacing(0)
+
+        # Window Icon
+        icon_path = get_resource_path(os.path.join("assets", "logo.ico"))
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
 
         # ---------------------------------------------------------
-        # Floating top navigation
+        # Left Sidebar (with inner scroll so nav never clips)
         # ---------------------------------------------------------
-        nav_host = QWidget()
-        nav_host.setObjectName("FloatingNavHost")
-        nav_host_layout = QVBoxLayout(nav_host)
-        nav_host_layout.setContentsMargins(24, 14, 24, 6)
-        nav_host_layout.setSpacing(0)
-
         self.sidebarWidget = QWidget()
-        self.sidebarWidget.setObjectName("FloatingNav")
-        self.sidebarWidget.setFixedHeight(60)
-        
-        sidebar_layout = QHBoxLayout(self.sidebarWidget)
-        sidebar_layout.setContentsMargins(12, 8, 12, 8)
+        self.sidebarWidget.setObjectName("Sidebar")
+        sidebar_outer_layout = QVBoxLayout(self.sidebarWidget)
+        sidebar_outer_layout.setContentsMargins(0, 0, 0, 0)
+        sidebar_outer_layout.setSpacing(0)
+
+        sidebar_scroll = QScrollArea()
+        sidebar_scroll.setWidgetResizable(True)
+        sidebar_scroll.setFrameShape(QFrame.NoFrame)
+        sidebar_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        sidebar_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+
+        sidebar_inner = QWidget()
+        sidebar_inner.setObjectName("SidebarInner")
+        sidebar_layout = QVBoxLayout(sidebar_inner)
+        sidebar_layout.setContentsMargins(12, 20, 12, 16)
         sidebar_layout.setSpacing(4)
 
-        # Brand
-        self.logo_container = QWidget()
-        self.logo_container.setObjectName("BrandBlock")
-        logo_layout = QHBoxLayout(self.logo_container)
-        logo_layout.setContentsMargins(2, 0, 12, 0)
-        logo_layout.setSpacing(8)
+        # Brand block
+        brand_block = QWidget()
+        brand_block.setObjectName("BrandBlock")
+        brand_layout = QHBoxLayout(brand_block)
+        brand_layout.setContentsMargins(8, 0, 8, 0)
+        brand_layout.setSpacing(10)
 
         self.lbl_logo_img = QLabel()
         self.lbl_logo_img.setObjectName("BrandLogo")
@@ -281,19 +280,21 @@ class MainWindow(QMainWindow):
         if os.path.exists(brand_logo_path):
             self.lbl_logo_img.setPixmap(
                 QPixmap(brand_logo_path).scaled(
-                    36, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation
+                    32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation
                 )
             )
-        logo_layout.addWidget(self.lbl_logo_img)
-        brand_text = QVBoxLayout()
-        brand_text.setSpacing(0)
-        brand_name = QLabel("TG MEDIA DOWNLOADER")
+        brand_layout.addWidget(self.lbl_logo_img)
+        brand_text_layout = QVBoxLayout()
+        brand_text_layout.setSpacing(1)
+        brand_name = QLabel("TG Downloader")
         brand_name.setObjectName("BrandName")
-        brand_text.addWidget(brand_name)
-        logo_layout.addLayout(brand_text)
-        sidebar_layout.addWidget(self.logo_container)
+        brand_text_layout.addWidget(brand_name)
+        brand_layout.addLayout(brand_text_layout)
+        brand_layout.addStretch()
+        sidebar_layout.addWidget(brand_block)
+        sidebar_layout.addSpacing(16)
 
-        # Page navigation
+        # Nav buttons
         self.btn_home = self._create_nav_button("Home", "nav-home.svg", True)
         self.btn_queue = self._create_nav_button("Queue", "nav-download.svg")
         self.btn_settings = self._create_nav_button("Settings", "nav-settings.svg")
@@ -307,106 +308,77 @@ class MainWindow(QMainWindow):
         sidebar_layout.addWidget(self.btn_home)
         sidebar_layout.addWidget(self.btn_queue)
         sidebar_layout.addWidget(self.btn_settings)
-        sidebar_layout.addStretch()
         sidebar_layout.addWidget(self.btn_about)
+        sidebar_layout.addStretch()
 
-        # Theme and account actions
+        # Theme toggle
         self.btn_theme = self._create_nav_button("Theme", "nav-sun.svg")
-        self.btn_theme.setAutoExclusive(False) # Theme toggle isn't part of nav group
+        self.btn_theme.setAutoExclusive(False)
         self.btn_theme.setCheckable(False)
         self.btn_theme.clicked.connect(self.toggle_theme)
-        self.update_theme_icon() # Set initial icon
+        self.update_theme_icon()
         sidebar_layout.addWidget(self.btn_theme)
 
+        # Logout
         self.btn_logout = self._create_nav_button("Logout", "nav-logout.svg")
         self.btn_logout.setObjectName("LogoutBtn")
         self.btn_logout.setAutoExclusive(False)
         self.btn_logout.setCheckable(False)
         self.btn_logout.clicked.connect(self.logout)
         sidebar_layout.addWidget(self.btn_logout)
-        nav_host_layout.addWidget(self.sidebarWidget)
-        main_layout.addWidget(nav_host)
-        
-        # Window Icon
-        icon_path = get_resource_path(os.path.join("assets", "logo.ico"))
-        if os.path.exists(icon_path):
-            self.setWindowIcon(QIcon(icon_path))
+
+        sidebar_scroll.setWidget(sidebar_inner)
+        sidebar_outer_layout.addWidget(sidebar_scroll)
+
+        root_layout.addWidget(self.sidebarWidget)
 
         # ---------------------------------------------------------
-        # Main Content Layout
+        # Main Content Area
         # ---------------------------------------------------------
         content_wrapper = QWidget()
+        content_wrapper.setObjectName("ContentArea")
         content_layout = QVBoxLayout(content_wrapper)
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
 
-        # Top Header Area
-        self.header = QFrame()
-        self.header.setObjectName("TopBar")
-        self.header.setFixedHeight(76)
-        h_layout = QHBoxLayout(self.header)
-        h_layout.setContentsMargins(36, 16, 36, 12)
-
-        header_stack = QVBoxLayout()
-        header_stack.setSpacing(1)
-        self.lbl_page_title = QLabel("Downloads")
-        self.lbl_page_title.setObjectName("MainHeader")
-        self.lbl_page_subtitle = QLabel("Find and download Telegram media")
-        self.lbl_page_subtitle.setObjectName("MutedText")
-        header_stack.addWidget(self.lbl_page_title)
-        header_stack.addWidget(self.lbl_page_subtitle)
-        h_layout.addLayout(header_stack)
-        h_layout.addStretch()
-        support_button = QPushButton("Buy me a coffee")
-        support_button.setObjectName("SupportButton")
-        support_button.setCursor(Qt.PointingHandCursor)
-        support_button.clicked.connect(
-            lambda: QDesktopServices.openUrl(
-                QUrl("https://buymeacoffee.com/x4kqsd0lka")
-            )
-        )
-        h_layout.addWidget(support_button)
-        secure_badge = QLabel("LOCAL SESSION")
-        secure_badge.setObjectName("SecureBadge")
-        h_layout.addWidget(secure_badge)
-
-        content_layout.addWidget(self.header)
-
         # Stacked Pages
         self.stacked_widget = QStackedWidget()
         self.setup_home_page()
-        
+
         self.page_queue = DownloadsView()
         self.page_settings = SettingsView()
         self.page_login = LoginView()
-        
-        self.stacked_widget.addWidget(self.page_home)   # Index 0
-        self.stacked_widget.addWidget(self.page_queue)  # Index 1
-        self.stacked_widget.addWidget(self.page_settings) # Index 2
-        self.stacked_widget.addWidget(self.page_login)  # Index 3
-        
+
+        self.stacked_widget.addWidget(self.page_home)      # Index 0
+        self.stacked_widget.addWidget(self.page_queue)     # Index 1
+        self.stacked_widget.addWidget(self.page_settings)  # Index 2
+        self.stacked_widget.addWidget(self.page_login)     # Index 3
+
         # Connect Login signals
         self.page_login.login_started.connect(self.worker.start_login)
         self.page_login.code_submitted.connect(self.worker.submit_code)
         self.page_login.password_submitted.connect(self.worker.submit_password)
-        
+
         # Connect Queue Global Buttons
         self.page_queue.btn_pause_all.clicked.connect(self.pause_all_downloads)
         self.page_queue.btn_resume_all.clicked.connect(self.resume_all_downloads)
         self.page_queue.reFetchRequested.connect(self.re_fetch_from_history)
-        
-        content_layout.addWidget(self.stacked_widget)
 
-        # Build Main View
-        main_layout.addWidget(content_wrapper)
-        
-        # 🟢 Global Status Bar (Refined for right alignment and styling)
+        content_layout.addWidget(self.stacked_widget)
+        root_layout.addWidget(content_wrapper, stretch=1)
+
+        # 🟢 Global Status Bar
         self.status_bar = QStatusBar()
         self.status_bar.setObjectName("GlobalStatusBar")
         self.setStatusBar(self.status_bar)
-        
+
         self.lbl_status_msg = QLabel("Ready")
         self.status_bar.addPermanentWidget(self.lbl_status_msg)
+
+        # Stub for compatibility (header is no longer separate)
+        self.header = QFrame()
+        self.lbl_page_title = QLabel()
+        self.lbl_page_subtitle = QLabel()
 
     def _create_nav_button(self, text, icon_name=None, is_checked=False):
         btn = QToolButton()
@@ -415,19 +387,14 @@ class MainWindow(QMainWindow):
             icon_path = get_resource_path(os.path.join("assets", "icons", icon_name))
             if os.path.exists(icon_path):
                 btn.setIcon(QIcon(icon_path))
-        btn.setIconSize(QSize(20, 20))
+        btn.setIconSize(QSize(18, 18))
         btn.setCheckable(True)
         btn.setAutoExclusive(True)
         btn.setChecked(is_checked)
         btn.setCursor(Qt.PointingHandCursor)
         btn.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
-        btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        if len(text) >= 8:
-            btn.setFixedWidth(96)
-        elif len(text) >= 6:
-            btn.setFixedWidth(84)
-        else:
-            btn.setFixedWidth(76)
+        btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        btn.setFixedHeight(38)
         return btn
 
     def setup_home_page(self):
@@ -435,34 +402,63 @@ class MainWindow(QMainWindow):
         self.page_home.setWidgetResizable(True)
         self.page_home.setFrameShape(QFrame.NoFrame)
         self.page_home.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
         home_content = QWidget()
         home_content.setObjectName("HomeContent")
-        layout = QVBoxLayout(home_content)
-        layout.setContentsMargins(36, 16, 36, 36)
-        layout.setSpacing(18)
+        outer_layout = QVBoxLayout(home_content)
+        outer_layout.setContentsMargins(0, 0, 0, 0)
+        outer_layout.setSpacing(0)
 
+        # Centered max-width container
+        center_widget = QWidget()
+        center_layout = QVBoxLayout(center_widget)
+        center_layout.setContentsMargins(32, 28, 32, 40)
+        center_layout.setSpacing(16)
+
+        # Page title row
+        page_header = QHBoxLayout()
+        page_title = QLabel("Downloads")
+        page_title.setObjectName("PageTitle")
+        page_subtitle = QLabel("Find and download Telegram media")
+        page_subtitle.setObjectName("PageSubtitle")
+        title_stack = QVBoxLayout()
+        title_stack.setSpacing(2)
+        title_stack.addWidget(page_title)
+        title_stack.addWidget(page_subtitle)
+        page_header.addLayout(title_stack)
+        page_header.addStretch()
+        support_button = QPushButton("Buy me a coffee ☕")
+        support_button.setObjectName("SupportButton")
+        support_button.setCursor(Qt.PointingHandCursor)
+        support_button.clicked.connect(
+            lambda: QDesktopServices.openUrl(QUrl("https://buymeacoffee.com/x4kqsd0lka"))
+        )
+        secure_badge = QLabel("LOCAL SESSION")
+        secure_badge.setObjectName("SecureBadge")
+        page_header.addWidget(support_button)
+        page_header.addWidget(secure_badge)
+        center_layout.addLayout(page_header)
+
+        # Hero card
         hero = QFrame()
         hero.setObjectName("HeroCard")
         hero_layout = QHBoxLayout(hero)
-        hero_layout.setContentsMargins(30, 28, 30, 28)
-        hero_layout.setSpacing(30)
+        hero_layout.setContentsMargins(28, 24, 28, 24)
+        hero_layout.setSpacing(28)
 
         hero_copy = QVBoxLayout()
-        hero_copy.setSpacing(8)
+        hero_copy.setSpacing(6)
         kicker = QLabel("TELEGRAM MEDIA DOWNLOADER")
         kicker.setObjectName("Eyebrow")
-        kicker.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
         hero_title = QLabel("Your downloads, in one place.")
         hero_title.setObjectName("HeroTitle")
         hero_title.setWordWrap(True)
-        hero_title.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
         hero_body = QLabel(
             "Find media from a channel or group, choose the files you want, "
             "and follow every download live."
         )
         hero_body.setObjectName("DescriptionText")
         hero_body.setWordWrap(True)
-        hero_body.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
         hero_copy.addWidget(kicker)
         hero_copy.addWidget(hero_title)
         hero_copy.addWidget(hero_body)
@@ -471,11 +467,10 @@ class MainWindow(QMainWindow):
 
         metrics = QFrame()
         metrics.setObjectName("MetricsPanel")
-        metrics.setMinimumWidth(0)
         metrics_layout = QGridLayout(metrics)
-        metrics_layout.setContentsMargins(20, 18, 20, 18)
-        metrics_layout.setHorizontalSpacing(24)
-        metrics_layout.setVerticalSpacing(6)
+        metrics_layout.setContentsMargins(18, 16, 18, 16)
+        metrics_layout.setHorizontalSpacing(20)
+        metrics_layout.setVerticalSpacing(4)
         metric_specs = [
             ("THROUGHPUT", "home_speed_value", "0 B/s"),
             ("ACTIVE QUEUE", "home_queue_value", "0"),
@@ -484,60 +479,49 @@ class MainWindow(QMainWindow):
         for column, (label, attr_name, value) in enumerate(metric_specs):
             metric_label = QLabel(label)
             metric_label.setObjectName("MetricLabel")
-            metric_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
             metric_value = QLabel(value)
             metric_value.setObjectName("MetricValue")
-            metric_value.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
             setattr(self, attr_name, metric_value)
             metrics_layout.addWidget(metric_label, 0, column)
             metrics_layout.addWidget(metric_value, 1, column)
         hero_layout.addWidget(metrics, stretch=2)
-        layout.addWidget(hero)
+        center_layout.addWidget(hero)
 
-        workflow = QFrame()
-        workflow.setObjectName("WorkflowStrip")
-        workflow_layout = QGridLayout(workflow)
-        workflow_layout.setContentsMargins(12, 10, 12, 10)
-        workflow_layout.setSpacing(8)
+        # How it works strip (3 steps)
+        steps_layout = QHBoxLayout()
+        steps_layout.setSpacing(10)
         workflow_steps = (
             ("01", "Enter source", "Paste a channel or group link."),
             ("02", "Choose media", "Pick categories or exact files."),
             ("03", "Track download", "Watch live speed and progress."),
         )
-        workflow_positions = ((0, 0, 1, 2), (1, 0, 1, 1), (1, 1, 1, 1))
-        for index, (number, title, detail) in enumerate(workflow_steps):
+        for number, title, detail in workflow_steps:
             step = QFrame()
             step.setObjectName("WorkflowStep")
-            step_layout = QHBoxLayout(step)
-            step_layout.setContentsMargins(12, 10, 12, 10)
-            step_layout.setSpacing(10)
-            step_number = QLabel(number)
-            step_number.setObjectName("SectionIndex")
-            step_text = QVBoxLayout()
-            step_text.setSpacing(1)
+            step_layout = QVBoxLayout(step)
+            step_layout.setContentsMargins(16, 14, 16, 14)
+            step_layout.setSpacing(6)
+            step_num = QLabel(number)
+            step_num.setObjectName("SectionIndex")
             step_title = QLabel(title)
             step_title.setObjectName("OptionTitle")
-            step_title.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
             step_detail = QLabel(detail)
             step_detail.setObjectName("MutedText")
             step_detail.setWordWrap(True)
-            step_detail.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
-            step_text.addWidget(step_title)
-            step_text.addWidget(step_detail)
-            step_layout.addWidget(step_number)
-            step_layout.addLayout(step_text, stretch=1)
-            row, column, row_span, column_span = workflow_positions[index]
-            workflow_layout.addWidget(step, row, column, row_span, column_span)
-        workflow_layout.setColumnStretch(0, 1)
-        workflow_layout.setColumnStretch(1, 1)
-        layout.addWidget(workflow)
+            step_layout.addWidget(step_num)
+            step_layout.addWidget(step_title)
+            step_layout.addWidget(step_detail)
+            step_layout.addStretch()
+            steps_layout.addWidget(step, stretch=1)
+        center_layout.addLayout(steps_layout)
 
-        search_card = QWidget()
+        # Search card
+        search_card = QFrame()
         search_card.setObjectName("SourcePanel")
         sc_layout = QVBoxLayout(search_card)
-        sc_layout.setContentsMargins(26, 22, 26, 24)
+        sc_layout.setContentsMargins(24, 20, 24, 22)
         sc_layout.setSpacing(10)
-        
+
         lbl_search_title = QLabel("Find media")
         lbl_search_title.setObjectName("SectionHeader")
         lbl_search_desc = QLabel(
@@ -545,40 +529,38 @@ class MainWindow(QMainWindow):
         )
         lbl_search_desc.setObjectName("MutedText")
         lbl_search_desc.setWordWrap(True)
-        lbl_search_desc.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
-        
+
         search_input_layout = QHBoxLayout()
+        search_input_layout.setSpacing(8)
         self.input_channel = QLineEdit()
         self.input_channel.setPlaceholderText("@channel, https://t.me/channel, or -100...")
-        self.input_channel.setMinimumHeight(48)
-        self.input_channel.setMinimumWidth(0)
-        
+        self.input_channel.setMinimumHeight(42)
+
         self.btn_fetch = QPushButton("Find media")
         self.btn_fetch.setObjectName("PrimaryButton")
-        self.btn_fetch.setMinimumHeight(48)
+        self.btn_fetch.setMinimumHeight(42)
         self.btn_fetch.clicked.connect(self.on_fetch_clicked)
-        
+
         search_input_layout.addWidget(self.input_channel, stretch=1)
         search_input_layout.addWidget(self.btn_fetch)
-        
+
         lbl_hint = QLabel(
             "Your Telegram account must already have access to private groups."
         )
         lbl_hint.setObjectName("MutedText")
         lbl_hint.setWordWrap(True)
-        lbl_hint.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
-        
+
         sc_layout.addWidget(lbl_search_title)
         sc_layout.addWidget(lbl_search_desc)
         sc_layout.addLayout(search_input_layout)
         sc_layout.addWidget(lbl_hint)
+        center_layout.addWidget(search_card)
+        center_layout.addStretch()
 
-        layout.addWidget(search_card)
-
-        layout.addStretch()
+        outer_layout.addWidget(center_widget)
         self.page_home.setWidget(home_content)
-        
-        self.card_widgets = {} # task_id -> DownloadCard
+
+        self.card_widgets = {}  # task_id -> DownloadCard
 
     def on_sidebar_changed(self, current_btn):
         # This was for QListWidget, we can keep it empty or remove it.
@@ -586,23 +568,13 @@ class MainWindow(QMainWindow):
         pass
 
     def switch_page(self, item_text, index):
-        # Update button states visually if needed (AutoExclusive handles checking)
         if "Home" in item_text:
-            self.header.show()
-            self.lbl_page_title.setText("Downloads")
-            self.lbl_page_subtitle.setText("Find and download Telegram media")
             self.stacked_widget.setCurrentIndex(0)
             self.btn_home.setChecked(True)
         elif "Queue" in item_text:
-            self.header.show()
-            self.lbl_page_title.setText("Download queue")
-            self.lbl_page_subtitle.setText("Live speed and file progress")
             self.stacked_widget.setCurrentIndex(1)
             self.btn_queue.setChecked(True)
         elif "Settings" in item_text:
-            self.header.show()
-            self.lbl_page_title.setText("Settings")
-            self.lbl_page_subtitle.setText("Folders, network, and download limits")
             self.stacked_widget.setCurrentIndex(2)
             self.btn_settings.setChecked(True)
         elif "About" in item_text:
@@ -612,8 +584,6 @@ class MainWindow(QMainWindow):
             if curr == 0: self.btn_home.setChecked(True)
             elif curr == 1: self.btn_queue.setChecked(True)
             elif curr == 2: self.btn_settings.setChecked(True)
-        else:
-            self.header.hide()
 
     def toggle_theme(self):
         # 🛡️ Optimization: Block signals to avoid massive redraw cascades while QSS is applying
@@ -683,7 +653,6 @@ class MainWindow(QMainWindow):
     def prompt_login(self):
         self._is_authenticating = True
         self.sidebarWidget.hide()
-        self.header.hide()
         self.page_login.reset_to_start()
         self.stacked_widget.setCurrentWidget(self.page_login)
 
@@ -692,11 +661,11 @@ class MainWindow(QMainWindow):
 
     def prompt_password(self):
         self.page_login.show_pwd_step()
-        
+
     def show_auth_error(self, err_msg):
         auth_dialogs.show_auth_error(self, err_msg)
         self.page_login.reset_to_start()
-            
+
     def on_auth_success(self):
         if self._is_authenticating:
             self.sidebarWidget.show()

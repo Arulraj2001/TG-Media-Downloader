@@ -103,22 +103,22 @@ class SettingsView(QWidget):
 
         self.container = QWidget()
         self.scroll_layout = QVBoxLayout(self.container)
-        self.scroll_layout.setContentsMargins(20, 34, 20, 44)
-        self.scroll_layout.setSpacing(18)
-        self.scroll_layout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+        self.scroll_layout.setContentsMargins(32, 28, 32, 44)
+        self.scroll_layout.setSpacing(16)
+        self.scroll_layout.setAlignment(Qt.AlignTop)
 
+        # Page header
+        page_title = QLabel("Settings")
+        page_title.setObjectName("PageTitle")
+        page_subtitle = QLabel("Folders, network, and download limits")
+        page_subtitle.setObjectName("PageSubtitle")
         header_block = QWidget()
         header_block.setMaximumWidth(860)
         header_layout = QVBoxLayout(header_block)
-        header_layout.setContentsMargins(0, 0, 0, 8)
-        header_layout.setSpacing(4)
-        lbl_header = QLabel("Settings")
-        lbl_header.setObjectName("MainHeaderLarge")
-        lbl_intro = QLabel("Choose where files are saved and how downloads use your connection.")
-        lbl_intro.setObjectName("DescriptionText")
-        lbl_intro.setWordWrap(True)
-        header_layout.addWidget(lbl_header)
-        header_layout.addWidget(lbl_intro)
+        header_layout.setContentsMargins(0, 0, 0, 4)
+        header_layout.setSpacing(3)
+        header_layout.addWidget(page_title)
+        header_layout.addWidget(page_subtitle)
         self.scroll_layout.addWidget(header_block)
 
         self.settings_card = QFrame()
@@ -128,10 +128,11 @@ class SettingsView(QWidget):
 
         self.clayout = QVBoxLayout(self.settings_card)
         self.clayout.setContentsMargins(0, 0, 0, 0)
-        self.clayout.setSpacing(14)
+        self.clayout.setSpacing(12)
 
+        # ── Downloads section ──────────────────────────────────────────
         download_section, download_layout = self._create_settings_section(
-            "01", "Downloads", "Folder, file names, and date options"
+            "Downloads", "Folder, file names, and date options"
         )
         self.clayout.addWidget(download_section)
 
@@ -184,8 +185,9 @@ class SettingsView(QWidget):
             "Set each downloaded file date to the date of its Telegram message."
         )
 
+        # ── Network section ────────────────────────────────────────────
         network_section, network_layout = self._create_settings_section(
-            "02", "Network", "Optional proxy settings"
+            "Network", "Optional proxy settings"
         )
         self.clayout.addWidget(network_section)
 
@@ -232,8 +234,9 @@ class SettingsView(QWidget):
         proxy_form.addLayout(proxy_row2)
         network_layout.addWidget(proxy_panel)
 
+        # ── Speed & Limits section ─────────────────────────────────────
         performance_section, performance_layout = self._create_settings_section(
-            "03", "Speed and limits", "Control scan size and download use"
+            "Speed & Limits", "Control scan size and download use"
         )
         self.clayout.addWidget(performance_section)
         limit_grid = QGridLayout()
@@ -267,13 +270,22 @@ class SettingsView(QWidget):
         performance_note.setWordWrap(True)
         performance_layout.addWidget(performance_note)
 
+        # Save button
+        save_row = QWidget()
+        save_row.setMaximumWidth(860)
+        save_row_layout = QHBoxLayout(save_row)
+        save_row_layout.setContentsMargins(0, 0, 0, 0)
+        save_row_layout.addStretch()
         self.btn_save = QPushButton("Save changes")
         self.btn_save.setObjectName("SuccessButton")
-        self.btn_save.setMinimumHeight(44)
+        self.btn_save.setMinimumHeight(40)
+        self.btn_save.setMinimumWidth(140)
         self.btn_save.setCursor(Qt.PointingHandCursor)
         self.btn_save.clicked.connect(self.save_settings)
-        self.clayout.addWidget(self.btn_save, 0, Qt.AlignRight)
+        save_row_layout.addWidget(self.btn_save)
+        self.scroll_layout.addWidget(save_row)
 
+        # ── Danger zone ────────────────────────────────────────────────
         logout_card = QFrame()
         logout_card.setObjectName("DangerCard")
         logout_card.setMaximumWidth(860)
@@ -301,29 +313,21 @@ class SettingsView(QWidget):
         root_layout.addWidget(self.scroll_area)
         self.load_settings()
 
-    def _create_settings_section(self, number, title, description):
+    def _create_settings_section(self, title, description):
         section = QFrame()
         section.setObjectName("SettingsSection")
         layout = QVBoxLayout(section)
-        layout.setContentsMargins(22, 20, 22, 22)
+        layout.setContentsMargins(20, 18, 20, 20)
         layout.setSpacing(12)
 
-        header = QHBoxLayout()
-        header.setSpacing(12)
-        index = QLabel(number)
-        index.setObjectName("SectionIndex")
-        header.addWidget(index)
-
-        text = QVBoxLayout()
-        text.setSpacing(2)
+        header = QVBoxLayout()
+        header.setSpacing(2)
         title_label = QLabel(title)
         title_label.setObjectName("SectionHeader")
         description_label = QLabel(description)
         description_label.setObjectName("MutedText")
-        text.addWidget(title_label)
-        text.addWidget(description_label)
-        header.addLayout(text)
-        header.addStretch()
+        header.addWidget(title_label)
+        header.addWidget(description_label)
         layout.addLayout(header)
         layout.addWidget(self._create_divider())
         return section, layout

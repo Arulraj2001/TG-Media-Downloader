@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
     QPushButton, QTabWidget, QWidget, QScrollArea,
     QCheckBox, QFrame, QSizePolicy, QLineEdit, QDateEdit,
-    QGridLayout, QToolButton
+    QGridLayout, QToolButton, QComboBox
 )
 from PySide6.QtCore import Qt, Signal, QDate, QRegularExpression
 from PySide6.QtGui import QIcon
@@ -169,6 +169,11 @@ class MediaBrowserDialog(QDialog):
         self.messages = messages_dict or {}
         self.selected_messages = []
         self.rows = {} # tab_name -> list of SelectableMediaRow
+        self.list_layouts = {} # tab_name -> QVBoxLayout list layout
+        self.tab_sort_combos = {} # tab_name -> QComboBox
+        self.tab_order_btns = {} # tab_name -> QPushButton
+        self.current_sort_by = "Date"
+        self.current_sort_desc = True # True = Descending, False = Ascending
         
         self.setup_ui(channel_title)
 
@@ -220,12 +225,12 @@ class MediaBrowserDialog(QDialog):
         self.inp_search.textChanged.connect(self.filter_rows)
         
         self.btn_toggle_filters = QToolButton()
-        self.btn_toggle_filters.setText("Show advanced settings")
         self.btn_toggle_filters.setCheckable(True)
         self.btn_toggle_filters.setChecked(True)
+        self.btn_toggle_filters.setText("Hide advanced settings")
         self.btn_toggle_filters.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.btn_toggle_filters.setMinimumHeight(40)
-        self.btn_toggle_filters.clicked.connect(self.toggle_filters_area)
+        self.btn_toggle_filters.toggled.connect(self.toggle_filters_area)
         
         search_layout.addWidget(self.inp_search, stretch=1)
         search_layout.addWidget(self.btn_toggle_filters)
@@ -290,44 +295,74 @@ class MediaBrowserDialog(QDialog):
         self.btn_reset_filters.setObjectName("SecondaryButton")
         self.btn_reset_filters.clicked.connect(self.reset_filters)
         f_layout.addWidget(self.btn_reset_filters, 2, 2)
+
+        # Row 4: Sort Controls
+        lbl_sort = QLabel("Sort by")
+        f_layout.addWidget(lbl_sort, 3, 0)
+        
+        sort_layout = QHBoxLayout()
+        sort_layout.setSpacing(8)
+        self.combo_sort_by = QComboBox()
+        self.combo_sort_by.addItems(["Date", "Size", "Name"])
+        self.combo_sort_by.setMinimumWidth(110)
+        self.combo_sort_by.currentTextChanged.connect(self.on_sort_field_changed)
+        
+        self.combo_sort_order = QComboBox()
+        self.combo_sort_order.addItems(["Descending (Newest / Largest / Z-A)", "Ascending (Oldest / Smallest / A-Z)"])
+        self.combo_sort_order.currentIndexChanged.connect(lambda idx: self.on_sort_order_changed(idx == 0))
+        
+        sort_layout.addWidget(self.combo_sort_by)
+        sort_layout.addWidget(self.combo_sort_order, stretch=1)
+        f_layout.addLayout(sort_layout, 3, 1)
         
         # Stacked Widget to support Bulk vs Tabs
         from PySide6.QtWidgets import QStackedWidget
         self.main_stack = QStackedWidget()
 
-        # --- Bulk View ---
+        # --- Bulk View (wrapped in scroll so nothing clips) ---
+        bulk_scroll_host = QWidget()
+        bulk_scroll_host.setObjectName("BulkView")
+        bulk_scroll_outer = QVBoxLayout(bulk_scroll_host)
+        bulk_scroll_outer.setContentsMargins(0, 0, 0, 0)
+        bulk_scroll_outer.setSpacing(0)
+
+        bulk_scroll = QScrollArea()
+        bulk_scroll.setWidgetResizable(True)
+        bulk_scroll.setFrameShape(QFrame.NoFrame)
+        bulk_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
         self.bulk_view = QWidget()
         self.bulk_view.setObjectName("BulkView")
         bulk_layout = QVBoxLayout(self.bulk_view)
         bulk_layout.setContentsMargins(30, 24, 30, 24)
         bulk_layout.setSpacing(14)
-        
+
         lbl_bulk = QLabel("Download by category")
         lbl_bulk.setObjectName("DialogTitle")
-        
+
         lbl_desc = QLabel(
             "Download whole categories without loading the file list first.\n"
             "Use the button below when you want to choose individual files."
         )
         lbl_desc.setObjectName("MutedText")
         lbl_desc.setWordWrap(True)
-        
+
         bulk_layout.addWidget(lbl_bulk)
         bulk_layout.addWidget(lbl_desc)
-        
+
         options_panel = QFrame()
         options_panel.setObjectName("BulkOptions")
         cat_layout = QVBoxLayout(options_panel)
         cat_layout.setContentsMargins(14, 12, 14, 12)
         cat_layout.setSpacing(8)
         self.bulk_checkboxes = {}
-        
+
         # Container for checkboxes to keep them centered together
         cb_container = QWidget()
         cb_layout = QVBoxLayout(cb_container)
         cb_layout.setSpacing(8)
         cb_layout.setContentsMargins(0, 0, 0, 0)
-        
+
         # We only need the main categories for bulk
         categories = [
             ("All media (images and videos)", 6),
@@ -360,23 +395,24 @@ class MediaBrowserDialog(QDialog):
                 lambda checked, selected_id=media_id:
                     keep_bulk_choices_distinct(selected_id, checked)
             )
-            
+
         cat_layout.addWidget(cb_container)
-        
         bulk_layout.addWidget(options_panel)
-        
+
         self.btn_load_specific = QPushButton("Load and select specific files")
         self.btn_load_specific.setObjectName("SecondaryButton")
         self.btn_load_specific.setMinimumHeight(44)
         self.btn_load_specific.clicked.connect(lambda: self.fetch_requested.emit())
-        
+
         btn_layout = QHBoxLayout()
         btn_layout.addWidget(self.btn_load_specific)
         btn_layout.addStretch()
         bulk_layout.addLayout(btn_layout)
         bulk_layout.addStretch()
-        
-        self.main_stack.addWidget(self.bulk_view)
+
+        bulk_scroll.setWidget(self.bulk_view)
+        bulk_scroll_outer.addWidget(bulk_scroll)
+        self.main_stack.addWidget(bulk_scroll_host)
 
         # --- Tabs View ---
         self.tabs = QTabWidget()
@@ -409,8 +445,6 @@ class MediaBrowserDialog(QDialog):
         if not self.messages or len(self.messages.get("all", [])) == 0:
             self.main_stack.setCurrentIndex(0)
             self.lbl_selected_count.setText("Choose one or more categories")
-            self.inp_search.setEnabled(False)
-            self.btn_toggle_filters.setEnabled(False)
         else:
             self.main_stack.setCurrentIndex(1)
 
@@ -465,6 +499,29 @@ class MediaBrowserDialog(QDialog):
         t_layout.addWidget(btn_visible)
         t_layout.addWidget(btn_none)
         t_layout.addStretch()
+
+        lbl_tab_sort = QLabel("Sort by:")
+        lbl_tab_sort.setObjectName("ControlLabel")
+        combo_tab_sort = QComboBox()
+        combo_tab_sort.addItems(["Date", "Size", "Name"])
+        combo_tab_sort.setCurrentText(self.current_sort_by)
+        combo_tab_sort.setMinimumWidth(100)
+        combo_tab_sort.currentTextChanged.connect(self.on_sort_field_changed)
+        self.tab_sort_combos[tab_key] = combo_tab_sort
+
+        btn_tab_order = QPushButton()
+        btn_tab_order.setObjectName("SecondaryButton")
+        btn_tab_order.setText("⬇ Descending" if self.current_sort_desc else "⬆ Ascending")
+        btn_tab_order.setToolTip("Click to toggle Ascending / Descending order")
+        btn_tab_order.setCheckable(True)
+        btn_tab_order.setChecked(self.current_sort_desc)
+        btn_tab_order.setMinimumWidth(115)
+        btn_tab_order.toggled.connect(self.on_sort_order_changed)
+        self.tab_order_btns[tab_key] = btn_tab_order
+
+        t_layout.addWidget(lbl_tab_sort)
+        t_layout.addWidget(combo_tab_sort)
+        t_layout.addWidget(btn_tab_order)
         layout.addWidget(tools)
 
         # Scrollable list
@@ -477,9 +534,31 @@ class MediaBrowserDialog(QDialog):
         list_layout.setContentsMargins(16, 16, 16, 16) # Add padding so cards don't touch edges
         list_layout.setSpacing(10) # 10px spacing between cards
         list_layout.setAlignment(Qt.AlignTop)
+        self.list_layouts[tab_key] = list_layout
         
         self.rows[tab_key] = []
-        messages = self.messages.get(tab_key, [])
+        raw_messages = self.messages.get(tab_key, [])
+        seen_ids = set()
+        seen_sigs = set()
+        messages = []
+        for m in raw_messages:
+            if not m:
+                continue
+            m_id = getattr(m, 'id', None)
+            if m_id and m_id in seen_ids:
+                continue
+            if m_id:
+                seen_ids.add(m_id)
+            
+            sig = None
+            if getattr(m, 'file', None) and getattr(m.file, 'name', None) and getattr(m.file, 'size', None):
+                sig = (m.file.name.lower().strip(), m.file.size)
+            if sig:
+                if sig in seen_sigs:
+                    continue
+                seen_sigs.add(sig)
+            messages.append(m)
+
         for msg in messages:
             row = SelectableMediaRow(msg)
             if msg.id in self.previous_selected_ids:
@@ -506,7 +585,10 @@ class MediaBrowserDialog(QDialog):
 
     def toggle_filters_area(self, checked):
         self.filters_area.setVisible(checked)
-        # We allow it to size dynamically without forcing a rigid pixel boundary which helps on 768p
+        if checked:
+            self.btn_toggle_filters.setText("Hide advanced settings")
+        else:
+            self.btn_toggle_filters.setText("Show advanced settings")
         self.adjustSize()
 
     def reset_filters(self):
@@ -516,11 +598,101 @@ class MediaBrowserDialog(QDialog):
         self.size_max.clear()
         self.date_start.setDate(QDate.currentDate().addYears(-10))
         self.date_end.setDate(QDate.currentDate())
+        if hasattr(self, 'combo_sort_by'):
+            self.combo_sort_by.setCurrentIndex(0)
+        if hasattr(self, 'combo_sort_order'):
+            self.combo_sort_order.setCurrentIndex(0)
         self.btn_toggle_filters.setChecked(False)
-        self.filters_area.setVisible(False)
+        self.current_sort_by = "Date"
+        self.current_sort_desc = True
+        self.apply_sorting()
         self.filter_rows()
 
+    def on_sort_field_changed(self, new_field):
+        if not new_field:
+            return
+        self.current_sort_by = new_field
+        
+        if hasattr(self, 'combo_sort_by') and self.combo_sort_by.currentText() != new_field:
+            self.combo_sort_by.blockSignals(True)
+            self.combo_sort_by.setCurrentText(new_field)
+            self.combo_sort_by.blockSignals(False)
+            
+        if hasattr(self, 'tab_sort_combos'):
+            for combo in self.tab_sort_combos.values():
+                if combo.currentText() != new_field:
+                    combo.blockSignals(True)
+                    combo.setCurrentText(new_field)
+                    combo.blockSignals(False)
+                    
+        self.apply_sorting()
+
+    def on_sort_order_changed(self, is_desc):
+        self.current_sort_desc = is_desc
+        
+        if hasattr(self, 'combo_sort_order'):
+            self.combo_sort_order.blockSignals(True)
+            self.combo_sort_order.setCurrentIndex(0 if is_desc else 1)
+            self.combo_sort_order.blockSignals(False)
+            
+        if hasattr(self, 'tab_order_btns'):
+            for btn in self.tab_order_btns.values():
+                btn.blockSignals(True)
+                btn.setChecked(is_desc)
+                btn.setText("⬇ Descending" if is_desc else "⬆ Ascending")
+                btn.blockSignals(False)
+                
+        self.apply_sorting()
+
+    def _get_row_sort_key(self, row, sort_by):
+        msg = row.msg
+        if sort_by == "Date":
+            raw_date = getattr(msg, 'date', None)
+            if raw_date:
+                if isinstance(raw_date, str):
+                    return raw_date
+                if hasattr(raw_date, 'timestamp'):
+                    return raw_date.timestamp()
+                return str(raw_date)
+            return 0
+        elif sort_by == "Size":
+            if getattr(msg, 'is_mock', False):
+                return getattr(msg, 'size', 0)
+            elif getattr(msg, 'file', None):
+                return getattr(msg.file, 'size', 0)
+            elif getattr(msg, 'document', None):
+                return getattr(msg.document, 'size', 0)
+            elif getattr(msg, 'photo', None):
+                try: return msg.photo.sizes[-1].size
+                except: return 0
+            return 0
+        elif sort_by == "Name":
+            return row.lbl_title.text().lower()
+        return getattr(msg, 'id', 0)
+
+    def apply_sorting(self):
+        for tab_key, rows_list in self.rows.items():
+            if not rows_list or tab_key not in self.list_layouts:
+                continue
+
+            layout = self.list_layouts[tab_key]
+
+            # Sort row objects list
+            rows_list.sort(
+                key=lambda r: self._get_row_sort_key(r, self.current_sort_by),
+                reverse=self.current_sort_desc
+            )
+
+            # Re-insert into layout in sorted order
+            for i, r in enumerate(rows_list):
+                layout.removeWidget(r)
+                layout.insertWidget(i, r)
+
     def filter_rows(self, _=None):
+        # Nothing to filter yet (bulk mode, no files loaded)
+        if not self.rows:
+            return
+
         search_text = self.inp_search.text().lower().strip()
         regex_text = self.inp_regex.text().strip()
         
@@ -635,6 +807,7 @@ class MediaBrowserDialog(QDialog):
         # 3. Clear existing tabs
         self.tabs.clear()
         self.rows = {}
+        self.list_layouts = {}
         
         # 4. Rebuild everything (this is simpler than merging)
         self.tab_all   = self.build_tab("all")
@@ -663,3 +836,6 @@ class MediaBrowserDialog(QDialog):
         self.btn_toggle_filters.setEnabled(True)
         self.btn_load_specific.setText("Refresh specific files")
         self.btn_load_specific.setEnabled(True)
+        # Apply sorting & re-apply any search/filter text
+        self.apply_sorting()
+        self.filter_rows()
