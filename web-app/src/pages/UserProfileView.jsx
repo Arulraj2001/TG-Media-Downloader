@@ -1,22 +1,12 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useApp } from '../context/AppContext'
 import { User, Crown, Clock, Calendar, CheckCircle2, AlertCircle, FileText, Sparkles } from 'lucide-react'
 
 export default function UserProfileView() {
-  const { user, profile, subscription, freeFetchesRemaining } = useAuth()
-  
-  // Sample Payment Verifications history tracker
-  const [payments, setPayments] = useState([
-    {
-      id: 'pay-101',
-      planName: '6 Months Pass',
-      amount: '$24.99',
-      method: 'QR Code / UPI',
-      refId: 'UTR9876543210',
-      date: '2026-03-29',
-      status: 'pending' // pending, approved, rejected
-    }
-  ])
+  const { user, profile, freeFetchesRemaining } = useAuth()
+  const { payments, activeSubscription, systemSettings } = useApp()
+  const currentSub = activeSubscription || useAuth().subscription
 
   if (!user) {
     return (
@@ -38,7 +28,7 @@ export default function UserProfileView() {
         <div className="space-y-1 text-center sm:text-left flex-1">
           <div className="flex items-center justify-center sm:justify-start gap-2">
             <h1 className="text-2xl font-bold text-white">{profile?.full_name || 'User Account'}</h1>
-            {subscription ? (
+            {currentSub ? (
               <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[11px] font-bold">
                 PRO SUBSCRIBER
               </span>
@@ -61,11 +51,11 @@ export default function UserProfileView() {
           </h2>
         </div>
 
-        {subscription ? (
+        {currentSub ? (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
             <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-1">
               <span className="text-slate-400">Current Plan</span>
-              <p className="font-bold text-white text-sm">{subscription.subscription_plans?.name || 'Pro Plan'}</p>
+              <p className="font-bold text-white text-sm">{currentSub.planName || currentSub.subscription_plans?.name || 'Pro Plan'}</p>
             </div>
             <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-1">
               <span className="text-slate-400">Status</span>

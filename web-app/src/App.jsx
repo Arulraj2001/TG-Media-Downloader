@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { AppProvider } from './context/AppContext'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import ActionGateModal from './components/ActionGateModal'
@@ -15,8 +16,9 @@ import AdminPortalView from './pages/AdminPortalView'
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <AppProvider>
+      <AuthProvider>
+        <Router>
         <div className="flex flex-col min-h-screen bg-[#0F0F12] text-slate-100">
           <Navbar />
           <ActionGateModal />
@@ -44,5 +46,6 @@ export default function App() {
         </div>
       </Router>
     </AuthProvider>
+  </AppProvider>
   )
 }

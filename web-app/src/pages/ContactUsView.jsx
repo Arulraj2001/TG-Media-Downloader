@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
+import { useApp } from '../context/AppContext'
 import { Mail, MessageSquare, Send, CheckCircle2, User, HelpCircle } from 'lucide-react'
 
 export default function ContactUsView() {
+  const { submitContactForm } = useApp()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [subject, setSubject] = useState('General Inquiry')
@@ -14,13 +16,14 @@ export default function ContactUsView() {
     if (!name || !email || !message) return
 
     setIsSubmitting(true)
+    submitContactForm({ name, email, subject, message })
     setTimeout(() => {
       setIsSubmitting(false)
       setSubmitSuccess(true)
       setName('')
       setEmail('')
       setMessage('')
-    }, 800)
+    }, 500)
   }
 
   return (

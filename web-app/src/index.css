@@ -3,30 +3,25 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    color-scheme: dark light;
+  }
   body {
-    @apply bg-[#0F0F12] text-slate-100 font-sans antialiased;
+    @apply bg-slate-50 text-slate-900 dark:bg-[#0F0F12] dark:text-slate-100 font-sans antialiased transition-colors duration-200;
   }
 }
 
-/* Glassmorphism utility classes */
+/* Glassmorphism utility classes for Light & Dark modes */
 .glass-panel {
-  background: rgba(24, 24, 29, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  @apply bg-white/90 border-slate-200 text-slate-900 dark:bg-[#18181D]/90 dark:border-white/10 dark:text-slate-100 backdrop-blur-md transition-colors duration-200;
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  @apply bg-slate-100/80 border-slate-200/80 text-slate-800 dark:bg-white/[0.03] dark:border-white/[0.06] dark:text-slate-200 backdrop-blur-sm transition-colors duration-200;
 }
 
 .glass-input {
-  background: rgba(15, 15, 18, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #F8FAFC;
+  @apply bg-white border-slate-300 text-slate-900 dark:bg-[#0F0F12]/90 dark:border-white/15 dark:text-white transition-colors duration-200;
 }
 
 .glass-input:focus {
@@ -41,11 +36,10 @@
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #0F0F12;
+  @apply bg-slate-100 dark:bg-[#0F0F12];
 }
 ::-webkit-scrollbar-thumb {
-  background: #2A2A32;
-  border-radius: 4px;
+  @apply bg-slate-300 dark:bg-[#2A2A32] rounded-md;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #9562E3;

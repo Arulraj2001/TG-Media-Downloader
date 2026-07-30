@@ -1,60 +1,62 @@
 import React, { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useApp } from '../context/AppContext'
 import { Check, Crown, Sparkles, QrCode, Upload, ShieldCheck, ArrowRight, X } from 'lucide-react'
 
-const PLANS = [
-  {
-    id: 'plan_3m',
-    name: '3 Months Pass',
-    durationMonths: 3,
-    price: 14.99,
-    description: 'Perfect for short-term projects and fast bulk archiving.',
-    features: [
-      'Unlimited Fetch & Download Requests',
-      'Maximum Download Speeds',
-      'Telegram Forum Topics Access',
-      'Zero Advertisements',
-      'Direct Browser Local Streaming'
-    ]
-  },
-  {
-    id: 'plan_6m',
-    name: '6 Months Pass',
-    durationMonths: 6,
-    price: 24.99,
-    popular: true,
-    description: 'Best value for active Telegram media downloaders.',
-    features: [
-      'Unlimited Fetch & Download Requests',
-      'Maximum Download Speeds',
-      'Telegram Forum Topics Access',
-      'Zero Advertisements',
-      'Direct Browser Local Streaming',
-      'Priority Server Slots'
-    ]
-  },
-  {
-    id: 'plan_12m',
-    name: '12 Months VIP Pass',
-    durationMonths: 12,
-    price: 39.99,
-    description: 'Ultimate 1-Year VIP Pass with all features & updates.',
-    features: [
-      'Unlimited Fetch & Download Requests',
-      'Maximum Download Speeds',
-      'Telegram Forum Topics Access',
-      'Zero Advertisements',
-      'Direct Browser Local Streaming',
-      'Priority Server Slots',
-      'VIP Support'
-    ]
-  }
-]
-
 export default function PricingView() {
-  const { requireAuth, user } = useAuth()
+  const { requireAuth, user, profile } = useAuth()
+  const { systemSettings, submitPaymentVerification } = useApp()
   const [selectedPlan, setSelectedPlan] = useState(null)
   const [showCheckoutModal, setShowCheckoutModal] = useState(false)
+
+  const PLANS = [
+    {
+      id: 'plan_3m',
+      name: '3 Months Pass',
+      durationMonths: 3,
+      price: systemSettings.plan3mPrice || 14.99,
+      description: 'Perfect for short-term projects and fast bulk archiving.',
+      features: [
+        'Unlimited Fetch & Download Requests',
+        'Maximum Download Speeds',
+        'Telegram Forum Topics Access',
+        'Zero Advertisements',
+        'Direct Browser Local Streaming'
+      ]
+    },
+    {
+      id: 'plan_6m',
+      name: '6 Months Pass',
+      durationMonths: 6,
+      price: systemSettings.plan6mPrice || 24.99,
+      popular: true,
+      description: 'Best value for active Telegram media downloaders.',
+      features: [
+        'Unlimited Fetch & Download Requests',
+        'Maximum Download Speeds',
+        'Telegram Forum Topics Access',
+        'Zero Advertisements',
+        'Direct Browser Local Streaming',
+        'Priority Server Slots'
+      ]
+    },
+    {
+      id: 'plan_12m',
+      name: '12 Months VIP Pass',
+      durationMonths: 12,
+      price: systemSettings.plan12mPrice || 39.99,
+      description: 'Ultimate 1-Year VIP Pass with all features & updates.',
+      features: [
+        'Unlimited Fetch & Download Requests',
+        'Maximum Download Speeds',
+        'Telegram Forum Topics Access',
+        'Zero Advertisements',
+        'Direct Browser Local Streaming',
+        'Priority Server Slots',
+        'VIP Support'
+      ]
+    }
+  ]
   
   // Checkout Form State
   const [paymentMethod, setPaymentMethod] = useState('qr_code')
@@ -79,10 +81,20 @@ export default function PricingView() {
     }
 
     setIsSubmitting(true)
+    submitPaymentVerification({
+      userName: profile?.full_name || 'User Account',
+      userEmail: user?.email || 'user@example.com',
+      planName: selectedPlan.name,
+      planId: selectedPlan.id,
+      amount: `$${selectedPlan.price}`,
+      method: paymentMethod === 'qr_code' ? 'QR Code / UPI' : paymentMethod === 'paypal' ? 'PayPal' : paymentMethod === 'crypto' ? 'Crypto Wallet' : 'Bank Transfer',
+      refId: txnRefId,
+      proofUrl: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=600&q=80'
+    })
     setTimeout(() => {
       setIsSubmitting(false)
       setSubmitSuccess(true)
-    }, 1000)
+    }, 500)
   }
 
   return (

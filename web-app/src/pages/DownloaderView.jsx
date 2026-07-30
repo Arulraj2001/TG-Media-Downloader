@@ -8,16 +8,17 @@ import {
   ChevronDown, ChevronUp, Pause, Play, Trash2, ShieldCheck, Sparkles, FolderDown
 } from 'lucide-react'
 
-// Mock Telegram channel data for web demo
+// Mock Telegram channel data with all 9 desktop categories
 const MOCK_CHANNEL_MESSAGES = [
   { id: 101, title: 'Python_Data_Science_Handbook_2026.pdf', size: 15485760, date: '2026-03-15', type: 'files', category: 'PDF Document', ext: 'pdf' },
   { id: 102, title: 'Fullstack_Web_Development_Masterclass.mp4', size: 452428800, date: '2026-03-20', type: 'media', category: 'Video', ext: 'mp4' },
   { id: 103, title: 'Machine_Learning_Datasets_Bundle.zip', size: 104857600, date: '2026-02-10', type: 'zips', category: 'Archive', ext: 'zip' },
   { id: 104, title: 'Lofi_Study_Background_Audio.mp3', size: 8428800, date: '2026-01-05', type: 'music', category: 'Audio', ext: 'mp3' },
   { id: 105, title: 'UI_Design_System_Mockups_Dark.png', size: 5242880, date: '2026-03-25', type: 'media', category: 'Photo', ext: 'png' },
-  { id: 106, title: 'Advanced_NodeJS_Microservices_Architecture.pdf', size: 24500000, date: '2026-03-28', type: 'files', category: 'PDF Document', ext: 'pdf' },
-  { id: 107, title: 'React_18_Performance_Optimization_Guide.mp4', size: 280000000, date: '2026-03-12', type: 'media', category: 'Video', ext: 'mp4' },
-  { id: 108, title: 'Project_Source_Code_Backup.7z', size: 95000000, date: '2026-02-28', type: 'zips', category: 'Archive', ext: '7z' },
+  { id: 106, title: 'Voice_Note_Lecture_Summary_01.ogg', size: 2154800, date: '2026-03-26', type: 'voice', category: 'Voice Note', ext: 'ogg' },
+  { id: 107, title: 'Official_Documentation_Resource_Link.html', size: 12000, date: '2026-03-27', type: 'links', category: 'Web Link', ext: 'link' },
+  { id: 108, title: 'Celebration_Animation_Reaction.gif', size: 1450000, date: '2026-03-28', type: 'gifs', category: 'GIF Animation', ext: 'gif' },
+  { id: 109, title: 'Community_QnA_Transcript_Chat_Log.txt', size: 450000, date: '2026-03-29', type: 'chat', category: 'Chat Text', ext: 'txt' },
 ]
 
 export default function DownloaderView() {
@@ -326,7 +327,7 @@ export default function DownloaderView() {
             </div>
           )}
 
-          {/* Category Tabs */}
+          {/* 9 Category Tabs (Matching Desktop App 100%) */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-white/10 text-xs font-medium no-scrollbar">
             {[
               { id: 'all', label: 'All Files', icon: Layers },
@@ -334,6 +335,10 @@ export default function DownloaderView() {
               { id: 'files', label: 'Documents', icon: FileText },
               { id: 'zips', label: 'Archives', icon: Archive },
               { id: 'music', label: 'Music', icon: Music },
+              { id: 'voice', label: 'Voice Notes', icon: Sparkles },
+              { id: 'links', label: 'Links', icon: LinkIcon },
+              { id: 'gifs', label: 'GIFs', icon: Smile },
+              { id: 'chat', label: 'Chat Logs', icon: MessageSquare },
             ].map(tab => {
               const Icon = tab.icon
               const count = tab.id === 'all' 

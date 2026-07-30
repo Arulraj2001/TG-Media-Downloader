@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useApp } from '../context/AppContext'
 import { 
   Shield, Check, X, Eye, FileText, DollarSign, MessageSquare, 
   Settings, PenTool, LayoutDashboard, Sliders, CheckCircle2, Clock, 
@@ -8,59 +9,24 @@ import {
 
 export default function AdminPortalView() {
   const { isAdmin } = useAuth()
+  const { 
+    systemSettings, payments, contactMessages, blogPosts,
+    approvePaymentAdmin, rejectPaymentAdmin, addBlogPostAdmin, updateSystemSettingsAdmin 
+  } = useApp()
+
   const [activeTab, setActiveTab] = useState('payments')
 
-  // Mock State for Admin Modules
-  const [pendingPayments, setPendingPayments] = useState([
-    {
-      id: 'pv-001',
-      userName: 'John Doe',
-      userEmail: 'john@example.com',
-      planName: '6 Months Pass',
-      planId: 'plan_6m',
-      amount: '$24.99',
-      method: 'QR Code / UPI',
-      refId: 'UTR9876543210',
-      proofUrl: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=600&q=80',
-      date: '2026-03-29 10:45 AM',
-      status: 'pending'
-    }
-  ])
-
-  const [contactMessages, setContactMessages] = useState([
-    {
-      id: 'cm-001',
-      name: 'Sarah Connor',
-      email: 'sarah@example.com',
-      subject: 'Payment Verification Support',
-      message: 'Hi, I paid via PayPal and submitted my transaction ref. Please verify my 12-month VIP subscription.',
-      date: '2026-03-29 11:30 AM',
-      status: 'unread'
-    }
-  ])
-
-  const [blogPosts, setBlogPosts] = useState([
-    {
-      id: 'bp-001',
-      title: 'How to Download Telegram Media Files Directly in Your Browser',
-      slug: 'how-to-download-telegram-media-files-directly',
-      category: 'Guides',
-      status: 'published',
-      date: '2026-03-25'
-    }
-  ])
-
   // System Settings State
-  const [freeFetchLimit, setFreeFetchLimit] = useState(5)
-  const [adsFreeUsers, setAdsFreeUsers] = useState(true)
-  const [adsPaidUsers, setAdsPaidUsers] = useState(false)
-  const [upiId, setUpiId] = useState('admin@upi')
-  const [paypalMe, setPaypalMe] = useState('https://paypal.me/admin')
+  const [freeFetchLimit, setFreeFetchLimit] = useState(systemSettings.freeFetchLimit || 5)
+  const [adsFreeUsers, setAdsFreeUsers] = useState(systemSettings.adsFreeUsers ?? true)
+  const [adsPaidUsers, setAdsPaidUsers] = useState(systemSettings.adsPaidUsers ?? false)
+  const [upiId, setUpiId] = useState(systemSettings.paymentUpiId || 'admin@upi')
+  const [paypalMe, setPaypalMe] = useState(systemSettings.paymentPaypalMe || 'https://paypal.me/admin')
 
   // Pricing State
-  const [plan3mPrice, setPlan3mPrice] = useState(14.99)
-  const [plan6mPrice, setPlan6mPrice] = useState(24.99)
-  const [plan12mPrice, setPlan12mPrice] = useState(39.99)
+  const [plan3mPrice, setPlan3mPrice] = useState(systemSettings.plan3mPrice || 14.99)
+  const [plan6mPrice, setPlan6mPrice] = useState(systemSettings.plan6mPrice || 24.99)
+  const [plan12mPrice, setPlan12mPrice] = useState(systemSettings.plan12mPrice || 39.99)
 
   // New Blog Post Form State
   const [showBlogModal, setShowBlogModal] = useState(false)
@@ -155,29 +121,41 @@ export default function AdminPortalView() {
 
   // 1-Click Approve Payment
   const approvePayment = (id) => {
-    setPendingPayments(prev => prev.map(p => p.id === id ? { ...p, status: 'approved' } : p))
-    alert('Payment approved! User subscription has been activated for 6 months.')
+    approvePaymentAdmin(id)
+    alert('Payment approved! User subscription has been activated.')
   }
 
   const rejectPayment = (id) => {
-    setPendingPayments(prev => prev.map(p => p.id === id ? { ...p, status: 'rejected' } : p))
+    rejectPaymentAdmin(id)
   }
 
   const handleCreateBlogPost = (e) => {
     e.preventDefault()
     if (!newBlogTitle || !newBlogContent) return
-    const post = {
-      id: `bp-${Date.now()}`,
+    addBlogPostAdmin({
       title: newBlogTitle,
-      slug: newBlogTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       category: newBlogCategory,
-      status: 'published',
-      date: new Date().toISOString().split('T')[0]
-    }
-    setBlogPosts(prev => [post, ...prev])
+      content: newBlogContent,
+      excerpt: newBlogContent.slice(0, 150) + '...',
+      cover: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80'
+    })
     setShowBlogModal(false)
     setNewBlogTitle('')
     setNewBlogContent('')
+  }
+
+  const handleSaveSettings = () => {
+    updateSystemSettingsAdmin({
+      freeFetchLimit: parseInt(freeFetchLimit) || 5,
+      adsFreeUsers,
+      adsPaidUsers,
+      paymentUpiId: upiId,
+      paymentPaypalMe: paypalMe,
+      plan3mPrice: parseFloat(plan3mPrice) || 14.99,
+      plan6mPrice: parseFloat(plan6mPrice) || 24.99,
+      plan12mPrice: parseFloat(plan12mPrice) || 39.99
+    })
+    alert('System settings & subscription prices updated across the web app!')
   }
 
   return (
@@ -379,7 +357,7 @@ export default function AdminPortalView() {
           <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <h2 className="font-bold text-white text-base">Subscription Plan Prices & Payment Details</h2>
             <button
-              onClick={() => alert('Subscription prices updated successfully!')}
+              onClick={handleSaveSettings}
               className="py-2 px-4 rounded-xl bg-brand-500 hover:bg-brand-400 text-white font-bold text-xs shadow-glow"
             >
               Save Pricing Settings
@@ -427,7 +405,7 @@ export default function AdminPortalView() {
           <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <h2 className="font-bold text-white text-base">Free Limits & AdSense Ad Controls</h2>
             <button
-              onClick={() => alert('Settings saved successfully!')}
+              onClick={handleSaveSettings}
               className="py-2 px-4 rounded-xl bg-brand-500 hover:bg-brand-400 text-white font-bold text-xs shadow-glow"
             >
               Save Controls

@@ -2,38 +2,38 @@ import React, { useState, useEffect } from 'react'
 import { Sun, Moon } from 'lucide-react'
 
 export default function ThemeToggle() {
-  const [isDark, setIsDark] = useState(true)
+  const [isDark, setIsDark] = useState(() => {
+    const saved = localStorage.getItem('tg_theme')
+    return saved ? saved === 'dark' : true
+  })
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('tg_theme')
-    if (savedTheme === 'light') {
-      setIsDark(false)
-      document.documentElement.classList.remove('dark')
+    const root = document.documentElement
+    if (isDark) {
+      root.classList.add('dark')
+      localStorage.setItem('tg_theme', 'dark')
     } else {
-      setIsDark(true)
-      document.documentElement.classList.add('dark')
+      root.classList.remove('dark')
+      localStorage.setItem('tg_theme', 'light')
     }
-  }, [])
+  }, [isDark])
 
   const toggleTheme = () => {
-    if (isDark) {
-      document.documentElement.classList.remove('dark')
-      localStorage.setItem('tg_theme', 'light')
-      setIsDark(false)
-    } else {
-      document.documentElement.classList.add('dark')
-      localStorage.setItem('tg_theme', 'dark')
-      setIsDark(true)
-    }
+    setIsDark(prev => !prev)
   }
 
   return (
     <button
       onClick={toggleTheme}
+      type="button"
       title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-      className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition border border-white/10 flex items-center justify-center"
+      className="p-2 rounded-xl bg-slate-200 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 transition border border-slate-300 dark:border-white/10 flex items-center justify-center cursor-pointer shadow-sm"
     >
-      {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-brand-400" />}
+      {isDark ? (
+        <Sun className="w-4 h-4 text-amber-400" />
+      ) : (
+        <Moon className="w-4 h-4 text-purple-600" />
+      )}
     </button>
   )
 }

@@ -1,71 +1,15 @@
 import React, { useState } from 'react'
-import { useParams, Link } from 'react'
+import { useApp } from '../context/AppContext'
 import { Search, BookOpen, Clock, Tag, Calendar, User, ArrowLeft, Share2, Sparkles } from 'lucide-react'
 
-const BLOG_POSTS = [
-  {
-    id: 'post-1',
-    title: 'How to Download Telegram Media Files Directly in Your Browser',
-    slug: 'how-to-download-telegram-media-files-directly',
-    excerpt: 'A complete step-by-step guide on how to browse, filter, and download videos, documents, music, and zip files from any Telegram channel directly in your browser.',
-    category: 'Guides',
-    tags: ['Telegram', 'Downloader', 'Tutorial'],
-    date: '2026-03-25',
-    author: 'TG Downloader Team',
-    readTime: 5,
-    cover: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
-    content: `
-# How to Download Telegram Media Files Directly in Your Browser
-
-Telegram has become one of the most popular platforms for sharing media, documents, educational content, and archives. However, downloading multiple files or extracting specific media types from large Telegram channels can often feel slow or tedious.
-
-## Why Use TG Media Downloader?
-
-1. **Direct Browser Streaming**: No complex setup required. Files download straight into your local downloads directory.
-2. **Categorized Media Browsing**: Filter by Videos, Documents, Music, ZIP Archives, and GIFs.
-3. **Topic Browser**: Full support for Telegram Forum Topics and separated channels.
-4. **Advanced Date & Size Filtering**: Locate the exact files you need in seconds.
-
-### Step-by-Step Download Guide:
-- **Step 1**: Enter the Telegram channel username (e.g., \`@example_channel\`) or public link.
-- **Step 2**: Select your desired category tab or forum topic.
-- **Step 3**: Use the checkbox selectors to choose specific files or bulk download.
-- **Step 4**: Click Download to save directly to your computer or phone.
-    `
-  },
-  {
-    id: 'post-2',
-    title: 'Understanding Telegram Forum Topics and Categorized Downloads',
-    slug: 'understanding-telegram-forum-topics-and-categorized-downloads',
-    excerpt: 'Learn how Telegram Forum Topics work and how to easily isolate and download media from specific sub-topics.',
-    category: 'Tutorials',
-    tags: ['Telegram Forum', 'Topics', 'Media Filtering'],
-    date: '2026-03-20',
-    author: 'TG Downloader Team',
-    readTime: 4,
-    cover: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80',
-    content: `
-# Understanding Telegram Forum Topics and Categorized Downloads
-
-Telegram Forum Topics allow large communities to organize discussions into sub-channels. When managing downloads from these forum channels, having a dedicated topic picker is essential.
-
-## Key Benefits of Topic Separation:
-- Easily isolate study materials, movies, or document releases.
-- Avoid fetching unnecessary messages from unrelated topics.
-- Bulk download entire topic archives with a single click.
-
-With TG Media Downloader, topic structures are parsed automatically, allowing you to select and download topic media with zero hassle.
-    `
-  }
-]
-
 export default function PublicBlogView() {
+  const { blogPosts } = useApp()
   const [selectedPost, setSelectedPost] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
 
-  const filteredPosts = BLOG_POSTS.filter(post => 
+  const filteredPosts = (blogPosts || []).filter(post => 
     post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.category.toLowerCase().includes(searchQuery.toLowerCase())
+    (post.category && post.category.toLowerCase().includes(searchQuery.toLowerCase()))
   )
 
   if (selectedPost) {
