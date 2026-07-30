@@ -205,16 +205,16 @@ export default function DownloaderView() {
         description="Download files, videos, music, archives, and forum topics directly from Telegram channels. High speed, direct local downloads, and topic filtering."
       />
 
-      {/* Hero Section - Minimalist Fintech Style */}
+      {/* Hero Section */}
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[6px] bg-[#635BFF]/10 border border-[#635BFF]/30 text-[#635BFF] text-xs font-mono font-medium">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[6px] bg-[#635BFF]/10 border border-[#635BFF]/30 text-[#635BFF] text-xs font-mono font-bold">
           <Terminal className="w-3.5 h-3.5" />
           <span>DIRECT STREAMING API ENGINE</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-current tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
           Telegram Channel Media Downloader
         </h1>
-        <p className="text-slate-400 text-sm max-w-2xl">
+        <p className="text-slate-600 dark:text-slate-300 text-sm max-w-2xl">
           Enter any channel username or link to browse, filter, sort, and stream files directly to your device.
         </p>
       </div>
@@ -230,7 +230,7 @@ export default function DownloaderView() {
               value={channelInput}
               onChange={(e) => setChannelInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleFetch()}
-              className="w-full pl-10 pr-4 py-2.5 rounded-[6px] glass-input text-xs text-current focus:outline-none"
+              className="w-full pl-10 pr-4 py-2.5 rounded-[6px] glass-input text-xs text-slate-900 dark:text-white focus:outline-none"
             />
           </div>
 
@@ -238,12 +238,12 @@ export default function DownloaderView() {
           <select
             value={selectedTopic}
             onChange={(e) => setSelectedTopic(e.target.value)}
-            className="px-3.5 py-2.5 rounded-[6px] glass-input text-xs font-mono focus:outline-none"
+            className="px-3.5 py-2.5 rounded-[6px] glass-input text-xs font-mono text-slate-900 dark:text-white focus:outline-none"
           >
-            <option value="all">TOPIC: ALL (Main Feed)</option>
-            <option value="101">TOPIC #1: PDF Textbooks</option>
-            <option value="102">TOPIC #2: Video Courses</option>
-            <option value="103">TOPIC #3: ZIP Archives</option>
+            <option value="all" className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">TOPIC: ALL (Main Feed)</option>
+            <option value="101" className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">TOPIC #1: PDF Textbooks</option>
+            <option value="102" className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">TOPIC #2: Video Courses</option>
+            <option value="103" className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">TOPIC #3: ZIP Archives</option>
           </select>
 
           <button
@@ -271,7 +271,7 @@ export default function DownloaderView() {
         <div className="glass-panel rounded-[12px] p-6 space-y-6">
           
           {/* Header Controls: Search & Toggle Advanced Filters */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-[#E6E6E6]/10 pb-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-[#CBD5E1] dark:border-[#E6E6E6]/10 pb-4">
             <div className="relative w-full md:w-80">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
               <input
@@ -279,7 +279,7 @@ export default function DownloaderView() {
                 placeholder="Search by file name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 rounded-[6px] glass-input text-xs text-current focus:outline-none"
+                className="w-full pl-9 pr-3 py-1.5 rounded-[6px] glass-input text-xs text-slate-900 dark:text-white focus:outline-none"
               />
             </div>
 
@@ -296,7 +296,7 @@ export default function DownloaderView() {
           {showAdvancedFilters && (
             <div className="p-4 rounded-[6px] glass-card grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
               <div>
-                <label className="block text-slate-400 mb-1 font-mono text-[11px]">MIN SIZE (MB)</label>
+                <label className="block text-slate-600 dark:text-slate-400 mb-1 font-mono text-[11px]">MIN SIZE (MB)</label>
                 <input
                   type="number"
                   placeholder="e.g. 5"
@@ -306,7 +306,7 @@ export default function DownloaderView() {
                 />
               </div>
               <div>
-                <label className="block text-slate-400 mb-1 font-mono text-[11px]">MAX SIZE (MB)</label>
+                <label className="block text-slate-600 dark:text-slate-400 mb-1 font-mono text-[11px]">MAX SIZE (MB)</label>
                 <input
                   type="number"
                   placeholder="e.g. 500"
@@ -327,7 +327,7 @@ export default function DownloaderView() {
           )}
 
           {/* 9 Category Tabs (Matching Desktop App 100%) */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-[#E6E6E6]/10 text-xs font-medium no-scrollbar">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-[#CBD5E1] dark:border-[#E6E6E6]/10 text-xs font-medium no-scrollbar">
             {[
               { id: 'all', label: 'All Files', icon: Layers },
               { id: 'media', label: 'Media', icon: Film },
@@ -347,10 +347,10 @@ export default function DownloaderView() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-[6px] transition whitespace-nowrap text-xs font-semibold ${
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-[6px] transition whitespace-nowrap text-xs font-semibold ${
                     activeTab === tab.id
-                      ? 'bg-[#635BFF] text-white shadow-subtle'
-                      : 'text-slate-400 hover:text-current hover:bg-white/5'
+                      ? 'bg-[#635BFF] text-white shadow-sm'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/5'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -378,22 +378,22 @@ export default function DownloaderView() {
               >
                 Clear All
               </button>
-              <span className="text-slate-400 ml-2 text-xs font-mono">
+              <span className="text-slate-600 dark:text-slate-400 ml-2 text-xs font-mono">
                 SELECTED: <strong className="text-[#635BFF]">{selectedIds.length}</strong>
               </span>
             </div>
 
             {/* Sorting Controls */}
             <div className="flex items-center gap-2">
-              <span className="text-slate-400 text-xs font-mono">SORT BY:</span>
+              <span className="text-slate-600 dark:text-slate-400 text-xs font-mono">SORT BY:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-1 rounded-[6px] glass-input text-xs font-mono focus:outline-none"
+                className="px-3 py-1 rounded-[6px] glass-input text-xs font-mono focus:outline-none text-slate-900 dark:text-white"
               >
-                <option value="Date">Date</option>
-                <option value="Size">File Size</option>
-                <option value="Name">File Name</option>
+                <option value="Date" className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">Date</option>
+                <option value="Size" className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">File Size</option>
+                <option value="Name" className="bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white">File Name</option>
               </select>
 
               <button
@@ -409,7 +409,7 @@ export default function DownloaderView() {
           {/* File List Cards */}
           <div className="space-y-2 max-h-[450px] overflow-y-auto pr-1">
             {filteredMessages.length === 0 ? (
-              <div className="text-center py-12 text-slate-400 text-xs font-mono">
+              <div className="text-center py-12 text-slate-500 dark:text-slate-400 text-xs font-mono">
                 No matching media files found for current filter.
               </div>
             ) : (
@@ -419,7 +419,7 @@ export default function DownloaderView() {
                   <div
                     key={item.id}
                     onClick={() => toggleSelect(item.id)}
-                    className={`flex items-center gap-4 p-3 rounded-[6px] border transition cursor-pointer ${
+                    className={`flex items-center gap-4 p-3.5 rounded-[6px] border transition cursor-pointer ${
                       isSelected 
                         ? 'bg-[#635BFF]/10 border-[#635BFF]' 
                         : 'glass-card hover:border-[#635BFF]/40'
@@ -429,24 +429,24 @@ export default function DownloaderView() {
                       {isSelected ? (
                         <CheckSquare className="w-4 h-4 text-[#635BFF]" />
                       ) : (
-                        <Square className="w-4 h-4 text-slate-500" />
+                        <Square className="w-4 h-4 text-slate-400" />
                       )}
                     </button>
 
-                    <div className="w-8 h-8 rounded-[4px] bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 shrink-0">
-                      {item.type === 'files' && <FileText className="w-4 h-4" />}
-                      {item.type === 'media' && <Film className="w-4 h-4 text-purple-400" />}
-                      {item.type === 'zips' && <Archive className="w-4 h-4 text-amber-400" />}
-                      {item.type === 'music' && <Music className="w-4 h-4 text-emerald-400" />}
-                      {item.type === 'voice' && <Sparkles className="w-4 h-4 text-sky-400" />}
-                      {item.type === 'links' && <LinkIcon className="w-4 h-4 text-indigo-400" />}
-                      {item.type === 'gifs' && <Smile className="w-4 h-4 text-pink-400" />}
-                      {item.type === 'chat' && <MessageSquare className="w-4 h-4 text-teal-400" />}
+                    <div className="w-8 h-8 rounded-[4px] bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-slate-300 shrink-0">
+                      {item.type === 'files' && <FileText className="w-4 h-4 text-[#635BFF]" />}
+                      {item.type === 'media' && <Film className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
+                      {item.type === 'zips' && <Archive className="w-4 h-4 text-amber-600 dark:text-amber-400" />}
+                      {item.type === 'music' && <Music className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
+                      {item.type === 'voice' && <Sparkles className="w-4 h-4 text-sky-600 dark:text-sky-400" />}
+                      {item.type === 'links' && <LinkIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
+                      {item.type === 'gifs' && <Smile className="w-4 h-4 text-pink-600 dark:text-pink-400" />}
+                      {item.type === 'chat' && <MessageSquare className="w-4 h-4 text-teal-600 dark:text-teal-400" />}
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-xs text-current truncate">{item.title}</p>
-                      <div className="flex items-center gap-3 text-[11px] font-mono text-slate-400 mt-0.5">
+                      <p className="font-semibold text-xs sm:text-sm text-slate-900 dark:text-white truncate">{item.title}</p>
+                      <div className="flex items-center gap-3 text-xs font-mono text-slate-600 dark:text-slate-400 mt-0.5">
                         <span>{item.category}</span>
                         <span>•</span>
                         <span>{formatSize(item.size)}</span>
@@ -465,8 +465,8 @@ export default function DownloaderView() {
           </div>
 
           {/* Action Bar Footer */}
-          <div className="flex items-center justify-between pt-4 border-t border-[#E6E6E6]/10">
-            <span className="text-xs font-mono text-slate-400">
+          <div className="flex items-center justify-between pt-4 border-t border-[#CBD5E1] dark:border-[#E6E6E6]/10">
+            <span className="text-xs font-mono text-slate-600 dark:text-slate-400">
               DIRECT LOCAL STREAMING • ZERO SERVER STORAGE
             </span>
             <button
@@ -486,8 +486,8 @@ export default function DownloaderView() {
       {/* Active Download Queue Manager */}
       {downloadQueue.length > 0 && (
         <div className="glass-panel rounded-[12px] p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-[#E6E6E6]/10 pb-3">
-            <h3 className="font-bold text-current text-xs font-mono uppercase flex items-center gap-2">
+          <div className="flex items-center justify-between border-b border-[#CBD5E1] dark:border-[#E6E6E6]/10 pb-3">
+            <h3 className="font-bold text-slate-900 dark:text-white text-xs font-mono uppercase flex items-center gap-2">
               <Cpu className="w-4 h-4 text-[#635BFF]" />
               <span>Active Streams Queue ({downloadQueue.length})</span>
             </h3>
@@ -498,15 +498,15 @@ export default function DownloaderView() {
               <div key={job.id} className="glass-card p-4 rounded-[6px] space-y-2">
                 <div className="flex items-center justify-between text-xs font-mono">
                   <div>
-                    <span className="font-bold text-current">{job.channel}</span>
-                    <span className="text-slate-400 ml-2">
+                    <span className="font-bold text-slate-900 dark:text-white">{job.channel}</span>
+                    <span className="text-slate-600 dark:text-slate-400 ml-2">
                       ({job.completed} / {job.total} files completed)
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => toggleJobPause(job.id)}
-                      className="p-1 rounded-[4px] bg-white/5 hover:bg-white/10"
+                      className="p-1 rounded-[4px] bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20"
                     >
                       {job.status === 'downloading' ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
                     </button>
