@@ -76,8 +76,9 @@ export default function HomeLandingView() {
   return (
     <div className="space-y-20 pb-16">
       <SeoMeta
-        title="TG Media Downloader - Fast, Bulk & Direct Telegram Downloader"
-        description="Stream and download videos, documents, music, zip archives, and forum topics directly from Telegram channels into your browser with zero server caching."
+        title="Telegram Media Downloader — Bulk Save Channels, Groups, Chats & Folders"
+        description="Free Telegram Bulk Media Downloader — Save videos, photos, music, files, forum topics, and group folders directly from public and private Telegram channels at maximum speed. Zero server caching."
+        keywords="telegram downloader, telegram media downloader, bulk telegram downloader, download telegram videos, telegram channel downloader, telegram group downloader, telegram folder downloader, telegram private channel downloader, telegram chat downloader, telegram video saver, download telegram files online, mtproto telegram web downloader, telegram batch media saver"
         jsonLd={landingJsonLd}
       />
 

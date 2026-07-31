@@ -763,8 +763,22 @@ export default function DownloaderView() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <SeoMeta
-        title="Telegram Media Downloader — MTProto Web Tool"
-        description="Download photos, videos, documents, music, archives, and more from any Telegram channel or group."
+        title="Online Telegram Downloader — Bulk Download Videos, Files, Photos & Forum Topics"
+        description="Extract and download videos, photos, MP3 audio, PDF documents, ZIP archives, and forum sub-topics directly from any public or private Telegram channel, group, or chat."
+        keywords="telegram online downloader, download telegram videos online, telegram private video downloader, telegram forum topic downloader, download telegram media by channel link, telegram message id downloader, mtproto telegram web extractor"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "TG Media Downloader Web Edition",
+          "operatingSystem": "All",
+          "applicationCategory": "UtilitiesApplication",
+          "description": "Extract and download files directly from Telegram channels, groups, and topics.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          }
+        }}
       />
 
       {/* Page header */}

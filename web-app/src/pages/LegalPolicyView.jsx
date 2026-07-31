@@ -13,8 +13,9 @@ export default function LegalPolicyView({ type = 'privacy' }) {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12 space-y-8">
       <SeoMeta
-        title={`${titles[type] || 'Privacy Policy'} - TG Media Downloader`}
-        description="Legal and compliance documentation for TG Media Downloader Web Edition."
+        title={`${titles[type] || 'Privacy Policy'} — TG Media Downloader`}
+        description={`Read the official ${titles[type] || 'Privacy Policy'} for TG Media Downloader. Transparent zero-server storage policy and terms.`}
+        keywords={`tg downloader ${type}, telegram downloader legal, telegram media downloader policy`}
       />
 
       <div className="space-y-3">

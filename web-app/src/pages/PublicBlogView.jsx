@@ -17,8 +17,19 @@ export default function PublicBlogView() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-10 space-y-8">
         <SeoMeta
-          title={`${selectedPost.title} - TG Media Downloader Blog`}
-          description={selectedPost.excerpt}
+          title={selectedPost.title}
+          description={selectedPost.metaDesc || selectedPost.excerpt}
+          keywords={selectedPost.keywords || 'telegram download tutorial, how to download telegram videos, telegram private group downloader guide'}
+          image={selectedPost.cover}
+          jsonLd={{
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": selectedPost.title,
+            "description": selectedPost.metaDesc || selectedPost.excerpt,
+            "image": selectedPost.cover,
+            "author": { "@type": "Person", "name": selectedPost.author || "TG Downloader Team" },
+            "datePublished": selectedPost.date || "2026-07-30"
+          }}
         />
 
         <button
@@ -65,8 +76,9 @@ export default function PublicBlogView() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-12 space-y-8">
       <SeoMeta
-        title="Telegram Downloader Blog & Tutorials - TG Media Downloader"
-        description="Technical guides, channel downloading tutorials, and Telegram Forum Topics management guides."
+        title="Telegram Downloader Blog & Technical Guides — Tutorials & How-To"
+        description="Comprehensive technical guides, tutorials, and tips on downloading Telegram videos, private channel media, restricted group content, and managing Telegram forum sub-topics."
+        keywords="telegram downloading guides, how to download telegram videos, download restricted telegram channel, save telegram private group files, telegram media downloader tutorial"
       />
 
       {/* Header */}

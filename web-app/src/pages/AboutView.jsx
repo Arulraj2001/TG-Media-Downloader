@@ -13,8 +13,9 @@ export default function AboutView() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 space-y-10">
       <SeoMeta
-        title="About Us & Technology Architecture - TG Media Downloader"
-        description="Comprehensive technical overview of TG Media Downloader's direct browser streaming engine, MTProto client protocol, zero-server storage policy, and architecture."
+        title="About Us & Technology Architecture — TG Media Downloader"
+        description="Learn about TG Media Downloader's zero-server storage architecture, direct MTProto browser streaming engine, and private local media extraction protocol."
+        keywords="about tg media downloader, mtproto browser downloader technology, telegram zero server storage downloader, privacy first telegram downloader"
         jsonLd={aboutJsonLd}
       />
 

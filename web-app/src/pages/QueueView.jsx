@@ -270,8 +270,9 @@ export default function QueueView() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
       <SeoMeta
-        title="Download Queue — TG Media Downloader"
-        description="Monitor real-time Telegram file download progress, speed, and completed downloads."
+        title="Live Download Queue & Speed Monitor — Telegram Batch Downloader"
+        description="Monitor active Telegram batch download jobs, real-time download speeds, file transfer progress, and history."
+        keywords="telegram download queue, telegram batch transfer monitor, live telegram download speed, telegram file manager"
       />
 
       {/* Page header */}

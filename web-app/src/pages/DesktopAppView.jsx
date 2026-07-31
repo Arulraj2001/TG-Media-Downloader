@@ -115,8 +115,22 @@ export default function DesktopAppView() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-10 space-y-16">
       <SeoMeta
-        title="Desktop Application — TG Media Downloader (PySide6 Native)"
-        description="Explore our standalone Python PySide6 desktop app for Windows and Mac with multi-threaded downloads and zero browser limits."
+        title="Desktop App — Download Telegram Private Channels & Restricted Groups (Windows/Mac/Linux)"
+        description="Download the standalone Telegram Media Downloader desktop app for Windows, macOS, and Linux. Multi-threaded MTProto downloads, bypass restricted content restrictions, and zero browser memory limits."
+        keywords="telegram downloader desktop app, download telegram restricted channel videos, telegram media downloader windows, telegram downloader mac, telethon pyside6 desktop downloader, telegram batch downloader software"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          "name": "TG Media Downloader Desktop Edition",
+          "operatingSystem": "Windows 10/11, macOS, Linux",
+          "applicationCategory": "UtilitiesApplication",
+          "downloadUrl": "https://github.com/Arulraj2001/TG-Media-Downloader/releases",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          }
+        }}
       />
 
       {/* ── LIGHTBOX POPUP MODAL ────────────────────────────────────────── */}

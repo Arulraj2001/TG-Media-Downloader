@@ -30,8 +30,9 @@ export default function ContactUsView() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 space-y-10">
       <SeoMeta
-        title="Contact Helpdesk - TG Media Downloader"
-        description="Contact our technical support and helpdesk team for payment verification, feature requests, or inquiries."
+        title="Contact Technical Support & Helpdesk — TG Media Downloader"
+        description="Contact our technical support and helpdesk team for Telegram Downloader feature requests, technical questions, or inquiries."
+        keywords="contact tg downloader, telegram downloader support, telegram media downloader contact"
       />
 
       {/* Header */}
