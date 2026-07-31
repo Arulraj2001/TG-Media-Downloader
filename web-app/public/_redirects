@@ -1,1 +1,7 @@
-/*    /index.html   200
+# Netlify Redirects Configuration for TG Media Downloader
+# Ensure static files pass through directly without SPA fallback
+/sitemap.xml    /sitemap.xml   200
+/robots.txt     /robots.txt    200
+
+# Single Page Application SPA fallback
+/*              /index.html    200
