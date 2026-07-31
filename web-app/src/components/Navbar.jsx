@@ -27,9 +27,11 @@ export default function Navbar() {
 
           {/* Brand Logo */}
           <Link to="/" className="flex items-center gap-3.5 group flex-shrink-0">
-            <div className="w-10 h-10 rounded-[10px] bg-gradient-to-tr from-[#635BFF] to-[#8B5CF6] flex items-center justify-center text-white font-bold shadow-[0_0_20px_rgba(99,91,255,0.4)] transition group-hover:scale-105">
-              <Download className="w-5 h-5" />
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="TG Downloader Logo" 
+              className="w-10 h-10 rounded-[10px] object-contain shadow-[0_0_20px_rgba(99,91,255,0.4)] transition group-hover:scale-105" 
+            />
             <div className="flex flex-col">
               <span className="font-display font-extrabold text-xl text-current tracking-tight leading-tight group-hover:text-[#635BFF] transition">TG Downloader</span>
               <span className="text-[10px] text-[#635BFF] font-mono font-bold tracking-widest uppercase">FREE UNLIMITED v1.1</span>

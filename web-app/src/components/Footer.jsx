@@ -11,9 +11,11 @@ export default function Footer() {
           {/* Brand Col */}
           <div className="md:col-span-1 space-y-3.5">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#635BFF] to-purple-600 flex items-center justify-center text-white font-bold shadow-md shadow-[#635BFF]/30">
-                <Download className="w-4.5 h-4.5" />
-              </div>
+              <img 
+                src="/logo.png" 
+                alt="TG Downloader Logo" 
+                className="w-9 h-9 rounded-xl object-contain shadow-md shadow-[#635BFF]/30" 
+              />
               <span className="font-display font-extrabold text-slate-900 dark:text-white text-lg tracking-tight">TG Downloader</span>
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-normal">

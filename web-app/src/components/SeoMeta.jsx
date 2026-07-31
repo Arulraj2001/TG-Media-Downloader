@@ -41,7 +41,7 @@ export default function SeoMeta({
 
     const defaultDesc = 'Free Telegram Bulk Media Downloader — Save videos, photos, music, files, forum topics, and group folders directly from public and private Telegram channels at maximum speed.'
     const defaultKeywords = 'telegram downloader, telegram media downloader, bulk telegram downloader, download telegram videos, telegram channel downloader, telegram group downloader, telegram folder downloader, telegram private channel downloader, telegram chat downloader, telegram video saver, download telegram files online, telegram mtproto web downloader'
-    const defaultImage = image || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80'
+    const defaultImage = image || 'https://tg-media-bulk-downloader.netlify.app/og-image.png'
     const currentUrl = canonical || window.location.href
 
     // 2. Core Meta Tags
