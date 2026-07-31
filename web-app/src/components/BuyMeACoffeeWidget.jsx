@@ -24,25 +24,24 @@ export default function BuyMeACoffeeWidget() {
 
   return (
     <>
-      {/* ── FLOATING BUTTON (BOTTOM RIGHT CORNER) ── */}
+      {/* ── FLOATING BUTTON (BOTTOM RIGHT CORNER — ICON ONLY JUMPING ANIMATION) ── */}
       <div className="fixed bottom-6 right-6 z-40">
         <a
           href={COFFEE_URL}
           target="_blank"
           rel="noreferrer"
-          className="group relative flex items-center gap-2.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-white font-bold px-4 py-3 rounded-full shadow-[0_10px_25px_rgba(245,158,11,0.4)] hover:shadow-[0_15px_35px_rgba(245,158,11,0.6)] transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer border border-amber-300/30"
+          className="group relative w-14 h-14 rounded-full flex items-center justify-center bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-white shadow-[0_12px_30px_rgba(245,158,11,0.5)] hover:shadow-[0_18px_40px_rgba(245,158,11,0.7)] transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer border border-amber-300/40 animate-bounce"
           title="Support this free tool — Buy Me a Coffee!"
         >
-          <div className="relative">
-            <Coffee className="w-5 h-5 text-white animate-bounce" />
-            <Sparkles className="w-3.5 h-3.5 text-yellow-200 absolute -top-1.5 -right-1.5" />
+          <div className="relative flex items-center justify-center">
+            <Coffee className="w-6 h-6 text-white" />
+            <Sparkles className="w-3.5 h-3.5 text-yellow-200 absolute -top-2 -right-2 animate-pulse" />
           </div>
-          <span className="text-xs sm:text-sm font-display tracking-tight font-extrabold">Buy me a coffee</span>
 
           {/* Heart pulse dot */}
-          <span className="flex h-2.5 w-2.5 relative">
+          <span className="flex h-3 w-3 absolute -top-1 -right-1">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500 border border-white"></span>
           </span>
         </a>
       </div>

@@ -251,7 +251,7 @@ export default function DesktopAppView() {
             </div>
             <div className="p-3 flex items-center justify-between text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
               <span className="flex items-center gap-1 text-emerald-500 font-bold"><CheckCircle2 className="w-3.5 h-3.5" /> Python 3.12 + PySide6</span>
-              <span>v2.7.6</span>
+              <span>v1.1</span>
             </div>
           </div>
         </div>

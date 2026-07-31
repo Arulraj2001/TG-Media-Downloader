@@ -32,7 +32,7 @@ export default function Navbar() {
             </div>
             <div className="flex flex-col">
               <span className="font-display font-extrabold text-xl text-current tracking-tight leading-tight group-hover:text-[#635BFF] transition">TG Downloader</span>
-              <span className="text-[10px] text-[#635BFF] font-mono font-bold tracking-widest uppercase">FREE UNLIMITED v2.7</span>
+              <span className="text-[10px] text-[#635BFF] font-mono font-bold tracking-widest uppercase">FREE UNLIMITED v1.1</span>
             </div>
           </Link>
 

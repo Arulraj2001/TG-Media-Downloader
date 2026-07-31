@@ -60,10 +60,6 @@ export default function ContactUsView() {
             </p>
             <div className="space-y-3 text-xs font-mono text-slate-300 pt-2 border-t border-[#E6E6E6]/10">
               <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-[#635BFF]" />
-                <span>support@tgdownloader.com</span>
-              </div>
-              <div className="flex items-center gap-2">
                 <HelpCircle className="w-4 h-4 text-[#635BFF]" />
                 <span>24/7 Response Window</span>
               </div>
