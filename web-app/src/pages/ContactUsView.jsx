@@ -12,19 +12,17 @@ export default function ContactUsView() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!name || !email || !message) return
 
     setIsSubmitting(true)
-    submitContactForm({ name, email, subject, message })
-    setTimeout(() => {
-      setIsSubmitting(false)
-      setSubmitSuccess(true)
-      setName('')
-      setEmail('')
-      setMessage('')
-    }, 500)
+    await submitContactForm({ name, email, subject, message })
+    setIsSubmitting(false)
+    setSubmitSuccess(true)
+    setName('')
+    setEmail('')
+    setMessage('')
   }
 
   return (

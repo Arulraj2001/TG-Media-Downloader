@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
 
 const AppContext = createContext()
 
@@ -152,6 +153,34 @@ export function AppProvider({ children }) {
     localStorage.setItem('tg_contact_messages', JSON.stringify(contactMessages))
   }, [contactMessages])
 
+  // Load contact messages from Supabase on mount
+  useEffect(() => {
+    async function loadContactMessages() {
+      try {
+        const { data, error } = await supabase
+          .from('contact_messages')
+          .select('*')
+          .order('created_at', { ascending: false })
+
+        if (!error && data && data.length > 0) {
+          const formatted = data.map(m => ({
+            id: m.id,
+            name: m.name,
+            email: m.email,
+            subject: m.subject || 'General Inquiry',
+            message: m.message,
+            date: (m.created_at || '').slice(0, 10),
+            status: m.status || 'unread'
+          }))
+          setContactMessages(formatted)
+        }
+      } catch (err) {
+        console.error('Failed to load contact messages from Supabase:', err)
+      }
+    }
+    loadContactMessages()
+  }, [])
+
   useEffect(() => {
     localStorage.setItem('tg_blog_posts', JSON.stringify(blogPosts))
   }, [blogPosts])
@@ -181,7 +210,7 @@ export function AppProvider({ children }) {
     setPayments(prev => prev.map(p => p.id === paymentId ? { ...p, status: 'rejected' } : p))
   }
 
-  const submitContactForm = (messageData) => {
+  const submitContactForm = async (messageData) => {
     const newMsg = {
       id: `msg-${Date.now()}`,
       name: messageData.name,
@@ -192,6 +221,24 @@ export function AppProvider({ children }) {
       status: 'unread'
     }
     setContactMessages(prev => [newMsg, ...prev])
+
+    // Save directly to Supabase contact_messages table
+    try {
+      const { error } = await supabase
+        .from('contact_messages')
+        .insert({
+          name: messageData.name,
+          email: messageData.email,
+          subject: messageData.subject || 'General Inquiry',
+          message: messageData.message,
+          status: 'unread'
+        })
+      if (error) {
+        console.error('Supabase contact submission error:', error)
+      }
+    } catch (err) {
+      console.error('Supabase contact submission error:', err)
+    }
   }
 
   // Advanced Blog Post Actions

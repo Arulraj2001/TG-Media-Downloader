@@ -66,6 +66,7 @@ export default function AdminPortalView() {
 
   // Supabase Live Data State
   const [dbPayments, setDbPayments] = useState([])
+  const [dbContactMessages, setDbContactMessages] = useState([])
   const [dbLoading, setDbLoading] = useState(false)
 
   const fetchDbPayments = async () => {
@@ -80,9 +81,28 @@ export default function AdminPortalView() {
     setDbLoading(false)
   }
 
+  const fetchDbContactMessages = async () => {
+    const { data, error } = await supabase
+      .from('contact_messages')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (!error && data) {
+      setDbContactMessages(data.map(m => ({
+        id: m.id,
+        name: m.name,
+        email: m.email,
+        subject: m.subject || 'General Inquiry',
+        message: m.message,
+        date: (m.created_at || '').slice(0, 10),
+        status: m.status || 'unread'
+      })))
+    }
+  }
+
   useEffect(() => {
     if (isAdmin) {
       fetchDbPayments()
+      fetchDbContactMessages()
     }
   }, [isAdmin])
 
@@ -775,33 +795,45 @@ export default function AdminPortalView() {
         )}
 
         {/* TAB 5: HELPDESK INBOX */}
-        {activeTab === 'contact' && (
-          <div className="glass-panel p-6 rounded-[12px] space-y-6">
-            <div className="flex items-center justify-between border-b border-[#CBD5E1] dark:border-white/10 pb-3">
-              <h2 className="font-bold text-slate-900 dark:text-white text-sm font-mono uppercase font-display">Contact Messages Inbox ({contactMessages.length})</h2>
-            </div>
+        {activeTab === 'contact' && (() => {
+          const allMessages = dbContactMessages.length > 0 ? dbContactMessages : contactMessages
+          return (
+            <div className="glass-panel p-6 rounded-[12px] space-y-6">
+              <div className="flex items-center justify-between border-b border-[#CBD5E1] dark:border-white/10 pb-3">
+                <h2 className="font-bold text-slate-900 dark:text-white text-sm font-mono uppercase font-display">
+                  Contact Messages Inbox ({allMessages.length})
+                </h2>
+                <button
+                  onClick={fetchDbContactMessages}
+                  className="btn-fintech-secondary text-xs flex items-center gap-1.5 px-3 py-1 font-mono font-bold"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Refresh Inbox</span>
+                </button>
+              </div>
 
-            <div className="space-y-3">
-              {contactMessages.length === 0 ? (
-                <p className="text-center py-8 text-slate-500 font-mono text-xs">No messages in helpdesk inbox.</p>
-              ) : (
-                contactMessages.map(cm => (
-                  <div key={cm.id} className="glass-card p-4 rounded-[6px] space-y-2 text-xs">
-                    <div className="flex items-center justify-between border-b border-[#CBD5E1] dark:border-white/10 pb-2 font-mono">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-900 dark:text-white">{cm.name}</span>
-                        <span className="text-slate-500">({cm.email})</span>
+              <div className="space-y-3">
+                {allMessages.length === 0 ? (
+                  <p className="text-center py-8 text-slate-500 font-mono text-xs">No messages in helpdesk inbox.</p>
+                ) : (
+                  allMessages.map(cm => (
+                    <div key={cm.id} className="glass-card p-4 rounded-[10px] space-y-2 text-xs border border-slate-200 dark:border-white/10">
+                      <div className="flex items-center justify-between border-b border-[#CBD5E1] dark:border-white/10 pb-2 font-mono">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-900 dark:text-white">{cm.name}</span>
+                          <span className="text-slate-500">({cm.email})</span>
+                        </div>
+                        <span className="text-slate-500 text-[11px] font-bold">{cm.date}</span>
                       </div>
-                      <span className="text-slate-500 text-[11px]">{cm.date}</span>
+                      <p className="font-semibold text-[#635BFF] font-mono">Subject: {cm.subject}</p>
+                      <p className="text-slate-900 dark:text-white bg-slate-100 dark:bg-white/5 p-3 rounded-[6px] border border-[#CBD5E1] dark:border-white/10">{cm.message}</p>
                     </div>
-                    <p className="font-semibold text-[#635BFF] font-mono">Subject: {cm.subject}</p>
-                    <p className="text-slate-900 dark:text-white bg-slate-100 dark:bg-white/5 p-3 rounded-[6px] border border-[#CBD5E1] dark:border-white/10">{cm.message}</p>
-                  </div>
-                ))
-              )}
+                  ))
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )
+        })()}
 
         {/* TAB 6: PRICING & SUBSCRIPTIONS */}
         {activeTab === 'pricing' && (
