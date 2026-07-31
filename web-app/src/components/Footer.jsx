@@ -33,7 +33,6 @@ export default function Footer() {
               <li><Link to="/downloader" className="hover:text-[#635BFF] transition-colors">Channel Downloader</Link></li>
               <li><Link to="/downloader" className="hover:text-[#635BFF] transition-colors">Forum Topics Browser</Link></li>
               <li><Link to="/downloader" className="hover:text-[#635BFF] transition-colors">Media Filter & Sort</Link></li>
-              <li><Link to="/pricing" className="hover:text-[#635BFF] transition-colors">Subscription Plans</Link></li>
             </ul>
           </div>
 

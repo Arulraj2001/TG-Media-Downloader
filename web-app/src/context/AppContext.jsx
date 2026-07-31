@@ -12,6 +12,8 @@ const INITIAL_BLOG_POSTS = [
     author: 'TG Downloader Team',
     date: '2026-03-28',
     cover: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+    metaDesc: 'Learn how to connect your Telegram MTProto API ID and Hash to batch stream and download videos, PDFs, and ZIP archives directly into your browser.',
+    keywords: 'telegram bulk downloader, telegram api id, telegram mtproto stream',
     excerpt: 'Learn how to connect your Telegram MTProto API ID and Hash to batch stream and download videos, PDFs, and ZIP archives directly into your browser.',
     content: `## Complete Guide to Bulk Downloading Telegram Media
 
@@ -45,6 +47,8 @@ Telegram channels and public groups contain valuable learning materials, video c
     author: 'TG Downloader Technical Team',
     date: '2026-03-25',
     cover: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80',
+    metaDesc: 'Discover how to isolate specific sub-forum topics inside large Telegram channels and extract files without downloading unrelated channel noise.',
+    keywords: 'telegram forum topics, telegram topic downloader, sub channel extractor',
     excerpt: 'Discover how to isolate specific sub-forum topics inside large Telegram channels and extract files without downloading unrelated channel noise.',
     content: `## Telegram Forum Topics Isolation Guide
 
@@ -69,6 +73,8 @@ Standard Telegram downloaders pull files indiscriminately from the main channel 
     author: 'Security Research Team',
     date: '2026-03-20',
     cover: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1200&q=80',
+    metaDesc: 'Understand why Telegram MTProto API ID and Hash credentials are required, where to generate them, and how local session storage protects your privacy.',
+    keywords: 'telegram api id safety, telegram login code, my.telegram.org api',
     excerpt: 'Understand why Telegram MTProto API ID and Hash credentials are required, where to generate them, and how local session storage protects your privacy.',
     content: `## Understanding Telegram MTProto API Credentials
 
@@ -88,6 +94,8 @@ Telegram requires applications connecting to its official MTProto network to ide
     author: 'TG Downloader Team',
     date: '2026-03-15',
     cover: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1200&q=80',
+    metaDesc: 'Learn about direct browser local streaming architecture and why zero-server storage ensures maximum download speed and complete privacy.',
+    keywords: 'telegram video downloader web, direct local stream telegram, zero server caching',
     excerpt: 'Learn about direct browser local streaming architecture and why zero-server storage ensures maximum download speed and complete privacy.',
     content: `## Direct Browser Local Streaming Architecture
 
@@ -110,6 +118,7 @@ export function AppProvider({ children }) {
       adsPaidUsers: false,
       paymentUpiId: 'admin@upi',
       paymentPaypalMe: 'https://paypal.me/admin',
+      paymentQrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=admin@upi&pn=TG%20Downloader',
       plan3mPrice: 14.99,
       plan6mPrice: 24.99,
       plan12mPrice: 39.99
@@ -185,24 +194,56 @@ export function AppProvider({ children }) {
     setContactMessages(prev => [newMsg, ...prev])
   }
 
+  // Advanced Blog Post Actions
   const addBlogPostAdmin = (postData) => {
     const newPost = {
       id: Date.now(),
       title: postData.title,
-      slug: postData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+      slug: postData.slug || postData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
       category: postData.category || 'Guides',
-      readTime: postData.readTime || 5,
+      readTime: parseInt(postData.readTime) || 5,
       author: postData.author || 'TG Downloader Team',
       date: new Date().toISOString().split('T')[0],
       cover: postData.cover || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+      metaDesc: postData.metaDesc || postData.content.slice(0, 160),
+      keywords: postData.keywords || 'telegram media downloader, blog',
       excerpt: postData.excerpt || postData.content.slice(0, 150) + '...',
       content: postData.content
     }
     setBlogPosts(prev => [newPost, ...prev])
   }
 
+  const updateBlogPostAdmin = (postId, updatedData) => {
+    setBlogPosts(prev => prev.map(post => {
+      if (post.id === postId) {
+        return { ...post, ...updatedData }
+      }
+      return post
+    }))
+  }
+
+  const deleteBlogPostAdmin = (postId) => {
+    setBlogPosts(prev => prev.filter(p => p.id !== postId))
+  }
+
   const updateSystemSettingsAdmin = (newSettings) => {
     setSystemSettings(prev => ({ ...prev, ...newSettings }))
+  }
+
+  // Downloader View Cache (persists fetched media across route changes)
+  const [downloaderCache, setDownloaderCache] = useState({
+    channelInput: '',
+    channelInfo: null,
+    categories: null,
+    topicId: null,
+    browserView: 'bulk',
+    activeTab: 'All',
+    selectedIds: [],
+    searchQuery: '',
+  })
+
+  const updateDownloaderCache = (patch) => {
+    setDownloaderCache(prev => ({ ...prev, ...patch }))
   }
 
   const value = {
@@ -210,11 +251,15 @@ export function AppProvider({ children }) {
     payments,
     contactMessages,
     blogPosts,
+    downloaderCache,
+    updateDownloaderCache,
     submitPaymentVerification,
     approvePaymentAdmin,
     rejectPaymentAdmin,
     submitContactForm,
     addBlogPostAdmin,
+    updateBlogPostAdmin,
+    deleteBlogPostAdmin,
     updateSystemSettingsAdmin,
     activeSubscription: payments.find(p => p.status === 'approved') || null
   }

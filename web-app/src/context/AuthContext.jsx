@@ -1,236 +1,228 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import { supabase, getCurrentUser, getUserProfile, getUserActiveSubscription } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
 
 const AuthContext = createContext()
 
-// Sample Telegram joined chats pre-fetched for connected sessions
-const DEMO_TELEGRAM_CHATS = [
-  { id: '-1003761475215', title: 'Python & Data Science Library', username: 'study_notes', type: 'channel', unread: 12 },
-  { id: '-1001849204912', title: 'Fullstack Web Development Hub', username: 'webdev_courses', type: 'channel', unread: 45 },
-  { id: '-1001928471928', title: 'Machine Learning & AI Datasets', username: 'ai_datasets', type: 'channel', unread: 8 },
-  { id: '-1001592837492', title: 'Lofi Audio & Music Archives', username: 'lofi_music', type: 'group', unread: 0 },
-  { id: '-1001293847291', title: 'Design Systems & UI Components', username: 'ui_design_vault', type: 'channel', unread: 19 }
-]
+// Backend URL — set VITE_BACKEND_URL in .env for production
+const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
+
+// The one authorised admin email (password is managed in Supabase dashboard)
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || ''
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [profile, setProfile] = useState(null)
-  const [subscription, setSubscription] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [showAuthModal, setShowAuthModal] = useState(false)
-  const [freeFetchesRemaining, setFreeFetchesRemaining] = useState(5)
-  const [authActionCallback, setAuthActionCallback] = useState(null)
+  // ─── Admin Auth (Supabase session for admin only) ──────────────────────────
+  const [isAdmin, setIsAdmin]     = useState(false)
+  const [adminLoading, setAdminLoading] = useState(true)
 
-  // Telegram MTProto Account Session State (Matching Desktop App 100%)
+  // On mount: check if there's a live Supabase session that belongs to the admin
+  useEffect(() => {
+    let mounted = true
+
+    const checkAdminSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (mounted) {
+          const emailMatches = session?.user?.email === ADMIN_EMAIL
+          setIsAdmin(!!session && emailMatches)
+          setAdminLoading(false)
+        }
+      } catch {
+        if (mounted) setAdminLoading(false)
+      }
+    }
+
+    checkAdminSession()
+
+    // Keep in sync whenever Supabase auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (mounted) {
+        const emailMatches = session?.user?.email === ADMIN_EMAIL
+        setIsAdmin(!!session && emailMatches)
+      }
+    })
+
+    return () => {
+      mounted = false
+      subscription?.unsubscribe()
+    }
+  }, [])
+
+  /**
+   * Sign in via Supabase — only succeeds as admin if the email matches VITE_ADMIN_EMAIL.
+   * Password is managed entirely in the Supabase dashboard (no password stored in .env).
+   */
+  const adminSignIn = async (email, password) => {
+    try {
+      if (email.trim().toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+        return { error: 'This email is not authorized as admin.' }
+      }
+      const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+      if (error) return { error: error.message }
+      setIsAdmin(true)
+      return { success: true }
+    } catch (err) {
+      return { error: err.message }
+    }
+  }
+
+  const adminSignOut = async () => {
+    await supabase.auth.signOut()
+    setIsAdmin(false)
+  }
+
+  // ─── Telegram MTProto Session ──────────────────────────────────────────────
   const [tgSession, setTgSession] = useState(() => {
-    const saved = localStorage.getItem('tg_mtproto_session')
-    return saved ? JSON.parse(saved) : {
-      connected: false,
-      apiId: '',
-      apiHash: '',
-      phone: '',
-      step: 1, // 1 = API credentials & Phone, 2 = Code (OTP), 3 = 2FA Password, 4 = Connected
-      chats: []
+    try {
+      const saved = localStorage.getItem('tg_mtproto_session')
+      return saved ? JSON.parse(saved) : {
+        connected: false,
+        apiId: '',
+        apiHash: '',
+        phone: '',
+        step: 1,  // 1=creds, 2=OTP, 3=2FA, 4=connected
+        user: '',
+        chats: [],
+        phoneCodeHash: '',
+      }
+    } catch {
+      return { connected: false, apiId: '', apiHash: '', phone: '', step: 1, user: '', chats: [], phoneCodeHash: '' }
     }
   })
 
+  // Persist tgSession to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('tg_mtproto_session', JSON.stringify(tgSession))
   }, [tgSession])
 
-  useEffect(() => {
-    async function loadAuth() {
-      setLoading(true)
-      const currentUser = await getCurrentUser()
-      if (currentUser) {
-        setUser(currentUser)
-        const userProf = await getUserProfile(currentUser.id)
-        setProfile(userProf || {
-          email: currentUser.email,
-          full_name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0],
-          avatar_url: currentUser.user_metadata?.avatar_url || '',
-          role: currentUser.email === 'admin@tgdownloader.com' ? 'admin' : 'user'
-        })
-        const sub = await getUserActiveSubscription(currentUser.id)
-        setSubscription(sub)
-      } else {
-        setUser(null)
-        setProfile(null)
-        setSubscription(null)
-      }
-      setLoading(false)
-    }
-
-    loadAuth()
-
-    const { data: { subscription: authListener } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (session?.user) {
-          setUser(session.user)
-          const userProf = await getUserProfile(session.user.id)
-          setProfile(userProf || {
-            email: session.user.email,
-            full_name: session.user.user_metadata?.full_name || session.user.email.split('@')[0],
-            avatar_url: session.user.user_metadata?.avatar_url || '',
-            role: session.user.email === 'admin@tgdownloader.com' ? 'admin' : 'user'
-          })
-          const sub = await getUserActiveSubscription(session.user.id)
-          setSubscription(sub)
-        } else {
-          setUser(null)
-          setProfile(null)
-          setSubscription(null)
-        }
-        setLoading(false)
-      }
-    )
-
-    return () => {
-      authListener.unsubscribe()
-    }
-  }, [])
-
-  // Action gate function: requiring user to sign in before executing action
-  const requireAuth = (onSuccessAction) => {
-    if (user) {
-      if (onSuccessAction) onSuccessAction()
-      return true
-    } else {
-      if (onSuccessAction) setAuthActionCallback(() => onSuccessAction)
-      setShowAuthModal(true)
-      return false
-    }
-  }
-
-  // Google OAuth
-  const signInWithGoogle = async () => {
+  // ─── Telegram MTProto Actions ──────────────────────────────────────────────
+  const startTelegramConnect = async (apiId, apiHash, phone) => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}`
-        }
+      const res = await fetch(`${BACKEND}/api/telegram/send-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_id: apiId, api_hash: apiHash, phone })
       })
-      if (error) throw error
+      const data = await res.json()
+      if (data.error) return { error: data.error }
+
+      if (data.connected) {
+        setTgSession(prev => ({
+          ...prev, apiId, apiHash, phone: data.phone || phone,
+          connected: true, step: 4, user: data.user || '', chats: data.chats || [],
+        }))
+        _saveSessionMeta(data.phone || phone, apiId, apiHash)
+        return { success: true, connected: true }
+      }
+
+      setTgSession(prev => ({
+        ...prev, apiId, apiHash, phone: data.phone || phone,
+        step: 2, phoneCodeHash: data.phone_code_hash || '',
+      }))
+      return { success: true, connected: false }
     } catch (err) {
-      const mockUser = {
-        id: 'user-demo-id',
-        email: 'user@example.com',
-        user_metadata: { full_name: 'Demo User', avatar_url: '' }
-      }
-      setUser(mockUser)
-      setProfile({
-        id: 'user-demo-id',
-        email: 'user@example.com',
-        full_name: 'Demo User',
-        role: 'user'
-      })
-      setShowAuthModal(false)
-      if (authActionCallback) {
-        authActionCallback()
-        setAuthActionCallback(null)
-      }
+      return { error: `Cannot reach backend server. Is it running? (${err.message})` }
     }
   }
 
-  // Email Sign In
-  const signInWithEmail = async (email, password) => {
+  const verifyTelegramCode = async (code) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) throw error
-      setShowAuthModal(false)
-      if (authActionCallback) {
-        authActionCallback()
-        setAuthActionCallback(null)
+      const res = await fetch(`${BACKEND}/api/telegram/verify-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: tgSession.phone, code })
+      })
+      const data = await res.json()
+      if (data.error) return { error: data.error }
+      if (data.requires_2fa) {
+        setTgSession(prev => ({ ...prev, step: 3 }))
+        return { requires_2fa: true }
       }
+      setTgSession(prev => ({
+        ...prev, connected: true, step: 4,
+        user: data.user || '', chats: data.chats || [],
+      }))
       return { success: true }
     } catch (err) {
-      if (email.includes('admin')) {
-        setUser({ id: 'admin-id', email: 'admin@tgdownloader.com' })
-        setProfile({ id: 'admin-id', email: 'admin@tgdownloader.com', full_name: 'Admin Master', role: 'admin' })
-      } else {
-        setUser({ id: 'user-id', email })
-        setProfile({ id: 'user-id', email, full_name: email.split('@')[0], role: 'user' })
-      }
-      setShowAuthModal(false)
-      if (authActionCallback) {
-        authActionCallback()
-        setAuthActionCallback(null)
-      }
+      return { error: `Backend error: ${err.message}` }
+    }
+  }
+
+  const verifyTelegram2FA = async (password) => {
+    try {
+      const res = await fetch(`${BACKEND}/api/telegram/verify-2fa`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: tgSession.phone, password })
+      })
+      const data = await res.json()
+      if (data.error) return { error: data.error }
+      setTgSession(prev => ({
+        ...prev, connected: true, step: 4,
+        user: data.user || '', chats: data.chats || [],
+      }))
       return { success: true }
+    } catch (err) {
+      return { error: `Backend error: ${err.message}` }
     }
   }
 
-  // Sign Out
-  const signOut = async () => {
-    await supabase.auth.signOut()
-    setUser(null)
-    setProfile(null)
-    setSubscription(null)
-  }
-
-  // Telegram MTProto Login Steps (Matching Desktop App 100%)
-  const startTelegramConnect = (apiId, apiHash, phone) => {
-    setTgSession(prev => ({
-      ...prev,
-      apiId,
-      apiHash,
-      phone,
-      step: 2
-    }))
-    return { success: true }
-  }
-
-  const verifyTelegramCode = (code) => {
-    setTgSession(prev => ({
-      ...prev,
-      connected: true,
-      step: 4,
-      chats: DEMO_TELEGRAM_CHATS
-    }))
-    return { success: true }
-  }
-
-  const disconnectTelegram = () => {
-    setTgSession({
-      connected: false,
-      apiId: '',
-      apiHash: '',
-      phone: '',
-      step: 1,
-      chats: []
-    })
-  }
-
-  // Decrement free fetches
-  const consumeFetch = () => {
-    if (subscription) return true
-    if (freeFetchesRemaining > 0) {
-      setFreeFetchesRemaining(prev => prev - 1)
-      return true
+  const checkTelegramSession = async (phone) => {
+    try {
+      const res = await fetch(`${BACKEND}/api/telegram/check-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: phone || tgSession.phone })
+      })
+      const data = await res.json()
+      if (data.authorized) {
+        setTgSession(prev => ({
+          ...prev, connected: true, step: 4,
+          user: data.user || '', chats: data.chats || [],
+          phone: data.phone || prev.phone,
+        }))
+        return { authorized: true }
+      }
+      return { authorized: false }
+    } catch {
+      return { authorized: false }
     }
-    return false
+  }
+
+  const disconnectTelegram = async () => {
+    try {
+      await fetch(`${BACKEND}/api/telegram/disconnect`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: tgSession.phone })
+      })
+    } catch {}
+    const reset = { connected: false, apiId: '', apiHash: '', phone: '', step: 1, user: '', chats: [], phoneCodeHash: '' }
+    setTgSession(reset)
+    localStorage.setItem('tg_mtproto_session', JSON.stringify(reset))
+  }
+
+  const _saveSessionMeta = async (phone, apiId, apiHash) => {
+    try {
+      await fetch(`${BACKEND}/api/telegram/save-meta`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, api_id: apiId, api_hash: apiHash })
+      })
+    } catch {}
   }
 
   const value = {
-    user,
-    profile,
-    subscription,
-    loading,
-    showAuthModal,
-    setShowAuthModal,
-    requireAuth,
-    signInWithGoogle,
-    signInWithEmail,
-    signOut,
-    freeFetchesRemaining,
-    setFreeFetchesRemaining,
-    consumeFetch,
-    isAdmin: profile?.role === 'admin' || user?.email === 'admin@tgdownloader.com',
-    tgSession,
-    startTelegramConnect,
-    verifyTelegramCode,
-    disconnectTelegram
+    // Admin auth (Supabase-backed)
+    isAdmin,
+    adminLoading,
+    adminSignIn,
+    adminSignOut,
+    // Telegram MTProto
+    tgSession, setTgSession,
+    startTelegramConnect, verifyTelegramCode, verifyTelegram2FA,
+    checkTelegramSession, disconnectTelegram,
+    // Shared backend URL
+    BACKEND,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

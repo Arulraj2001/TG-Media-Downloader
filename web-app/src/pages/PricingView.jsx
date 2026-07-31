@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
-import { useAuth } from '../context/AuthContext'
+import React, { useState, useRef } from 'react'
 import { useApp } from '../context/AppContext'
+import { supabase } from '../lib/supabase'
 import SeoMeta from '../components/SeoMeta'
-import { Check, Crown, ShieldCheck, ArrowRight, X, Lock, FileCheck, Globe } from 'lucide-react'
+import { Check, Crown, ShieldCheck, ArrowRight, X, Lock, FileCheck, Globe, Upload, Image } from 'lucide-react'
 
 const CURRENCIES = [
   { code: 'USD', symbol: '$', name: 'US Dollar', rate: 1.0 },
@@ -12,7 +12,6 @@ const CURRENCIES = [
 ]
 
 export default function PricingView() {
-  const { requireAuth, user, profile } = useAuth()
   const { systemSettings, submitPaymentVerification } = useApp()
   const [selectedPlan, setSelectedPlan] = useState(null)
   const [showCheckoutModal, setShowCheckoutModal] = useState(false)
@@ -79,40 +78,76 @@ export default function PricingView() {
   // Checkout Form State
   const [paymentMethod, setPaymentMethod] = useState('qr_code')
   const [txnRefId, setTxnRefId] = useState('')
+  const [proofFile, setProofFile] = useState(null)
+  const [proofPreview, setProofPreview] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+  const fileInputRef = useRef(null)
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    if (file.size > 10 * 1024 * 1024) { setSubmitError('File too large. Max 10MB.'); return }
+    setProofFile(file)
+    setProofPreview(URL.createObjectURL(file))
+    setSubmitError('')
+  }
 
   const handleSelectPlan = (plan) => {
     requireAuth(() => {
       setSelectedPlan(plan)
       setShowCheckoutModal(true)
       setSubmitSuccess(false)
+      setSubmitError('')
+      setProofPreview('')
+      setProofFile(null)
+      setTxnRefId('')
     })
   }
 
-  const handlePaymentSubmit = (e) => {
+  const handlePaymentSubmit = async (e) => {
     e.preventDefault()
-    if (!txnRefId.trim()) {
-      alert('Please enter your Transaction Reference ID or UTR number.')
-      return
-    }
+    if (!txnRefId.trim()) { setSubmitError('Please enter your Transaction Reference ID or UTR.'); return }
+    if (!proofFile) { setSubmitError('Please upload a payment screenshot.'); return }
+    if (!user) { setSubmitError('Please sign in first.'); return }
 
     setIsSubmitting(true)
-    const convertedAmount = `${activeCurrency.symbol}${formatPrice(selectedPlan.usdPrice)} ${activeCurrency.code}`
-    submitPaymentVerification({
-      userName: profile?.full_name || 'User Account',
-      userEmail: user?.email || 'user@example.com',
-      planName: selectedPlan.name,
-      planId: selectedPlan.id,
-      amount: convertedAmount,
-      method: paymentMethod === 'qr_code' ? 'QR Code / UPI' : paymentMethod === 'paypal' ? 'PayPal' : paymentMethod === 'crypto' ? 'Crypto Wallet' : 'Bank Transfer',
-      refId: txnRefId,
-      proofUrl: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=600&q=80'
-    })
-    setTimeout(() => {
-      setIsSubmitting(false)
+    setSubmitError('')
+
+    try {
+      // Upload screenshot to Supabase Storage
+      const ext = proofFile.name.split('.').pop() || 'jpg'
+      const path = `${user.id}/${Date.now()}.${ext}`
+      const { data: uploadData, error: uploadErr } = await supabase.storage
+        .from('payment-proofs')
+        .upload(path, proofFile, { contentType: proofFile.type, upsert: false })
+
+      if (uploadErr) throw new Error(`Upload failed: ${uploadErr.message}`)
+
+      const { data: urlData } = supabase.storage.from('payment-proofs').getPublicUrl(path)
+      const screenshotUrl = urlData?.publicUrl || ''
+
+      // Insert payment_verifications row
+      const { error: insertErr } = await supabase.from('payment_verifications').insert({
+        user_id: user.id,
+        plan_id: selectedPlan.id,
+        amount_paid: selectedPlan.usdPrice * activeCurrency.rate,
+        currency: activeCurrency.code,
+        payment_method: paymentMethod === 'qr_code' ? 'QR Code / UPI' : paymentMethod === 'paypal' ? 'PayPal' : 'Other',
+        reference_id: txnRefId.trim(),
+        screenshot_url: screenshotUrl,
+        status: 'pending',
+      })
+
+      if (insertErr) throw new Error(`Submit failed: ${insertErr.message}`)
+
       setSubmitSuccess(true)
-    }, 500)
+    } catch (err) {
+      setSubmitError(err.message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -233,22 +268,32 @@ export default function PricingView() {
                   </p>
                 </div>
 
-                {/* Payment Methods Details */}
-                <div className="p-4 rounded-[6px] glass-card space-y-4 text-xs">
-                  <div className="flex items-center justify-between border-b border-[#CBD5E1] dark:border-white/10 pb-2">
-                    <span className="font-mono font-bold text-xs">PAYMENT INSTRUCTIONS</span>
-                    <span className="text-[#00C48C] font-mono text-[10px] font-bold">100% SECURE</span>
+                {/* Payment Methods Details & QR Code */}
+                <div className="p-4 rounded-[10px] glass-card space-y-4 text-xs">
+                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-2">
+                    <span className="font-mono font-bold text-xs uppercase">SCAN QR CODE OR COPY PAY DETAILS</span>
+                    <span className="text-[#00C48C] font-mono text-[10px] font-bold">INSTANT VERIFICATION</span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono">
-                    <div className="p-2.5 rounded-[6px] glass-input">
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">UPI / GPAY ID</p>
-                      <p className="font-mono text-current text-xs mt-0.5 select-all">{systemSettings.paymentUpiId || 'admin@upi'}</p>
+                  {/* QR Code Display Card */}
+                  <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-100 dark:bg-white/5 p-3.5 rounded-[8px] border border-slate-200 dark:border-white/10">
+                    <div className="bg-white p-2 rounded-[8px] border border-slate-300 dark:border-white/20 shadow-sm shrink-0">
+                      <img
+                        src={systemSettings.paymentQrCodeUrl || 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=admin@upi&pn=TG%20Downloader'}
+                        alt="Payment QR Code"
+                        className="w-36 h-36 object-contain rounded-[4px]"
+                      />
                     </div>
+                    <div className="space-y-2 font-mono text-xs text-left flex-1">
+                      <div className="p-2 rounded-[6px] glass-input">
+                        <p className="text-[10px] text-slate-500 font-bold uppercase">UPI / GPAY ID</p>
+                        <p className="font-bold text-[#635BFF] text-xs mt-0.5 select-all">{systemSettings.paymentUpiId || 'admin@upi'}</p>
+                      </div>
 
-                    <div className="p-2.5 rounded-[6px] glass-input">
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">PAYPAL.ME</p>
-                      <p className="font-mono text-current text-xs mt-0.5 select-all">{systemSettings.paymentPaypalMe || 'paypal.me/admin'}</p>
+                      <div className="p-2 rounded-[6px] glass-input">
+                        <p className="text-[10px] text-slate-500 font-bold uppercase">PAYPAL.ME</p>
+                        <p className="font-bold text-current text-xs mt-0.5 select-all">{systemSettings.paymentPaypalMe || 'paypal.me/admin'}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -279,6 +324,23 @@ export default function PricingView() {
                       required
                       className="w-full px-3.5 py-2.5 rounded-[6px] glass-input font-mono text-xs focus:outline-none"
                     />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-600 dark:text-slate-400 font-semibold mb-1">Upload Payment Screenshot / Receipt *</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      required
+                      className="w-full text-xs font-mono text-slate-600 dark:text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-[6px] file:border-0 file:bg-[#635BFF]/10 file:text-[#635BFF] file:font-bold hover:file:bg-[#635BFF]/20"
+                    />
+                    {proofPreview && (
+                      <div className="mt-2 p-2 rounded-[6px] glass-card flex items-center gap-3">
+                        <img src={proofPreview} alt="Receipt Screenshot" className="w-16 h-16 object-cover rounded-[4px] border border-slate-200 dark:border-white/10" />
+                        <span className="text-[11px] text-[#00C48C] font-mono font-bold">✓ Screenshot Attached</span>
+                      </div>
+                    )}
                   </div>
 
                   <button

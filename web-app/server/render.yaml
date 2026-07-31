@@ -1,11 +1,9 @@
 services:
   - type: web
     name: tg-downloader-backend
-    env: node
-    buildCommand: npm install
-    startCommand: node index.js
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn py_backend:app --bind 0.0.0.0:$PORT
     envVars:
-      - key: NODE_ENV
-        value: production
       - key: PORT
         value: 5000

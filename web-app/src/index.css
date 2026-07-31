@@ -3,27 +3,29 @@
 @tailwind utilities;
 
 :root {
-  --bg-main: #F1F5F9;         /* Slate-100 background for crisp structure */
-  --bg-card: #FFFFFF;         /* Pure White card */
-  --bg-panel: #FFFFFF;        /* Pure White panel */
-  --bg-input: #F8FAFC;        /* Light input */
-  --text-main: #0F172A;       /* Slate-900 high contrast dark text */
-  --text-muted: #334155;      /* Slate-700 high contrast muted text */
-  --border-subtle: #CBD5E1;   /* Slate-300 crisp border stroke */
+  --bg-main: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --bg-panel: #FFFFFF;
+  --bg-input: #F1F5F9;
+  --text-main: #0F172A;
+  --text-muted: #475569;
+  --border-subtle: #E2E8F0;
   --card-hover: #F8FAFC;
-  --badge-bg: #E2E8F0;
+  --badge-bg: #F1F5F9;
+  --ambient-glow: radial-gradient(circle at 50% 0%, rgba(99, 91, 255, 0.12), transparent 60%);
 }
 
 html.dark {
-  --bg-main: #121215;         /* Deep Charcoal dark background */
-  --bg-card: #1C1C22;         /* Dark card background */
-  --bg-panel: #18181D;        /* Dark panel background */
-  --bg-input: #141418;        /* Dark input */
-  --text-main: #F8FAFC;       /* Light white text */
-  --text-muted: #94A3B8;      /* Light muted text */
+  --bg-main: #0B0B0E;
+  --bg-card: #14141A;
+  --bg-panel: #111116;
+  --bg-input: #0F0F14;
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
   --border-subtle: rgba(255, 255, 255, 0.12);
   --card-hover: rgba(255, 255, 255, 0.04);
   --badge-bg: rgba(255, 255, 255, 0.06);
+  --ambient-glow: radial-gradient(circle at 50% 0%, rgba(99, 91, 255, 0.18), transparent 70%);
 }
 
 @layer base {
@@ -35,74 +37,83 @@ html.dark {
 
   body {
     background-color: var(--bg-main);
+    background-image: var(--ambient-glow);
+    background-attachment: fixed;
     color: var(--text-main);
     font-family: 'Plus Jakarta Sans', sans-serif;
     @apply antialiased transition-colors duration-300 min-h-screen text-base sm:text-lg;
   }
 
-  h1, h2, h3, .font-display {
-    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
-    letter-spacing: -0.02em;
+  h1, h2, h3, h4, .font-display {
+    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.025em;
   }
 
   code, pre, .font-mono {
-    font-family: 'Fira Code', monospace;
+    font-family: 'JetBrains Mono', monospace;
   }
 }
 
-/* Fintech Elegance Glass & Card Components */
+/* Premium Glass & Mesh Card System */
 .glass-panel {
   background-color: var(--bg-panel);
   border-color: var(--border-subtle);
   color: var(--text-main);
-  border-radius: 12px;
-  @apply border transition-colors duration-300 shadow-sm;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px -10px rgba(99, 91, 255, 0.08);
+  @apply border backdrop-blur-md transition-all duration-300;
 }
 
 .glass-card {
   background-color: var(--bg-card);
   border-color: var(--border-subtle);
   color: var(--text-main);
-  border-radius: 6px;
-  @apply border transition-colors duration-300 shadow-sm;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.04);
+  @apply border backdrop-blur-md transition-all duration-300;
 }
 
 .glass-card:hover {
   background-color: var(--card-hover);
+  border-color: rgba(99, 91, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -8px rgba(99, 91, 255, 0.15);
 }
 
 .glass-input {
   background-color: var(--bg-input);
   border-color: var(--border-subtle);
   color: var(--text-main);
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.95rem;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  @apply border transition-colors duration-300;
+  @apply border transition-all duration-200;
 }
 
 .glass-input:focus {
   border-color: #635BFF;
-  box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.25);
+  box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.25);
   outline: none;
 }
 
-/* Primary Fintech Button */
+/* Primary Stripe Indigo Gradient Button */
 .btn-fintech-primary {
-  background-color: #635BFF;
+  background: linear-gradient(135deg, #635BFF 0%, #5248FF 50%, #4338CA 100%);
   color: #FFFFFF;
-  border-radius: 6px;
+  border-radius: 8px;
   font-weight: 700;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  padding: 12px 24px;
+  padding: 12px 26px;
   font-size: 0.95rem;
-  transition: all 200ms ease-out;
-  @apply inline-flex items-center justify-center cursor-pointer shadow-sm;
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 24px -6px rgba(99, 91, 255, 0.45);
+  @apply inline-flex items-center justify-center cursor-pointer;
 }
 
 .btn-fintech-primary:hover {
-  background-color: #5248FF;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -4px rgba(99, 91, 255, 0.6);
+  filter: brightness(1.08);
 }
 
 .btn-fintech-primary:active {
@@ -112,28 +123,32 @@ html.dark {
 /* Secondary Ghost Button */
 .btn-fintech-secondary {
   background-color: var(--bg-card);
-  border: 1px solid var(--border-subtle);
+  border: 1.5px solid var(--border-subtle);
   color: var(--text-main);
-  border-radius: 6px;
+  border-radius: 8px;
   font-weight: 700;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  padding: 10px 22px;
+  padding: 10px 24px;
   font-size: 0.95rem;
   transition: all 200ms ease-out;
-  @apply inline-flex items-center justify-center cursor-pointer shadow-sm;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  @apply inline-flex items-center justify-center cursor-pointer;
 }
 
 .btn-fintech-secondary:hover {
   background-color: var(--card-hover);
+  border-color: #635BFF;
+  color: #635BFF;
+  transform: translateY(-1px);
 }
 
 /* Technical Monospace Badges */
 .badge-mono {
-  font-family: 'Fira Code', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.85rem;
   letter-spacing: -0.02em;
   padding: 4px 12px;
-  border-radius: 6px;
+  border-radius: 8px;
   background-color: var(--badge-bg);
 }
 

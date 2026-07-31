@@ -20,3 +20,7 @@ config.json
 dist/
 build
 *.log
+web-app/server/downloads_temp/
+web-app/server/sessions/
+web-app/node_modules/
+web-app/dist/

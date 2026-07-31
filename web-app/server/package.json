@@ -5,8 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "python py_backend.py",
+    "start:node": "node index.js",
+    "dev": "python py_backend.py"
   },
   "dependencies": {
     "cors": "^2.8.5",

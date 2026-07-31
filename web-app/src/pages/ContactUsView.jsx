@@ -124,7 +124,7 @@ export default function ContactUsView() {
                     className="w-full px-3.5 py-2.5 rounded-[6px] glass-input text-current font-mono text-xs focus:outline-none"
                   >
                     <option value="General Inquiry">General Inquiry</option>
-                    <option value="Payment Verification">Payment Verification Support</option>
+                    <option value="Desktop App Request">Desktop App Request (Windows / Mac Executable)</option>
                     <option value="Feature Request">Feature Request</option>
                     <option value="Technical Issue">Technical Issue</option>
                   </select>

@@ -10,10 +10,10 @@ export default {
       colors: {
         fintech: {
           primary: '#635BFF', // Azul Fintech (Stripe Indigo)
-          dark: '#242424',    // Cinza Escuro (Charcoal background)
-          surface: '#1A1A1A', // Deep surface
-          light: '#FFFFFF',   // Branco
-          muted: '#E6E6E6',   // Cinza Claro
+          dark: '#0B0B0E',    // Deep Luxurious Charcoal
+          surface: '#14141A', // Card surface
+          light: '#FFFFFF',   // Pure White
+          muted: '#E6E6E6',   // Muted
           success: '#00C48C', // Verde
           warning: '#FFC700', // Amarelo
           error: '#FF4B4B',   // Vermelho
@@ -21,17 +21,18 @@ export default {
       },
       fontFamily: {
         sans: ['Plus Jakarta Sans', 'system-ui', '-apple-system', 'sans-serif'],
-        display: ['Space Grotesk', 'Plus Jakarta Sans', 'sans-serif'],
-        mono: ['Fira Code', 'ui-monospace', 'monospace'],
+        display: ['Outfit', 'Plus Jakarta Sans', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
       },
       borderRadius: {
-        'sm': '6px',
-        'md': '12px',
-        'lg': '18px',
+        'sm': '8px',
+        'md': '14px',
+        'lg': '20px',
       },
       boxShadow: {
-        'subtle': '0 2px 12px rgba(0, 0, 0, 0.06)',
-        'lift': '0 4px 20px rgba(0, 0, 0, 0.12)',
+        'subtle': '0 4px 20px -4px rgba(99, 91, 255, 0.08)',
+        'lift': '0 12px 30px -10px rgba(99, 91, 255, 0.22)',
+        'glow': '0 0 30px rgba(99, 91, 255, 0.35)',
       }
     },
   },
