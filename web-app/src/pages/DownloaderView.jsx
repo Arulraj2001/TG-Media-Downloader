@@ -19,6 +19,7 @@ import { useApp } from '../context/AppContext'
 import { useDownloads } from '../context/DownloadContext'
 import { loadSettings } from './SettingsView'
 import SeoMeta from '../components/SeoMeta'
+import { triggerCoffeeModal } from '../components/BuyMeACoffeeWidget'
 import {
   Download, ShieldCheck, Key, Phone, Hash, Search,
   ArrowRight, CheckCircle2, Film, FileText, Music, Archive,
@@ -345,6 +346,7 @@ function MediaBrowser({ channelInput, channelTitle, categories, initialTopicId, 
     if (!ids.length) return
     const selectedMsgs = ids.map(id => allMsgsMap[id]).filter(Boolean)
     if (!selectedMsgs.length) return
+    triggerCoffeeModal()
     await startJob({
       selectedMsgs,
       channelInput,
@@ -364,6 +366,7 @@ function MediaBrowser({ channelInput, channelTitle, categories, initialTopicId, 
     if (selected.includes('audio'))     items = [...items, ...(categories['Music'] || []), ...(categories['Voice'] || [])]
     const unique = [...new Map(items.map(m => [m.id, m])).values()]
     if (!unique.length) return
+    triggerCoffeeModal()
     await startJob({
       selectedMsgs: unique,
       channelInput,
@@ -618,6 +621,7 @@ function HomeView({ tgSession }) {
   const handleFetch = async () => {
     const ch = channelInput.trim()
     if (!ch) return
+    triggerCoffeeModal()
     setIsFetching(true); setFetchError(''); setCategories(null); setTopicId(null)
     try {
       const res  = await fetch(`${backendUrl}/api/telegram/fetch-topics`, {

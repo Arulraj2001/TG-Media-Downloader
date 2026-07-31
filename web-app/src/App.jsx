@@ -16,6 +16,7 @@ import LegalPolicyView   from './pages/LegalPolicyView'
 import AboutView         from './pages/AboutView'
 import AdminPortalView   from './pages/AdminPortalView'
 import LoginView         from './pages/LoginView'
+import BuyMeACoffeeWidget from './components/BuyMeACoffeeWidget'
 import { DownloadProvider } from './context/DownloadContext'
 
 /**
@@ -84,6 +85,7 @@ function AppLayout() {
       </main>
 
       {!isAdminPage && !isLoginPage && <Footer />}
+      {!isAdminPage && !isLoginPage && <BuyMeACoffeeWidget />}
     </div>
   )
 }
