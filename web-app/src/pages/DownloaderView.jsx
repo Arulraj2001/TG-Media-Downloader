@@ -781,19 +781,36 @@ export default function DownloaderView() {
         }}
       />
 
-      {/* Page header */}
-      <div className="flex items-center gap-4 mb-6 flex-wrap">
-        <div className="w-11 h-11 rounded-[12px] bg-[#635BFF] flex items-center justify-center shadow-lg shadow-[#635BFF]/30 flex-shrink-0">
-          <Download className="w-5 h-5 text-white" />
+      {/* Page header with vibrant bulk badges */}
+      <div className="flex items-center justify-between gap-4 mb-6 flex-wrap pb-4 border-b border-slate-200/80 dark:border-white/10">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-[14px] bg-gradient-to-tr from-[#635BFF] to-purple-600 flex items-center justify-center shadow-[0_0_25px_rgba(99,91,255,0.4)] flex-shrink-0">
+            <Download className="w-6 h-6 text-white animate-bounce" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl sm:text-3xl font-black text-current tracking-tight">Telegram Bulk Downloader</h1>
+              <span className="px-2.5 py-0.5 rounded-full bg-[#635BFF]/15 text-[#635BFF] dark:text-indigo-300 border border-[#635BFF]/30 text-[10px] font-mono font-bold">
+                BULK BATCH MODE
+              </span>
+            </div>
+            <p className="text-xs font-mono mt-0.5 text-slate-500 dark:text-slate-400">
+              CHANNELS · GROUPS · GROUP FOLDERS · FORUM TOPICS · PRIVATE CHATS
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-black text-current tracking-tight">Telegram Media Downloader</h1>
-          <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>DIRECT MTPROTO CHANNEL EXTRACTOR v2.7</p>
-        </div>
-        <div className="ml-auto flex items-center gap-3">
-          <span className="badge-mono text-emerald-600 dark:text-emerald-400 text-[10px] border border-emerald-500/20 bg-emerald-500/10">100% FREE UNLIMITED</span>
+
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-xs font-mono font-bold shadow-sm">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>100% FREE UNLIMITED</span>
+          </div>
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-mono font-bold shadow-sm">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>ZERO SERVER STORAGE</span>
+          </div>
           {tgSession.connected && (
-            <button onClick={handleDisconnect} className="btn-fintech-secondary text-xs px-3 py-1.5 rounded-lg">Disconnect</button>
+            <button onClick={handleDisconnect} className="btn-fintech-secondary text-xs px-3 py-1.5 rounded-lg font-mono">Disconnect</button>
           )}
         </div>
       </div>

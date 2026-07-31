@@ -276,20 +276,25 @@ export default function QueueView() {
       />
 
       {/* Page header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-white/10 flex-wrap">
         <div>
-          <h1 className="text-2xl font-black text-current tracking-tight">Download Queue</h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            Live speed and file progress
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-black text-current tracking-tight">Bulk Download Queue</h1>
+            <span className="px-2.5 py-0.5 rounded-full bg-[#635BFF]/15 text-[#635BFF] dark:text-indigo-300 border border-[#635BFF]/30 text-[10px] font-mono font-bold">
+              LIVE BATCH MONITOR
+            </span>
+          </div>
+          <p className="text-xs font-mono mt-1" style={{ color: 'var(--text-muted)' }}>
+            Real-time multi-file transfer speed &amp; progress
             {activeCount > 0
-              ? ` · ${activeCount} active`
+              ? ` · ${activeCount} active batch jobs`
               : ' · No active downloads'}
           </p>
         </div>
         {completed.length > 0 && (
           <button
             onClick={clearCompleted}
-            className="btn-fintech-secondary text-xs px-4 py-2 flex items-center gap-1.5"
+            className="btn-fintech-secondary text-xs px-4 py-2 flex items-center gap-1.5 font-mono font-bold hover:text-red-400"
           >
             <Trash2 className="w-3.5 h-3.5" /> Clear history
           </button>

@@ -82,16 +82,16 @@ export default function PublicBlogView() {
       />
 
       {/* Header */}
-      <div className="space-y-3 max-w-xl">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[6px] bg-[#635BFF]/10 border border-[#635BFF]/30 text-[#635BFF] text-xs font-mono font-medium">
+      <div className="space-y-3 max-w-2xl">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#635BFF]/15 border border-[#635BFF]/30 text-[#635BFF] dark:text-indigo-300 text-xs font-mono font-bold shadow-sm">
           <Terminal className="w-3.5 h-3.5" />
-          <span>TECHNICAL GUIDES & ARTICLES</span>
+          <span>TELEGRAM BULK DOWNLOADER TUTORIALS &amp; GUIDES</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-bold text-current tracking-tight">
-          TG Downloader Articles & Docs
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-current tracking-tight font-display">
+          Bulk Downloader Guides &amp; Docs
         </h1>
-        <p className="text-slate-400 text-sm">
-          Technical guides and documentation for Telegram channel media downloading and topic extraction.
+        <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+          In-depth technical tutorials, how-to guides, and tips for bulk downloading videos, photos, files, and forum topics from Telegram channels, groups, and folders.
         </p>
       </div>
 

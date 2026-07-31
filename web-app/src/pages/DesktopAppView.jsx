@@ -12,10 +12,10 @@ import { Link } from 'react-router-dom'
 import SeoMeta from '../components/SeoMeta'
 import { useApp } from '../context/AppContext'
 import {
-  Laptop, Download, Shield, Cpu, FolderArchive, Zap,
+  Laptop, Download, Shield, Cpu, Archive, Zap,
   CheckCircle2, Send, Coffee, ArrowRight, ExternalLink,
   Layers, Filter, Sparkles, MessageSquare, Eye, ChevronRight,
-  X, ChevronLeft, Maximize2
+  X, ChevronLeft, Maximize2, Folder
 } from 'lucide-react'
 
 const SCREENSHOTS = [
@@ -203,26 +203,37 @@ export default function DesktopAppView() {
       )}
 
       {/* ── HERO BANNER ────────────────────────────────────────────────── */}
-      <div className="relative overflow-hidden glass-panel p-8 sm:p-12 text-center sm:text-left flex flex-col md:flex-row items-center justify-between gap-8">
-        <div className="flex-1 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold bg-[#635BFF]/10 text-[#635BFF] border border-[#635BFF]/20">
-            <Laptop className="w-3.5 h-3.5" /> STANDALONE PYTHON PYSIDE6 APP
+      <div className="relative overflow-hidden glass-panel p-8 sm:p-12 text-center sm:text-left flex flex-col md:flex-row items-center justify-between gap-8 rounded-[24px] border border-slate-200/90 dark:border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-[#635BFF]/20 via-purple-500/10 to-transparent blur-3xl pointer-events-none"></div>
+
+        <div className="flex-1 space-y-4 relative z-10">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold bg-[#635BFF]/15 text-[#635BFF] dark:text-indigo-300 border border-[#635BFF]/30 shadow-sm">
+            <Laptop className="w-4 h-4" /> STANDALONE PYSIDE6 DESKTOP BULK DOWNLOADER
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-current tracking-tight leading-tight">
             TG Downloader <br />
-            <span className="text-[#635BFF]">Desktop Edition</span>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#635BFF] via-purple-500 to-pink-500">Desktop Edition</span>
           </h1>
-          <p className="text-sm sm:text-base max-w-xl" style={{ color: 'var(--text-muted)' }}>
-            Enjoy native desktop performance, multi-threaded parallel downloads, automatic topic folder separation, and zero browser memory limitations.
+          <p className="text-sm sm:text-base max-w-xl leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+            Enjoy native desktop performance, multi-threaded parallel downloads, automatic topic folder separation, restricted channel media bypass, and zero browser memory limitations.
           </p>
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-2">
-            <a href="#request-form" className="btn-fintech-primary px-6 py-3 text-sm gap-2">
+
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 pt-2">
+            <a href="#request-form" className="btn-fintech-primary px-6 py-3.5 text-sm font-bold gap-2 shadow-[0_0_25px_rgba(99,91,255,0.4)] hover:scale-[1.02] transition-all">
               <Download className="w-4 h-4" /> Request Desktop App
             </a>
             <a href="https://buymeacoffee.com/x4kqsd0lka" target="_blank" rel="noreferrer"
-              className="btn-fintech-secondary px-5 py-3 text-sm gap-2">
+              className="btn-fintech-secondary px-5 py-3.5 text-sm font-bold gap-2 hover:scale-[1.02] transition-all">
               <Coffee className="w-4 h-4 text-amber-500" /> Buy me a coffee
             </a>
+          </div>
+
+          <div className="pt-4 flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs font-mono text-slate-500 dark:text-slate-400">
+            <span className="flex items-center gap-1 text-emerald-500 font-bold"><Sparkles className="w-3.5 h-3.5" /> 100% Free &amp; Open</span>
+            <span>•</span>
+            <span className="flex items-center gap-1 text-[#635BFF] font-bold"><Folder className="w-3.5 h-3.5" /> Auto Folder Separation</span>
+            <span>•</span>
+            <span className="flex items-center gap-1 text-amber-500 font-bold"><Zap className="w-3.5 h-3.5" /> Multi-Thread Engine</span>
           </div>
         </div>
 
@@ -258,7 +269,7 @@ export default function DesktopAppView() {
           {[
             { icon: Cpu,           title: 'Native MTProto Speed', desc: 'Direct socket downloads without browser HTTP chunking limits.' },
             { icon: Zap,           title: 'Multi-Thread Engine',  desc: 'Download up to 8 Telegram files simultaneously in parallel.' },
-            { icon: FolderArchive, title: 'Auto Folder Sync',     desc: 'Separate channels, sub-topics, and categories automatically on disk.' },
+            { icon: Archive,       title: 'Auto Folder Sync',     desc: 'Separate channels, sub-topics, and categories automatically on disk.' },
             { icon: Shield,        title: 'Offline Session File',  desc: 'Stores encrypted session files locally on your computer.' },
           ].map(({ icon: Icon, title, desc }) => (
             <div key={title} className="glass-card p-5 space-y-2">
