@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /profile
 
-Sitemap: https://tgdownloader.com/sitemap.xml
+Sitemap: https://tg-media-bulk-downloader.netlify.app/sitemap.xml
