@@ -23,7 +23,7 @@ import { triggerCoffeeModal } from '../components/BuyMeACoffeeWidget'
 import {
   Download, ShieldCheck, Key, Phone, Hash, Search,
   ArrowRight, CheckCircle2, Film, FileText, Music, Archive,
-  Globe, MessageSquare, Mic, Sparkles, X,
+  Globe, MessageSquare, Mic, Sparkles, X, ExternalLink,
   Filter, SortAsc, SortDesc, RefreshCw, Loader2,
   AlertCircle, List, Layers, CheckSquare, Square, Eye
 } from 'lucide-react'
@@ -78,45 +78,179 @@ function StepConnect({ tgSession, onSendCode, loading, error }) {
   const handleSubmit = (e) => { e.preventDefault(); if (!apiId || !apiHash || !phone) return; onSendCode(apiId, apiHash, phone) }
 
   return (
-    <div className="max-w-lg mx-auto">
-      <div className="glass-panel p-8">
-        <div className="mb-6">
-          <span className="text-xs font-mono text-[#635BFF] bg-[#635BFF]/10 px-2 py-0.5 rounded-md border border-[#635BFF]/20">STEP 1 OF 3</span>
-          <h2 className="text-2xl font-black text-current mt-3 tracking-tight">Connect Telegram</h2>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-            Enter your Telegram API credentials from{' '}
-            <a href="https://my.telegram.org" target="_blank" rel="noreferrer" className="text-[#635BFF] hover:underline">my.telegram.org</a>
-          </p>
+    <div className="max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* LEFT COLUMN: Connect Form */}
+        <div className="lg:col-span-6 glass-panel p-6 sm:p-8 space-y-6">
+          <div>
+            <span className="text-xs font-mono font-bold text-[#635BFF] bg-[#635BFF]/10 px-2.5 py-1 rounded-md border border-[#635BFF]/20">
+              STEP 1 OF 3
+            </span>
+            <h2 className="text-2xl font-black text-current mt-3 tracking-tight font-display">
+              Connect Telegram Session
+            </h2>
+            <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+              Enter your Telegram MTProto API credentials to authorize your browser stream.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {[
+              { label: 'API ID',       icon: Key,   val: apiId,   set: setApiId,   ph: 'e.g. 12345678',                     type: 'text' },
+              { label: 'API Hash',     icon: Hash,  val: apiHash, set: setApiHash, ph: 'e.g. 0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d', type: 'text' },
+              { label: 'Phone Number', icon: Phone, val: phone,   set: setPhone,   ph: 'e.g. +91 98765 43210 (with country code)', type: 'tel'  },
+            ].map(({ label, icon: Icon, val, set, ph, type }) => (
+              <div key={label}>
+                <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider font-mono" style={{ color: 'var(--text-muted)' }}>
+                  {label} *
+                </label>
+                <div className="relative">
+                  <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+                  <input
+                    type={type}
+                    placeholder={ph}
+                    value={val}
+                    onChange={e => set(e.target.value)}
+                    className="glass-input w-full pl-10 pr-4 py-3 text-sm font-mono"
+                  />
+                </div>
+              </div>
+            ))}
+
+            {error && <ErrorBox msg={error} />}
+
+            <button
+              type="submit"
+              disabled={loading || !apiId || !apiHash || !phone}
+              className="btn-fintech-primary w-full py-3.5 text-sm font-bold disabled:opacity-50 flex items-center justify-center gap-2 rounded-xl shadow-lg shadow-[#635BFF]/25 hover:scale-[1.01] active:scale-95 transition-all"
+            >
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
+              <span>{loading ? 'Sending Verification Code...' : 'Send Verification Code'}</span>
+            </button>
+          </form>
+
+          {/* Privacy badge */}
+          <div className="flex items-center gap-2 text-xs font-mono text-emerald-500 pt-2 border-t border-slate-200/50 dark:border-white/10">
+            <ShieldCheck className="w-4 h-4 flex-shrink-0" />
+            <span>Direct Client-Side MTProto Connection — Keys Never Saved</span>
+          </div>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {[
-            { label: 'API ID',       icon: Key,   val: apiId,   set: setApiId,   ph: '12345678',                          type: 'text' },
-            { label: 'API Hash',     icon: Hash,  val: apiHash, set: setApiHash, ph: '0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d', type: 'text' },
-            { label: 'Phone Number', icon: Phone, val: phone,   set: setPhone,   ph: '+91 98765 43210',                    type: 'tel'  },
-          ].map(({ label, icon: Icon, val, set, ph, type }) => (
-            <div key={label}>
-              <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>{label}</label>
-              <div className="relative">
-                <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--text-muted)' }} />
-                <input type={type} placeholder={ph} value={val} onChange={e => set(e.target.value)}
-                  className="glass-input w-full pl-10 pr-4 py-3 text-sm font-mono" />
+
+        {/* RIGHT COLUMN: Detailed API ID & Hash Creation Guide */}
+        <div className="lg:col-span-6 glass-panel p-6 sm:p-8 space-y-5 border border-amber-500/20 bg-gradient-to-b from-amber-500/5 via-transparent to-transparent">
+          
+          <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-white/10 pb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-500 flex items-center justify-center font-bold">
+                <Key className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-display font-extrabold text-lg text-current leading-tight">
+                  How to Get API ID &amp; Hash
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                  Official 2-minute setup from my.telegram.org
+                </p>
               </div>
             </div>
-          ))}
-          {error && <ErrorBox msg={error} />}
-          <button type="submit" disabled={loading || !apiId || !apiHash || !phone} className="btn-fintech-primary w-full py-3 disabled:opacity-50 gap-2">
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
-            {loading ? 'Sending code...' : 'Send verification code'}
-          </button>
-        </form>
-        <div className="mt-5 p-4 rounded-xl border" style={{ background: 'rgba(99,91,255,0.04)', borderColor: 'rgba(99,91,255,0.15)' }}>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-            <strong style={{ color: 'var(--text-main)' }}>How to get API credentials:</strong><br />
-            1. Visit <a href="https://my.telegram.org" target="_blank" rel="noreferrer" className="text-[#635BFF]">my.telegram.org</a> and sign in<br />
-            2. Go to "API development tools"<br />
-            3. Create a new app — copy the <strong style={{ color: 'var(--text-main)' }}>API ID</strong> and <strong style={{ color: 'var(--text-main)' }}>API Hash</strong>
-          </p>
+
+            <a
+              href="https://my.telegram.org"
+              target="_blank"
+              rel="noreferrer"
+              className="btn-fintech-secondary px-3 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center gap-1 text-[#635BFF] hover:scale-105 transition-transform"
+            >
+              <span>my.telegram.org</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
+
+          <div className="space-y-3.5 text-xs">
+            
+            {/* Step 1 */}
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/10">
+              <span className="w-6 h-6 rounded-full bg-[#635BFF] text-white font-mono font-extrabold flex items-center justify-center flex-shrink-0 text-[11px]">
+                1
+              </span>
+              <div className="space-y-0.5 leading-relaxed">
+                <strong className="text-current font-bold text-sm block">Visit my.telegram.org &amp; Sign In</strong>
+                <span className="text-slate-600 dark:text-slate-300">
+                  Open <a href="https://my.telegram.org" target="_blank" rel="noreferrer" className="text-[#635BFF] underline font-bold">my.telegram.org</a> in your web browser. Enter your Telegram phone number with country code (e.g. <code className="font-mono bg-slate-200 dark:bg-white/10 px-1 py-0.5 rounded text-[11px]">+1 234567890</code> or <code className="font-mono bg-slate-200 dark:bg-white/10 px-1 py-0.5 rounded text-[11px]">+91 9876543210</code>) and click Next.
+                </span>
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/10">
+              <span className="w-6 h-6 rounded-full bg-[#635BFF] text-white font-mono font-extrabold flex items-center justify-center flex-shrink-0 text-[11px]">
+                2
+              </span>
+              <div className="space-y-0.5 leading-relaxed">
+                <strong className="text-current font-bold text-sm block">Get Code in Official Telegram App</strong>
+                <span className="text-slate-600 dark:text-slate-300">
+                  Telegram will send a login confirmation code directly to your official Telegram app (on phone or desktop). <em className="text-amber-500 font-medium">Check your chat list for the official Telegram service notification.</em>
+                </span>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/10">
+              <span className="w-6 h-6 rounded-full bg-[#635BFF] text-white font-mono font-extrabold flex items-center justify-center flex-shrink-0 text-[11px]">
+                3
+              </span>
+              <div className="space-y-0.5 leading-relaxed">
+                <strong className="text-current font-bold text-sm block">Go to "API Development Tools"</strong>
+                <span className="text-slate-600 dark:text-slate-300">
+                  Paste the confirmation code on the website and click <strong className="text-current">Sign In</strong>. On the main menu dashboard, click on <strong className="text-[#635BFF]">"API development tools"</strong>.
+                </span>
+              </div>
+            </div>
+
+            {/* Step 4 */}
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/10">
+              <span className="w-6 h-6 rounded-full bg-[#635BFF] text-white font-mono font-extrabold flex items-center justify-center flex-shrink-0 text-[11px]">
+                4
+              </span>
+              <div className="space-y-0.5 leading-relaxed">
+                <strong className="text-current font-bold text-sm block">Create New Application</strong>
+                <span className="text-slate-600 dark:text-slate-300">
+                  Fill in <strong className="text-current">App title</strong> (e.g. <code className="font-mono bg-slate-200 dark:bg-white/10 px-1 py-0.5 rounded text-[11px]">MyDownloader</code>) &amp; <strong className="text-current">Short name</strong> (e.g. <code className="font-mono bg-slate-200 dark:bg-white/10 px-1 py-0.5 rounded text-[11px]">mydownloader</code>). Leave platform as <strong className="text-current">Desktop</strong> and click <strong className="text-emerald-500">Create application</strong>.
+                </span>
+              </div>
+            </div>
+
+            {/* Step 5 */}
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/10">
+              <span className="w-6 h-6 rounded-full bg-[#635BFF] text-white font-mono font-extrabold flex items-center justify-center flex-shrink-0 text-[11px]">
+                5
+              </span>
+              <div className="space-y-0.5 leading-relaxed">
+                <strong className="text-current font-bold text-sm block">Copy API ID &amp; API Hash</strong>
+                <span className="text-slate-600 dark:text-slate-300">
+                  Copy your numerical <strong className="text-[#635BFF]">App api_id</strong> and 32-character <strong className="text-[#635BFF]">App api_hash</strong> strings, and paste them into the input fields on the left!
+                </span>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Quick direct link CTA */}
+          <div className="p-3.5 rounded-xl bg-[#635BFF]/10 border border-[#635BFF]/25 flex items-center justify-between gap-3 text-xs">
+            <span className="font-mono text-[#635BFF] font-bold">Ready to get your API keys?</span>
+            <a
+              href="https://my.telegram.org"
+              target="_blank"
+              rel="noreferrer"
+              className="btn-fintech-primary text-xs px-3 py-1.5 gap-1.5 flex items-center rounded-lg flex-shrink-0 font-bold"
+            >
+              <span>Open my.telegram.org</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
+
         </div>
+
       </div>
     </div>
   )
