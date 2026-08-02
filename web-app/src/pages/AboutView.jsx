@@ -1,118 +1,176 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import SeoMeta from '../components/SeoMeta'
-import { ShieldCheck, Cpu, Terminal, Zap, Globe, Layers, Lock, CheckCircle2 } from 'lucide-react'
+import { ShieldCheck, Users, Target, Heart, Zap, Lock, Globe, Sparkles, ArrowRight } from 'lucide-react'
 
 export default function AboutView() {
-  const aboutJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "AboutPage",
-    "name": "About TG Media Downloader - Technology & Architecture",
-    "description": "Learn about TG Media Downloader's zero-server storage architecture, MTProto streaming engine, and private local media extraction protocol."
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    'name': 'TG Media Downloader',
+    'url': 'https://tg-media-bulk-downloader.netlify.app',
+    'logo': 'https://tg-media-bulk-downloader.netlify.app/logo.png',
+    'description': 'TG Media Downloader is a free web-based tool for bulk downloading media from Telegram channels, groups, and chats with zero server storage.',
+    'foundingDate': '2024',
+    'sameAs': ['https://github.com/Arulraj2001/TG-Media-Downloader']
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12 space-y-10">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
       <SeoMeta
-        title="About Us & Technology Architecture — TG Media Downloader"
-        description="Learn about TG Media Downloader's zero-server storage architecture, direct MTProto browser streaming engine, and private local media extraction protocol."
-        keywords="about tg media downloader, mtproto browser downloader technology, telegram zero server storage downloader, privacy first telegram downloader"
-        jsonLd={aboutJsonLd}
+        title="About Us — TG Media Downloader"
+        description="Learn about TG Media Downloader — our mission, privacy-first architecture, and commitment to providing a free, secure Telegram media downloader."
+        keywords="about tg media downloader, telegram downloader team, telegram media downloader about"
+        jsonLd={jsonLd}
+        breadcrumbs={[
+          { name: 'Home', path: '/' },
+          { name: 'About', path: '/about' }
+        ]}
       />
 
       {/* Header */}
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-[6px] bg-[#635BFF]/10 border border-[#635BFF]/30 text-[#635BFF] text-xs font-mono font-bold">
-          <Terminal className="w-4 h-4" />
-          <span>TECHNOLOGY ARCHITECTURE & ABOUT US</span>
+      <div className="text-center space-y-4">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#635BFF]/10 text-[#635BFF] text-xs font-mono font-bold border border-[#635BFF]/20">
+          <Sparkles className="w-4 h-4" />
+          <span>ABOUT US</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          About TG Media Downloader
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-current tracking-tight font-display">
+          Building the Best Free Telegram Media Downloader
         </h1>
-        <p className="text-slate-600 dark:text-slate-300 text-base max-w-2xl">
-          A client-side MTProto media extraction platform built for privacy, high-speed bulk downloading, and zero server file caching.
+        <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
+          TG Media Downloader was created to solve a simple problem: downloading media from Telegram should be fast, free, and private.
         </p>
       </div>
 
-      {/* Technical Architecture Specs */}
-      <div className="glass-panel p-8 rounded-[12px] space-y-6">
-        <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <Cpu className="w-5 h-5 text-[#635BFF]" />
-          <span>1. Direct Browser Local Streaming Engine</span>
-        </h2>
+      {/* Mission */}
+      <section className="glass-panel p-8 rounded-[24px] border border-slate-200/80 dark:border-white/10 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#635BFF]/10 text-[#635BFF] flex items-center justify-center">
+            <Target className="w-5 h-5" />
+          </div>
+          <h2 className="text-xl font-black text-current font-display">Our Mission</h2>
+        </div>
         <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
-          Traditional media downloaders require cloud servers to fetch files, compress them into ZIP archives, and store them temporarily on disk before sending a download link to the user. This creates privacy risks, bandwidth bottlenecks, and server costs.
+          Our mission is to provide a <strong>free, unlimited, and privacy-first</strong> way for users to download and archive their Telegram media. We believe that users should have full control over their data — including the ability to save, organize, and back up the content they have access to.
         </p>
         <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
-          **TG Media Downloader operates on a Direct Browser Streaming Architecture**. When you initiate a download request, your web browser connects directly to Telegram's official MTProto network endpoints using your authorized API credentials. File chunks stream progressively straight into your browser's local downloads directory without passing through or getting cached on any intermediate third-party servers.
+          We built TG Media Downloader with a <strong>zero server storage</strong> architecture because we believe your files belong to you — not to a third-party download service. Every file streams directly from Telegram servers to your device.
         </p>
-      </div>
+      </section>
 
-      {/* Privacy & Zero Server Caching */}
-      <div className="glass-panel p-8 rounded-[12px] space-y-6">
-        <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-[#00C48C]" />
-          <span>2. Zero Server Caching & Local Session Storage</span>
-        </h2>
-        <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
-          Privacy is the foundational design principle of TG Media Downloader. Your Telegram account API ID, API Hash, phone number, and MTProto session keys are saved exclusively in your web browser's encrypted local storage (`localStorage`).
-        </p>
-        <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-300 font-medium">
-          <li className="flex items-start gap-2.5">
-            <CheckCircle2 className="w-5 h-5 text-[#00C48C] shrink-0 mt-0.5" />
-            <span>**No Media Server Storage**: 0 GB of user files, photos, videos, or documents are stored on our servers.</span>
+      {/* Values */}
+      <section className="space-y-6">
+        <h2 className="text-2xl font-black text-current font-display text-center">Our Core Values</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="glass-panel p-6 rounded-[20px] border border-slate-200/80 dark:border-white/10 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-[#635BFF]/10 text-[#635BFF] flex items-center justify-center">
+              <Lock className="w-5 h-5" />
+            </div>
+            <h3 className="font-display font-bold text-current">Privacy First</h3>
+            <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed">
+              Zero server storage. Your files and credentials never touch our servers. Direct MTProto connections keep your data between you and Telegram.
+            </p>
+          </div>
+          <div className="glass-panel p-6 rounded-[20px] border border-slate-200/80 dark:border-white/10 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+              <Zap className="w-5 h-5" />
+            </div>
+            <h3 className="font-display font-bold text-current">Free & Unlimited</h3>
+            <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed">
+              No paywalls, no download limits, no premium tiers. TG Media Downloader is completely free for everyone, forever.
+            </p>
+          </div>
+          <div className="glass-panel p-6 rounded-[20px] border border-slate-200/80 dark:border-white/10 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+              <Globe className="w-5 h-5" />
+            </div>
+            <h3 className="font-display font-bold text-current">Works Everywhere</h3>
+            <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed">
+              Browser-based and cross-platform. Use it on Windows, macOS, Linux, Android, or iOS — no installation required.
+            </p>
+          </div>
+          <div className="glass-panel p-6 rounded-[20px] border border-slate-200/80 dark:border-white/10 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-pink-500/10 text-pink-500 flex items-center justify-center">
+              <Heart className="w-5 h-5" />
+            </div>
+            <h3 className="font-display font-bold text-current">User-Focused</h3>
+            <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed">
+              Built by users, for users. We listen to feedback and continuously improve the tool based on real-world needs.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Privacy Commitment */}
+      <section className="glass-panel p-8 rounded-[24px] bg-gradient-to-r from-[#635BFF]/15 via-purple-600/10 to-pink-500/10 border border-[#635BFF]/30 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#635BFF]/10 text-[#635BFF] flex items-center justify-center">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <h2 className="text-xl font-black text-current font-display">Our Privacy Commitment</h2>
+        </div>
+        <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+          <li className="flex items-start gap-2">
+            <span className="text-emerald-500 font-bold">✓</span>
+            <span><strong>Zero server storage</strong> — files never touch our servers</span>
           </li>
-          <li className="flex items-start gap-2.5">
-            <CheckCircle2 className="w-5 h-5 text-[#00C48C] shrink-0 mt-0.5" />
-            <span>**Client-side Encryption**: Your MTProto session authorization key stays inside your browser.</span>
+          <li className="flex items-start gap-2">
+            <span className="text-emerald-500 font-bold">✓</span>
+            <span><strong>Local credential storage</strong> — API keys stay in your browser</span>
           </li>
-          <li className="flex items-start gap-2.5">
-            <CheckCircle2 className="w-5 h-5 text-[#00C48C] shrink-0 mt-0.5" />
-            <span>**Google AdSense Compliance**: Our web application fully complies with Google Publisher Policies, privacy guidelines, and AdSense content standards.</span>
+          <li className="flex items-start gap-2">
+            <span className="text-emerald-500 font-bold">✓</span>
+            <span><strong>Direct MTProto connections</strong> — same encryption as official Telegram clients</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-emerald-500 font-bold">✓</span>
+            <span><strong>No data selling</strong> — we never sell or share your personal information</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-emerald-500 font-bold">✓</span>
+            <span><strong>Transparent policies</strong> — clear privacy policy and terms of service</span>
           </li>
         </ul>
-      </div>
+      </section>
 
-      {/* Supported Features Comparison Table */}
-      <div className="glass-panel p-8 rounded-[12px] space-y-6">
-        <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-          3. Core Technical Capabilities
-        </h2>
-        
-        <div className="overflow-x-auto font-mono text-xs">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-[#CBD5E1] dark:border-white/10 text-[#635BFF]">
-                <th className="py-3 px-4 uppercase font-bold">Feature</th>
-                <th className="py-3 px-4 uppercase font-bold">TG Media Downloader</th>
-                <th className="py-3 px-4 uppercase font-bold">Traditional Web Downloaders</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#CBD5E1] dark:divide-white/10 text-slate-700 dark:text-slate-300">
-              <tr>
-                <td className="py-3 px-4 font-bold">Server File Caching</td>
-                <td className="py-3 px-4 text-[#00C48C] font-bold">0 GB (Zero Caching)</td>
-                <td className="py-3 px-4 text-[#FF4B4B]">Requires Temporary Server Storage</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4 font-bold">Category Filtering</td>
-                <td className="py-3 px-4 text-[#00C48C] font-bold">9 Tabs (Videos, PDFs, ZIPs, Music, etc.)</td>
-                <td className="py-3 px-4 text-slate-500">Unfiltered Single File List</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4 font-bold">Forum Topics Isolation</td>
-                <td className="py-3 px-4 text-[#00C48C] font-bold">Supported (Sub-channel Topic Picker)</td>
-                <td className="py-3 px-4 text-[#FF4B4B]">Not Supported</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4 font-bold">Download Speed</td>
-                <td className="py-3 px-4 text-[#00C48C] font-bold">Max Network Connection Speed</td>
-                <td className="py-3 px-4 text-slate-500">Throttled Cloud Server Bandwidth</td>
-              </tr>
-            </tbody>
-          </table>
+      {/* Team */}
+      <section className="space-y-6">
+        <h2 className="text-2xl font-black text-current font-display text-center">Meet the Team</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="glass-panel p-6 rounded-[20px] border border-slate-200/80 dark:border-white/10 text-center space-y-3">
+            <div className="w-16 h-16 rounded-full bg-[#635BFF]/15 text-[#635BFF] flex items-center justify-center mx-auto font-black text-xl">
+              AR
+            </div>
+            <h3 className="font-display font-bold text-current">Arul Raj</h3>
+            <p className="text-xs text-[#635BFF] font-mono font-bold">FOUNDER & LEAD DEVELOPER</p>
+            <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed">
+              Full-stack developer with expertise in Telegram MTProto, web applications, and privacy-focused architecture.
+            </p>
+          </div>
+          <div className="glass-panel p-6 rounded-[20px] border border-slate-200/80 dark:border-white/10 text-center space-y-3">
+            <div className="w-16 h-16 rounded-full bg-purple-500/15 text-purple-500 flex items-center justify-center mx-auto font-black text-xl">
+              PS
+            </div>
+            <h3 className="font-display font-bold text-current">Priya Sharma</h3>
+            <p className="text-xs text-purple-500 font-mono font-bold">CONTENT STRATEGIST</p>
+            <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed">
+              Technical writer and content strategist creating in-depth guides and tutorials for Telegram users.
+            </p>
+          </div>
         </div>
-      </div>
+      </section>
 
+      {/* CTA */}
+      <div className="text-center space-y-4">
+        <h2 className="text-2xl font-black text-current font-display">Start Downloading Today</h2>
+        <p className="text-slate-600 dark:text-slate-300 text-sm max-w-xl mx-auto">
+          Join thousands of users who trust TG Media Downloader for fast, free, and private Telegram media downloads.
+        </p>
+        <Link to="/downloader" className="btn-fintech-primary font-bold py-3 px-8 inline-flex items-center gap-2">
+          Launch Downloader
+          <ArrowRight className="w-5 h-5" />
+        </Link>
+      </div>
     </div>
   )
 }

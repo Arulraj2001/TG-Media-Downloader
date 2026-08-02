@@ -52,8 +52,8 @@ export default function HomeLandingView() {
     <div className="space-y-24 pb-20 overflow-hidden">
       <SeoMeta
         title="Telegram Media Downloader — Bulk Save Channels, Groups, Chats & Folders"
-        description="Free Telegram Bulk Media Downloader — Save videos, photos, music, files, forum topics, and group folders directly from public and private Telegram channels at maximum speed. Zero server caching."
-        keywords="telegram downloader, telegram media downloader, bulk telegram downloader, download telegram videos, telegram channel downloader, telegram group downloader, telegram folder downloader, telegram private channel downloader, telegram chat downloader, telegram video saver, download telegram files online, mtproto telegram web downloader, telegram batch media saver"
+        description="Free Telegram Bulk Media Downloader for channels, groups, folders, and forum topics. Privacy-first zero server caching, clear AdSense compliance, and SEO-friendly original content for search visibility."
+        keywords="telegram downloader, telegram media downloader, google adsense eligible telegram downloader, ad-friendly telegram site, bulk telegram downloader, download telegram videos online, telegram channel downloader, telegram group folder downloader, telegram private channel download, telegram forum topic downloader, mtproto web downloader, bulk file extractor"
         jsonLd={landingJsonLd}
       />
 
@@ -344,6 +344,43 @@ export default function HomeLandingView() {
           <div>
             <p className="font-display text-4xl sm:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-pink-500">99.99%</p>
             <p className="text-xs text-slate-600 dark:text-slate-400 uppercase font-bold mt-1">Direct Uptime</p>
+          </div>
+        </div>
+      </section>
+
+      {/* AdSense Compliance Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 pt-8">
+        <div className="text-center space-y-3 max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#00C48C]/10 text-[#00C48C] text-xs font-mono font-bold border border-[#00C48C]/20">
+            <ShieldCheck className="w-4 h-4" />
+            <span>GOOGLE ADSENSE READY WEBSITE STRUCTURE</span>
+          </div>
+          <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-current tracking-tight">
+            Built for Search Visibility and AdSense Compliance
+          </h2>
+          <p className="text-slate-600 dark:text-slate-300 text-base">
+            Original blog content, clear privacy and legal pages, visible contact links, and strong page metadata help this site satisfy Google Publisher and search optimization standards.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="glass-panel p-6 rounded-[20px] border border-slate-200/90 dark:border-white/10 shadow-sm">
+            <h3 className="font-display text-xl font-bold text-current">Unique Content Pages</h3>
+            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+              The site includes an original homepage, about page, blog engine, privacy policy, and contact page for strong AdSense readiness.
+            </p>
+          </div>
+          <div className="glass-panel p-6 rounded-[20px] border border-slate-200/90 dark:border-white/10 shadow-sm">
+            <h3 className="font-display text-xl font-bold text-current">Clear Policy & Contact Links</h3>
+            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+              Visible links to Privacy Policy, Terms of Service, and Contact ensure trust signals for both AdSense review and organic search engines.
+            </p>
+          </div>
+          <div className="glass-panel p-6 rounded-[20px] border border-slate-200/90 dark:border-white/10 shadow-sm">
+            <h3 className="font-display text-xl font-bold text-current">Original SEO-Rich Copy</h3>
+            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+              Page titles, descriptions, keywords, and visible headings are optimized to rank for telegram downloader, telegram bulk media, and related search terms.
+            </p>
           </div>
         </div>
       </section>

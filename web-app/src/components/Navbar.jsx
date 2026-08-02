@@ -2,13 +2,14 @@ import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useDownloads } from '../context/DownloadContext'
-import { Download, Menu, X, Sparkles, ListVideo } from 'lucide-react'
+import { Download, Menu, X, Sparkles, ListVideo, Search, ChevronDown } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 
 export default function Navbar() {
   const { isAdmin, adminSignOut } = useAuth()
   const { activeCount } = useDownloads()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [resourcesOpen, setResourcesOpen] = useState(false)
   const location = useLocation()
 
   const isActive = (path) => location.pathname === path
@@ -39,10 +40,33 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-1">
             <Link to="/"            className={navLinkCls('/')}>Home</Link>
             <Link to="/downloader"  className={navLinkCls('/downloader')}>Downloader</Link>
-            <Link to="/desktop-app" className={navLinkCls('/desktop-app')}>Desktop App</Link>
+            <Link to="/features"    className={navLinkCls('/features')}>Features</Link>
+
+            {/* Resources Dropdown */}
+            <div className="relative" onMouseEnter={() => setResourcesOpen(true)} onMouseLeave={() => setResourcesOpen(false)}>
+              <button className={`px-4 py-2 rounded-[8px] text-sm font-bold transition flex items-center gap-1 ${
+                ['/blog', '/docs', '/faq', '/search'].includes(location.pathname)
+                  ? 'text-[#635BFF] bg-[#635BFF]/10 border border-[#635BFF]/20 shadow-sm'
+                  : 'text-slate-700 dark:text-slate-300 hover:text-[#635BFF] hover:bg-slate-200/50 dark:hover:bg-white/5'
+              }`}>
+                Resources
+                <ChevronDown className="w-3.5 h-3.5" />
+              </button>
+              {resourcesOpen && (
+                <div className="absolute top-full left-0 mt-2 w-56 glass-panel rounded-[12px] border border-slate-200/80 dark:border-white/10 shadow-xl p-2 space-y-1">
+                  <Link to="/blog" className="block px-4 py-2.5 rounded-[8px] text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-[#635BFF] hover:bg-slate-200/50 dark:hover:bg-white/5">Blog & Guides</Link>
+                  <Link to="/docs" className="block px-4 py-2.5 rounded-[8px] text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-[#635BFF] hover:bg-slate-200/50 dark:hover:bg-white/5">Documentation</Link>
+                  <Link to="/faq" className="block px-4 py-2.5 rounded-[8px] text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-[#635BFF] hover:bg-slate-200/50 dark:hover:bg-white/5">FAQ</Link>
+                  <Link to="/search" className="block px-4 py-2.5 rounded-[8px] text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-[#635BFF] hover:bg-slate-200/50 dark:hover:bg-white/5">Search</Link>
+                </div>
+              )}
+            </div>
+
+            <Link to="/about"     className={navLinkCls('/about')}>About</Link>
+            <Link to="/contact"   className={navLinkCls('/contact')}>Contact</Link>
 
             {/* Queue link — shows active count badge */}
             <Link to="/queue" className={`relative px-4 py-2 rounded-[8px] text-sm font-bold transition ${
@@ -57,14 +81,10 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
-
-            <Link to="/settings" className={navLinkCls('/settings')}>Settings</Link>
-            <Link to="/blog"     className={navLinkCls('/blog')}>Blog</Link>
-            <Link to="/contact"  className={navLinkCls('/contact')}>Contact</Link>
           </nav>
 
           {/* Right Actions */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
             <ThemeToggle />
 
             {/* Free Unlimited Badge */}
@@ -85,7 +105,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="flex md:hidden items-center gap-2">
+          <div className="flex lg:hidden items-center gap-2">
             <ThemeToggle />
             {activeCount > 0 && (
               <Link to="/queue" className="relative">
@@ -106,16 +126,21 @@ export default function Navbar() {
 
       {/* Mobile Drawer */}
       {menuOpen && (
-        <div className="md:hidden glass-panel border-t border-slate-200 dark:border-white/10 px-4 pt-2 pb-6 space-y-1 font-bold text-sm">
+        <div className="lg:hidden glass-panel border-t border-slate-200 dark:border-white/10 px-4 pt-2 pb-6 space-y-1 font-bold text-sm">
           <Link to="/"           onClick={() => setMenuOpen(false)} className="block py-2.5 text-current hover:text-[#635BFF]">Home</Link>
           <Link to="/downloader" onClick={() => setMenuOpen(false)} className="block py-2.5 text-current hover:text-[#635BFF]">Downloader</Link>
-          <Link to="/desktop-app" onClick={() => setMenuOpen(false)} className="block py-2.5 text-current hover:text-[#635BFF]">Desktop App</Link>
+          <Link to="/features"   onClick={() => setMenuOpen(false)} className="block py-2.5 text-current hover:text-[#635BFF]">Features</Link>
+          <Link to="/blog"       onClick={() => setMenuOpen(false)} className="block py-2.5 text-current hover:text-[#635BFF]">Blog & Guides</Link>
+          <Link to="/docs"       onClick={() => setMenuOpen(false)} className="block py-2.5 text-current hover:text-[#635BFF]">Documentation</Link>
+          <Link to="/faq"        onClick={() => setMenuOpen(false)} className="block py-2.5 text-current hover:text-[#635BFF]">FAQ</Link>
+          <Link to="/about"      onClick={() => setMenuOpen(false)} className="block py-2.5 text-current hover:text-[#635BFF]">About</Link>
+          <Link to="/contact"    onClick={() => setMenuOpen(false)} className="block py-2.5 text-current hover:text-[#635BFF]">Contact</Link>
+          <Link to="/search"     onClick={() => setMenuOpen(false)} className="block py-2.5 text-current hover:text-[#635BFF] flex items-center gap-2">
+            <Search className="w-4 h-4" /> Search
+          </Link>
           <Link to="/queue"      onClick={() => setMenuOpen(false)} className="block py-2.5 text-current hover:text-[#635BFF] flex items-center gap-2">
             Queue {activeCount > 0 && <span className="px-1.5 py-0.5 rounded bg-[#635BFF] text-white text-[10px]">{activeCount}</span>}
           </Link>
-          <Link to="/settings"   onClick={() => setMenuOpen(false)} className="block py-2.5 text-current hover:text-[#635BFF]">Settings</Link>
-          <Link to="/blog"       onClick={() => setMenuOpen(false)} className="block py-2.5 text-current hover:text-[#635BFF]">Blog &amp; Guides</Link>
-          <Link to="/contact"    onClick={() => setMenuOpen(false)} className="block py-2.5 text-current hover:text-[#635BFF]">Contact</Link>
           {isAdmin && (
             <button onClick={() => { adminSignOut(); setMenuOpen(false) }} className="block py-2.5 text-amber-500 text-left w-full">
               Sign Out (Admin)

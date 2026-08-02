@@ -116,7 +116,7 @@ async def fetch_channel(client, channel_input):
     """
     original_input = str(channel_input).strip()
 
-    def dialog_matches(dialog):
+    def dialog_matches(dialog, allow_partial=False):
         """Match IDs, usernames, and the visible Telegram dialog title."""
         wanted = str(original_input).strip()
         wanted_folded = wanted.lstrip("@").casefold()
@@ -132,7 +132,17 @@ async def fetch_channel(client, channel_input):
         username = str(
             getattr(getattr(dialog, "entity", None), "username", "") or ""
         ).strip().lstrip("@").casefold()
-        return wanted_folded in {title, username}
+        
+        # Pass 1: Exact match on title or username
+        if wanted_folded in {title, username}:
+            return True
+
+        # Pass 2: Substring match on title or username (requires at least 2 chars query)
+        if allow_partial and len(wanted_folded) >= 2:
+            if wanted_folded in title or (username and wanted_folded in username):
+                return True
+
+        return False
     
     # Pre-processing: aggressively normalize numeric channel IDs
     if original_input.isdigit() or (original_input.startswith("-") and original_input[1:].isdigit()):
@@ -158,25 +168,34 @@ async def fetch_channel(client, channel_input):
         print(f"DEBUG: Successfully resolved channel/entity: '{title}' (ID: {channel.id})")
         return channel
     except Exception as e:
-        # Second attempt: if direct lookup fails (common for private entities),
-        # try to find it in ALL dialogs of the current user.
+        # Second attempt: if direct lookup fails (common for private entities or title searches),
+        # try to find it in dialogs of the current user (exact match first, then partial match).
         print(f"Direct lookup for {original_input} failed ({e}). Searching through dialogs... this may take a moment.")
         active_count = 0
         archived_count = 0
+        dialogs_cache = []
         try:
-            # Check Active Dialogs
+            # Check Active Dialogs (Pass 1: Exact match)
             async for dialog in client.iter_dialogs():
                 active_count += 1
-                if dialog_matches(dialog):
-                    print(f"Found entity in active dialogs (checked {active_count}): {dialog.title}")
+                dialogs_cache.append(dialog)
+                if dialog_matches(dialog, allow_partial=False):
+                    print(f"Found exact entity match in active dialogs (checked {active_count}): {dialog.title}")
                     return dialog.entity
                     
-            # Check Archived Dialogs
+            # Check Archived Dialogs (Pass 1: Exact match)
             print(f"Not in active dialogs (checked {active_count}). Searching archived dialogs...")
             async for dialog in client.iter_dialogs(archived=True):
                 archived_count += 1
-                if dialog_matches(dialog):
-                    print(f"Found entity in archived dialogs (checked {archived_count}): {dialog.title}")
+                dialogs_cache.append(dialog)
+                if dialog_matches(dialog, allow_partial=False):
+                    print(f"Found exact entity match in archived dialogs (checked {archived_count}): {dialog.title}")
+                    return dialog.entity
+
+            # Pass 2: Partial/substring title match over collected dialogs
+            for dialog in dialogs_cache:
+                if dialog_matches(dialog, allow_partial=True):
+                    print(f"Found partial entity match in dialogs: '{dialog.title}' (ID: {dialog.id})")
                     return dialog.entity
                     
             print(f"Channel {original_input} was completely missing from all {active_count} active and {archived_count} archived chats.")

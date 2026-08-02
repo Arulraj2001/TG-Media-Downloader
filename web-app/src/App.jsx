@@ -12,10 +12,16 @@ import QueueView         from './pages/QueueView'
 import SettingsView      from './pages/SettingsView'
 import PublicBlogView    from './pages/PublicBlogView'
 import ContactUsView     from './pages/ContactUsView'
-import LegalPolicyView   from './pages/LegalPolicyView'
 import AboutView         from './pages/AboutView'
 import AdminPortalView   from './pages/AdminPortalView'
 import LoginView         from './pages/LoginView'
+import FeaturesView      from './pages/FeaturesView'
+import FaqView           from './pages/FaqView'
+import DocsView          from './pages/DocsView'
+import SearchView        from './pages/SearchView'
+import SitemapView       from './pages/SitemapView'
+import NotFoundView      from './pages/NotFoundView'
+import LegalPagesView    from './pages/LegalPagesView'
 import BuyMeACoffeeWidget from './components/BuyMeACoffeeWidget'
 import { DownloadProvider } from './context/DownloadContext'
 
@@ -62,12 +68,27 @@ function AppLayout() {
           <Route path="/queue"       element={<QueueView />} />
           <Route path="/settings"    element={<SettingsView />} />
           <Route path="/blog"        element={<PublicBlogView />} />
+          <Route path="/blog/:slug"  element={<PublicBlogView />} />
           <Route path="/contact"     element={<ContactUsView />} />
           <Route path="/about"       element={<AboutView />} />
-          <Route path="/privacy"     element={<LegalPolicyView type="privacy" />} />
-          <Route path="/terms"       element={<LegalPolicyView type="terms" />} />
-          <Route path="/refund-policy" element={<LegalPolicyView type="refund" />} />
-          <Route path="/disclaimer"  element={<LegalPolicyView type="disclaimer" />} />
+          <Route path="/features"    element={<FeaturesView />} />
+          <Route path="/faq"         element={<FaqView />} />
+          <Route path="/docs"        element={<DocsView />} />
+          <Route path="/search"      element={<SearchView />} />
+          <Route path="/sitemap"     element={<SitemapView />} />
+
+          {/* Legal Pages */}
+          <Route path="/privacy-policy"   element={<LegalPagesView type="privacy-policy" />} />
+          <Route path="/terms-of-service" element={<LegalPagesView type="terms-of-service" />} />
+          <Route path="/disclaimer"       element={<LegalPagesView type="disclaimer" />} />
+          <Route path="/cookie-policy"    element={<LegalPagesView type="cookie-policy" />} />
+          <Route path="/editorial-policy" element={<LegalPagesView type="editorial-policy" />} />
+          <Route path="/security"         element={<LegalPagesView type="security" />} />
+
+          {/* Legacy legal routes for backward compatibility */}
+          <Route path="/privacy"     element={<LegalPagesView type="privacy-policy" />} />
+          <Route path="/terms"       element={<LegalPagesView type="terms-of-service" />} />
+          <Route path="/refund-policy" element={<LegalPagesView type="terms-of-service" />} />
 
           {/* ── Admin login ── */}
           <Route path="/login" element={<LoginView />} />
@@ -79,8 +100,8 @@ function AppLayout() {
             </AdminRoute>
           } />
 
-          {/* Catch-all */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Catch-all 404 */}
+          <Route path="*" element={<NotFoundView />} />
         </Routes>
       </main>
 

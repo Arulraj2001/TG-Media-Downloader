@@ -48,7 +48,7 @@ from telethon.tl.types import (
 PARENT_SRC = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src'))
 sys.path.append(PARENT_SRC)
 try:
-    from core_downloader import parse_channel_input, fetch_categorized_media, deduplicate_messages
+    from core_downloader import parse_channel_input, fetch_categorized_media, deduplicate_messages, fetch_channel
     CORE_AVAILABLE = True
     print("[Backend] core_downloader imported successfully")
 except ImportError as e:
@@ -56,6 +56,7 @@ except ImportError as e:
     parse_channel_input = None
     fetch_categorized_media = None
     deduplicate_messages = None
+    fetch_channel = None
     print(f"[Backend] core_downloader not available: {e}")
 
 # In-memory entity cache to avoid repeating Telegram API roundtrips
@@ -67,8 +68,11 @@ async def get_cached_entity(client, channel_input: str):
     if channel_input in ENTITY_CACHE:
         return ENTITY_CACHE[channel_input]
     try:
-        entity = await client.get_entity(channel_input)
-        if entity:
+        if CORE_AVAILABLE and fetch_channel:
+            entity = await fetch_channel(client, channel_input)
+        else:
+            entity = await client.get_entity(channel_input)
+        if entity and not isinstance(entity, str):
             ENTITY_CACHE[channel_input] = entity
         return entity
     except Exception:
@@ -557,7 +561,9 @@ def fetch_topics():
 
         # Resolve entity
         try:
-            entity = await client.get_entity(channel_input)
+            entity = await get_cached_entity(client, channel_input)
+            if isinstance(entity, str) or not entity:
+                return {'error': f"Cannot find channel: '{channel_input}'"}
         except (ValueError, ChannelPrivateError, UsernameInvalidError, UsernameNotOccupiedError) as e:
             return {'error': f"Cannot find channel: {e}"}
         except Exception as e:
@@ -645,7 +651,9 @@ def fetch_media():
             return {'error': 'Session expired. Please reconnect.'}
 
         try:
-            entity = await client.get_entity(channel_input)
+            entity = await get_cached_entity(client, channel_input)
+            if isinstance(entity, str) or not entity:
+                return {'error': f"Cannot find channel: '{channel_input}'"}
         except Exception as e:
             return {'error': f"Cannot find channel: {e}"}
 
@@ -983,7 +991,10 @@ def start_download_job():
     async def _do_downloads():
         await ensure_connected(client)
         try:
-            entity = await client.get_entity(channel_input)
+            entity = await get_cached_entity(client, channel_input)
+            if isinstance(entity, str) or not entity:
+                progress_queue.put({'type': 'error', 'msg': f"Cannot find channel: '{channel_input}'"})
+                return
         except Exception as e:
             progress_queue.put({'type': 'error', 'msg': f"Cannot find channel: {e}"})
             return

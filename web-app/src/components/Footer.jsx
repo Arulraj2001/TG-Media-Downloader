@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Download, ShieldCheck, Heart } from 'lucide-react'
+import { Download, ShieldCheck, Heart, Search, Map } from 'lucide-react'
 
 export default function Footer() {
   return (
@@ -27,35 +27,42 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Tools & Features */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">Tools &amp; Features</h4>
+            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">Tools & Features</h4>
             <ul className="space-y-2.5 text-xs font-medium">
               <li><Link to="/downloader" className="hover:text-[#635BFF] transition-colors">Bulk Channel Downloader</Link></li>
+              <li><Link to="/features" className="hover:text-[#635BFF] transition-colors">Features Overview</Link></li>
               <li><Link to="/desktop-app" className="hover:text-[#635BFF] transition-colors">Desktop Version (Windows/Mac)</Link></li>
-              <li><Link to="/queue" className="hover:text-[#635BFF] transition-colors">Live Queue &amp; Speed Monitor</Link></li>
+              <li><Link to="/queue" className="hover:text-[#635BFF] transition-colors">Live Queue & Speed Monitor</Link></li>
               <li><Link to="/about" className="hover:text-[#635BFF] transition-colors">Technology Architecture</Link></li>
             </ul>
           </div>
 
           {/* Resources & Guides */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">Guides &amp; Articles</h4>
+            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">Resources</h4>
             <ul className="space-y-2.5 text-xs font-medium">
-              <li><Link to="/blog" className="hover:text-[#635BFF] transition-colors">Tutorials &amp; Documentation</Link></li>
-              <li><Link to="/contact" className="hover:text-[#635BFF] transition-colors">Support &amp; Technical Helpdesk</Link></li>
+              <li><Link to="/blog" className="hover:text-[#635BFF] transition-colors">Blog & Guides</Link></li>
+              <li><Link to="/docs" className="hover:text-[#635BFF] transition-colors">Documentation</Link></li>
+              <li><Link to="/faq" className="hover:text-[#635BFF] transition-colors">FAQ</Link></li>
+              <li><Link to="/search" className="hover:text-[#635BFF] transition-colors flex items-center gap-1"><Search className="w-3 h-3" /> Search</Link></li>
+              <li><Link to="/sitemap" className="hover:text-[#635BFF] transition-colors flex items-center gap-1"><Map className="w-3 h-3" /> Sitemap</Link></li>
+              <li><Link to="/contact" className="hover:text-[#635BFF] transition-colors">Support & Technical Helpdesk</Link></li>
               <li><a href="https://buymeacoffee.com/x4kqsd0lka" target="_blank" rel="noreferrer" className="hover:text-amber-500 transition-colors flex items-center gap-1.5 font-bold text-amber-500"><Heart className="w-3.5 h-3.5 fill-amber-500" /> Support via Buy Me a Coffee</a></li>
             </ul>
           </div>
 
-          {/* Legal Policies */}
+          {/* Legal & Policies */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">Legal &amp; Policies</h4>
+            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">Legal & Policies</h4>
             <ul className="space-y-2.5 text-xs font-medium">
-              <li><Link to="/privacy" className="hover:text-[#635BFF] transition-colors">Privacy Policy</Link></li>
-              <li><Link to="/terms" className="hover:text-[#635BFF] transition-colors">Terms of Service</Link></li>
-              <li><Link to="/refund-policy" className="hover:text-[#635BFF] transition-colors">Refund &amp; Cancellation Policy</Link></li>
-              <li><Link to="/disclaimer" className="hover:text-[#635BFF] transition-colors">DMCA &amp; Copyright Disclaimer</Link></li>
+              <li><Link to="/privacy-policy" className="hover:text-[#635BFF] transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/terms-of-service" className="hover:text-[#635BFF] transition-colors">Terms of Service</Link></li>
+              <li><Link to="/disclaimer" className="hover:text-[#635BFF] transition-colors">DMCA & Copyright Disclaimer</Link></li>
+              <li><Link to="/cookie-policy" className="hover:text-[#635BFF] transition-colors">Cookie Policy</Link></li>
+              <li><Link to="/editorial-policy" className="hover:text-[#635BFF] transition-colors">Editorial Policy</Link></li>
+              <li><Link to="/security" className="hover:text-[#635BFF] transition-colors">Security Statement</Link></li>
             </ul>
           </div>
 
@@ -66,9 +73,10 @@ export default function Footer() {
           <p>© {new Date().getFullYear()} TG Media Downloader Web Edition. All rights reserved.</p>
           <div className="flex items-center gap-5">
             <Link to="/about" className="hover:text-[#635BFF] transition-colors">About</Link>
-            <Link to="/privacy" className="hover:text-[#635BFF] transition-colors">Privacy</Link>
-            <Link to="/terms" className="hover:text-[#635BFF] transition-colors">Terms</Link>
+            <Link to="/privacy-policy" className="hover:text-[#635BFF] transition-colors">Privacy</Link>
+            <Link to="/terms-of-service" className="hover:text-[#635BFF] transition-colors">Terms</Link>
             <Link to="/contact" className="hover:text-[#635BFF] transition-colors">Contact Support</Link>
+            <Link to="/sitemap" className="hover:text-[#635BFF] transition-colors">Sitemap</Link>
           </div>
         </div>
       </div>

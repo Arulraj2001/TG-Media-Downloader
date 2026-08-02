@@ -1,112 +1,146 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import INITIAL_BLOG_POSTS from '../data/blogPosts'
+import { EXTRA_BLOG_POSTS } from '../data/blogPosts2'
 
 const AppContext = createContext()
 
-const INITIAL_BLOG_POSTS = [
+const ALL_BLOG_POSTS = [...INITIAL_BLOG_POSTS, ...EXTRA_BLOG_POSTS]
+
+const INITIAL_BLOG_POSTS_LEGACY = [
   {
     id: 1,
-    title: 'How to Download Telegram Channel Files in Bulk (2026 Step-by-Step Guide)',
-    slug: 'download-telegram-channel-files-bulk-guide',
-    category: 'Guides',
-    readTime: 6,
-    author: 'TG Downloader Team',
-    date: '2026-03-28',
-    cover: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
-    metaDesc: 'Learn how to connect your Telegram MTProto API ID and Hash to batch stream and download videos, PDFs, and ZIP archives directly into your browser.',
-    keywords: 'telegram bulk downloader, telegram api id, telegram mtproto stream',
-    excerpt: 'Learn how to connect your Telegram MTProto API ID and Hash to batch stream and download videos, PDFs, and ZIP archives directly into your browser.',
-    content: `## Complete Guide to Bulk Downloading Telegram Media
+    title: 'How to Download Telegram Media Without Cloud Storage: A Privacy-First Guide',
+    slug: 'download-telegram-media-without-cloud-storage',
+    category: 'Privacy',
+    readTime: 7,
+    author: 'TG Media Downloader Team',
+    date: '2026-07-20',
+    cover: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
+    metaDesc: 'A step-by-step guide to downloading Telegram photos, videos, and documents directly through the browser while keeping zero server file storage.',
+    keywords: 'telegram media download, local browser download, privacy first telegram downloader',
+    excerpt: 'A step-by-step guide to downloading Telegram photos, videos, and documents directly through the browser while keeping zero server file storage.',
+    content: `## Why Privacy-First Telegram Downloads Matter
+Many Telegram downloader tools route files through a cloud server before delivering them to you. That creates needless storage risk, bandwidth delay, and privacy exposure.
 
-Telegram channels and public groups contain valuable learning materials, video courses, research datasets, and audio archives. Downloading these files individually through desktop or mobile apps can be extremely tedious.
+TG Media Downloader is designed to keep your download flow local by using your browser as the primary download agent.
 
-### Step 1: Obtain Your Telegram API Credentials
-1. Go to **my.telegram.org** in your browser.
-2. Sign in with your Telegram account phone number (with country code).
-3. Click on **API Development Tools**.
-4. Fill in the app creation form (App title and short name).
-5. Copy your **API ID** (numerical value) and **API Hash** (32-character string).
+### What This Means for You
+- **No file storage on our servers**: downloaded media never lands in a third-party cloud environment.
+- **Direct Telegram MTProto connection**: your browser communicates directly with Telegram endpoints.
+- **Faster delivery**: files stream into your browser download manager as they arrive.
 
-### Step 2: Connect Your MTProto Session in TG Downloader
-1. Open **TG Media Downloader** web edition.
-2. In the Downloader Tool tab, enter your **API ID**, **API Hash**, and **Phone Number**.
-3. Click **Send verification code**.
-4. Check your official Telegram mobile or desktop app for the login code and enter it into the tool.
+### How to Start Secure Downloads
+1. Open the web app and sign in with your Telegram API credentials.
+2. Choose a channel or group that you are authorized to access.
+3. Use the downloader interface to select media categories like **Video**, **Photo**, **Document**, or **Audio**.
+4. Click **Start Download** to begin streaming file chunks directly to your machine.
 
-### Step 3: Filter, Sort & Stream Local Browser Downloads
-1. Select a chat from your **pre-fetched joined channels dropdown** or paste a public channel link.
-2. Switch across the **9 Category Tabs** (Documents, Media, Archives, Music, etc.).
-3. Filter by **Min/Max MB size** or apply **Regex file name patterns**.
-4. Click **Add selected to queue** to begin direct browser downloads with max MTProto speeds!`
+### Best Practices for Privacy
+- Always use a private network or trusted Wi-Fi when downloading sensitive content.
+- Avoid sharing your Telegram API credentials in public or untrusted browser sessions.
+- Clear your browser cache or local storage if you stop using the tool on a shared computer.`
   },
   {
     id: 2,
-    title: 'How to Download Media from Specific Telegram Forum Topics',
-    slug: 'download-telegram-forum-topics-guide',
-    category: 'Tutorials',
-    readTime: 5,
-    author: 'TG Downloader Technical Team',
-    date: '2026-03-25',
-    cover: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80',
-    metaDesc: 'Discover how to isolate specific sub-forum topics inside large Telegram channels and extract files without downloading unrelated channel noise.',
-    keywords: 'telegram forum topics, telegram topic downloader, sub channel extractor',
-    excerpt: 'Discover how to isolate specific sub-forum topics inside large Telegram channels and extract files without downloading unrelated channel noise.',
-    content: `## Telegram Forum Topics Isolation Guide
+    title: 'Why Direct MTProto Browser Streaming is Safer and Faster Than Server-Based Downloaders',
+    slug: 'direct-mtproto-streaming-safer-faster',
+    category: 'Technology',
+    readTime: 6,
+    author: 'TG Media Downloader Engineering',
+    date: '2026-07-15',
+    cover: 'https://images.unsplash.com/photo-1531497865145-8f0d2f3d9a4a?auto=format&fit=crop&w=1200&q=80',
+    metaDesc: 'Explore the benefits of using direct MTProto browser streaming for Telegram file downloads instead of intermediate cloud proxy download services.',
+    keywords: 'MTProto streaming, telegram downloader performance, cloudless telegram download',
+    excerpt: 'Explore the benefits of using direct MTProto browser streaming for Telegram file downloads instead of intermediate cloud proxy download services.',
+    content: `## The Problem with Server-Based Telegram Downloaders
+Most web-based Telegram downloaders route media through a server first. That means:
+- increased latency,
+- extra bandwidth use,
+- and possible retention of user files.
 
-Large Telegram communities use **Forum Topics** to separate discussions into sub-channels (e.g. #PDFs, #Video-Courses, #Announcements).
+TG Media Downloader avoids that by letting your browser handle the connection directly.
 
-### Why Isolate Forum Topics?
-Standard Telegram downloaders pull files indiscriminately from the main channel feed. TG Media Downloader includes a dedicated **Forum Topic Picker** that allows you to target exact sub-channels.
+### How Direct MTProto Streaming Works
+1. Your browser authenticates with Telegram using your API ID and API Hash.
+2. The app requests media chunks over the MTProto protocol.
+3. Chunks are streamed directly into your browser downloads manager.
 
-### How to Target Specific Topics
-1. Connect your Telegram account credentials.
-2. Select your target channel.
-3. Open the **Topic Selector Dropdown** next to the channel search input.
-4. Select the specific topic ID (e.g., Topic #1: PDF Textbooks).
-5. Click **Fetch Media**. The tool will isolate only messages sent within that sub-forum thread.`
+### Benefits for Users
+- **Higher download throughput** because bandwidth is not constrained by a remote proxy.
+- **Stronger privacy**, since the app does not store or cache any Telegram media.
+- **Reduced server costs**, allowing the service to remain lightweight and responsive.
+
+### Real-World Use Cases
+- Bulk downloading lecture videos from a study channel.
+- Exporting PDF manuals from a technology group.
+- Capturing audio voice notes from a private community thread.
+
+When you choose a direct streaming architecture, you're choosing speed and control over unnecessary server intermediaries.`
   },
   {
     id: 3,
-    title: 'Telegram API ID & Hash: Where to Find & How to Connect Safely',
-    slug: 'telegram-api-id-hash-safety-guide',
-    category: 'Security',
-    readTime: 4,
-    author: 'Security Research Team',
-    date: '2026-03-20',
-    cover: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1200&q=80',
-    metaDesc: 'Understand why Telegram MTProto API ID and Hash credentials are required, where to generate them, and how local session storage protects your privacy.',
-    keywords: 'telegram api id safety, telegram login code, my.telegram.org api',
-    excerpt: 'Understand why Telegram MTProto API ID and Hash credentials are required, where to generate them, and how local session storage protects your privacy.',
-    content: `## Understanding Telegram MTProto API Credentials
+    title: 'Step-by-Step: Create Your Telegram API ID & Hash for Secure Downloads',
+    slug: 'create-telegram-api-id-hash-secure-downloads',
+    category: 'Guides',
+    readTime: 5,
+    author: 'TG Media Downloader Support',
+    date: '2026-07-10',
+    cover: 'https://images.unsplash.com/photo-1500522144261-ea64433bbe27?auto=format&fit=crop&w=1200&q=80',
+    metaDesc: 'A friendly walkthrough for generating your Telegram API ID and API Hash at my.telegram.org and connecting them safely to the browser downloader.',
+    keywords: 'telegram api id hash tutorial, my.telegram.org, secure telegram login',
+    excerpt: 'A friendly walkthrough for generating your Telegram API ID and API Hash at my.telegram.org and connecting them safely to the browser downloader.',
+    content: `## Generate Your Telegram API Credentials in Minutes
+Telegram requires every third-party client to identify itself with an **API ID** and **API Hash**. These credentials allow the downloader to access your authorized chats and media files.
 
-### What is an API ID and API Hash?
-Telegram requires applications connecting to its official MTProto network to identify themselves via an **API ID** and **API Hash**. These credentials grant client applications permission to read your authorized channels and request media chunks.
+### Create Your API Credentials
+1. Visit **my.telegram.org** and sign in with your Telegram phone number.
+2. On the **API Development Tools** page, create a new application.
+3. Enter a descriptive app name and a short name.
+4. Save the generated **API ID** and **API Hash**.
 
-### How Session Security Works
-- **Local Storage Only**: Your API credentials and MTProto session state are saved exclusively in your browser's local storage.
-- **Zero Server Caching**: No media files, photos, videos, or documents pass through or get saved on third-party servers. All data transfers happen directly between Telegram servers and your local device.`
+### Connect Credentials to TG Media Downloader
+1. Open the Downloader page in the web app.
+2. Paste your **API ID** and **API Hash** into the connection form.
+3. Send the verification code and confirm it in your Telegram app.
+4. Once connected, the app can access your authorized channels and download files securely.
+
+### Safety Notes
+- Do not share your API Hash publicly.
+- Use a trusted device and browser when entering your credentials.
+- The app stores credentials in browser local storage only, not on external servers.`
   },
   {
     id: 4,
-    title: 'How to Download Telegram Videos & PDFs Without Saving to Server',
-    slug: 'download-telegram-videos-pdfs-direct-local-stream',
-    category: 'Guides',
-    readTime: 5,
-    author: 'TG Downloader Team',
-    date: '2026-03-15',
-    cover: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1200&q=80',
-    metaDesc: 'Learn about direct browser local streaming architecture and why zero-server storage ensures maximum download speed and complete privacy.',
-    keywords: 'telegram video downloader web, direct local stream telegram, zero server caching',
-    excerpt: 'Learn about direct browser local streaming architecture and why zero-server storage ensures maximum download speed and complete privacy.',
-    content: `## Direct Browser Local Streaming Architecture
+    title: 'Target Telegram Channel Topics and Download Only What Matters',
+    slug: 'target-telegram-channel-topics-download-only-what-matters',
+    category: 'Productivity',
+    readTime: 6,
+    author: 'TG Media Downloader Product Team',
+    date: '2026-07-05',
+    cover: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
+    metaDesc: 'Learn how to use topic filtering and category selection in TG Media Downloader so you can extract only the files you need from large Telegram channels.',
+    keywords: 'telegram topic filtering, channel downloader productivity, tg media downloader topics',
+    excerpt: 'Learn how to use topic filtering and category selection in TG Media Downloader so you can extract only the files you need from large Telegram channels.',
+    content: `## Reduce Download Noise with Topic Filtering
+Large Telegram channels can contain hundreds of files across multiple discussion topics. Downloading everything is inefficient and often unnecessary.
 
-Traditional web downloaders download files onto their cloud server first and then send a download link to the user. This approach creates privacy bottlenecks and bandwidth limits.
+TG Media Downloader includes tools that help you focus on the right content.
 
-### The TG Downloader Advantage
-TG Media Downloader uses a **Direct Browser Local Streaming Engine**:
-1. Your browser establishes a direct HTTP stream with Telegram MTProto endpoints.
-2. File chunks stream progressively straight into your browser's downloads manager.
-3. Downloads execute at maximum network connection speed with 0 GB server storage overhead.`
+### Use Category Selection
+- Choose **Photos** to capture image collections.
+- Select **Videos** for recorded lessons or clips.
+- Filter to **Documents** for manuals, PDFs, and text archives.
+
+### Use Topic Picker for Forum Threads
+1. Open the channel selector for a Telegram group with forum topics.
+2. Choose the exact topic branch you want to extract.
+3. Fetch content from that topic only.
+
+### Save Time with Smart Queues
+- Add only relevant files to the download queue.
+- Skip promotional images or unrelated attachments.
+- Export selected media faster with fewer clicks and no extra storage overhead.`
   }
 ]
 
@@ -138,7 +172,7 @@ export function AppProvider({ children }) {
 
   const [blogPosts, setBlogPosts] = useState(() => {
     const saved = localStorage.getItem('tg_blog_posts')
-    return saved ? JSON.parse(saved) : INITIAL_BLOG_POSTS
+    return saved ? JSON.parse(saved) : ALL_BLOG_POSTS
   })
 
   useEffect(() => {

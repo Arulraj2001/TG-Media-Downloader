@@ -33,15 +33,23 @@ export default function LegalPolicyView({ type = 'privacy' }) {
           <>
             <section className="space-y-2">
               <h2 className="text-sm font-bold text-current font-mono">1. INFORMATION WE COLLECT</h2>
-              <p className="text-slate-400">TG Media Downloader respects user privacy. We store basic profile details (email address, full name, and subscription tier) required to maintain user account access and payment verification logs.</p>
+              <p className="text-slate-400">TG Media Downloader respects user privacy. We collect only the information needed for account access and payment verification, such as email address, full name, subscription tier, and support request details.</p>
             </section>
             <section className="space-y-2">
               <h2 className="text-sm font-bold text-current font-mono">2. ZERO MEDIA SERVER STORAGE</h2>
-              <p className="text-slate-400">We do not host, store, or archive any Telegram media files, photos, videos, or documents on our servers. All media items are streamed directly to your local browser downloads.</p>
+              <p className="text-slate-400">We do not host, store, or archive any Telegram media files, photos, videos, or documents on our servers. All media items are streamed directly from Telegram servers to your browser downloads without intermediate storage.</p>
             </section>
             <section className="space-y-2">
-              <h2 className="text-sm font-bold text-current font-mono">3. THIRD-PARTY SERVICES & GOOGLE ADSENSE</h2>
-              <p className="text-slate-400">We utilize Supabase for user authentication and Google AdSense for serving advertisements. These vendors may use cookies to serve ads based on user visits.</p>
+              <h2 className="text-sm font-bold text-current font-mono">3. COOKIES, ANALYTICS, AND AD SERVING</h2>
+              <p className="text-slate-400">This website may use cookies and analytics to improve user experience and measure traffic. We do not collect sensitive personal data for advertising and do not use cookies for unauthorized tracking.</p>
+            </section>
+            <section className="space-y-2">
+              <h2 className="text-sm font-bold text-current font-mono">4. GOOGLE ADSENSE & THIRD-PARTY ADS</h2>
+              <p className="text-slate-400">We display third-party advertisements through Google AdSense only. Google may use cookies and similar technologies to serve ads based on your visit to this website. Our site content is developed to meet Google Publisher Policies and maintain a positive user experience.</p>
+            </section>
+            <section className="space-y-2">
+              <h2 className="text-sm font-bold text-current font-mono">5. USER RIGHTS</h2>
+              <p className="text-slate-400">You can request corrections or deletions of your account data by contacting us through the contact page. We retain data only as needed to support service operations and AdSense compliance.</p>
             </section>
           </>
         )}
