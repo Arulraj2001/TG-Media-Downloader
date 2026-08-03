@@ -308,31 +308,40 @@ def send_code():
     session_file = os.path.join(SESSION_DIR, session_name)
 
     async def _send():
-        client = get_client_for_phone(clean)
-        if not client:
-            client = TelegramClient(session_file, api_id_int, api_hash_str, loop=get_event_loop())
+        existing = get_client_for_phone(clean)
+        if existing:
+            try:
+                await connect_client_safely(existing)
+                if await existing.is_user_authorized():
+                    me = await existing.get_me()
+                    dialogs = []
+                    async for d in existing.iter_dialogs(limit=100):
+                        dialogs.append({
+                            'id': str(d.id),
+                            'title': d.name or '',
+                            'username': getattr(d.entity, 'username', '') or '',
+                            'type': 'channel' if isinstance(d.entity, Channel) else 'group',
+                            'unread': getattr(d, 'unread_count', 0),
+                        })
+                    CLIENT_SESSIONS[clean] = existing
+                    return {
+                        'connected': True,
+                        'user': me.first_name or '',
+                        'phone': clean,
+                        'chats': dialogs,
+                    }
+            except Exception:
+                pass
+            # Unauthorized existing client — disconnect & reset so Telethon sends a clean SendCodeRequest
+            try:
+                await existing.disconnect()
+            except Exception:
+                pass
+            CLIENT_SESSIONS.pop(clean, None)
 
+        client = TelegramClient(session_file, api_id_int, api_hash_str, loop=get_event_loop())
         try:
             await connect_client_safely(client)
-
-            if await client.is_user_authorized():
-                me = await client.get_me()
-                dialogs = []
-                async for d in client.iter_dialogs(limit=100):
-                    dialogs.append({
-                        'id': str(d.id),
-                        'title': d.name or '',
-                        'username': getattr(d.entity, 'username', '') or '',
-                        'type': 'channel' if isinstance(d.entity, Channel) else 'group',
-                        'unread': getattr(d, 'unread_count', 0),
-                    })
-                CLIENT_SESSIONS[clean] = client
-                return {
-                    'connected': True,
-                    'user': me.first_name or '',
-                    'phone': clean,
-                    'chats': dialogs,
-                }
 
             # Not yet authorized — send OTP
             print(f"[Telethon] Sending code to {clean} (api_id={api_id_int})")
@@ -360,7 +369,10 @@ def send_code():
         except FloodWaitError as e:
             raise ValueError(f"Telegram flood wait: please wait {e.seconds} seconds.")
         except Exception as e:
-            if 'database is locked' in str(e).lower():
+            err_msg = str(e)
+            if 'ResendCodeRequest' in err_msg or 'options for this type of number' in err_msg:
+                raise ValueError("Telegram verification code was already sent. Please check your Telegram app or SMS, or wait 1-2 minutes before requesting a new code.")
+            if 'database is locked' in err_msg.lower():
                 raise ValueError("Session database is currently busy. Please try again in a few seconds.")
             raise e
 
