@@ -47,20 +47,25 @@ export default function Navbar() {
 
             {/* Resources Dropdown */}
             <div className="relative" onMouseEnter={() => setResourcesOpen(true)} onMouseLeave={() => setResourcesOpen(false)}>
-              <button className={`px-4 py-2 rounded-[8px] text-sm font-bold transition flex items-center gap-1 ${
-                ['/blog', '/docs', '/faq', '/search'].includes(location.pathname)
-                  ? 'text-[#635BFF] bg-[#635BFF]/10 border border-[#635BFF]/20 shadow-sm'
-                  : 'text-slate-700 dark:text-slate-300 hover:text-[#635BFF] hover:bg-slate-200/50 dark:hover:bg-white/5'
-              }`}>
+              <button 
+                onClick={() => setResourcesOpen(prev => !prev)}
+                className={`px-4 py-2 rounded-[8px] text-sm font-bold transition flex items-center gap-1 ${
+                  ['/blog', '/docs', '/faq', '/search'].includes(location.pathname)
+                    ? 'text-[#635BFF] bg-[#635BFF]/10 border border-[#635BFF]/20 shadow-sm'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-[#635BFF] hover:bg-slate-200/50 dark:hover:bg-white/5'
+                }`}
+              >
                 Resources
                 <ChevronDown className="w-3.5 h-3.5" />
               </button>
               {resourcesOpen && (
-                <div className="absolute top-full left-0 mt-2 w-56 glass-panel rounded-[12px] border border-slate-200/80 dark:border-white/10 shadow-xl p-2 space-y-1">
-                  <Link to="/blog" className="block px-4 py-2.5 rounded-[8px] text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-[#635BFF] hover:bg-slate-200/50 dark:hover:bg-white/5">Blog & Guides</Link>
-                  <Link to="/docs" className="block px-4 py-2.5 rounded-[8px] text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-[#635BFF] hover:bg-slate-200/50 dark:hover:bg-white/5">Documentation</Link>
-                  <Link to="/faq" className="block px-4 py-2.5 rounded-[8px] text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-[#635BFF] hover:bg-slate-200/50 dark:hover:bg-white/5">FAQ</Link>
-                  <Link to="/search" className="block px-4 py-2.5 rounded-[8px] text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-[#635BFF] hover:bg-slate-200/50 dark:hover:bg-white/5">Search</Link>
+                <div className="absolute top-full left-0 pt-2 w-56 z-50">
+                  <div className="glass-panel rounded-[12px] border border-slate-200/80 dark:border-white/10 shadow-xl p-2 space-y-1">
+                    <Link to="/blog" onClick={() => setResourcesOpen(false)} className="block px-4 py-2.5 rounded-[8px] text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-[#635BFF] hover:bg-slate-200/50 dark:hover:bg-white/5">Blog & Guides</Link>
+                    <Link to="/docs" onClick={() => setResourcesOpen(false)} className="block px-4 py-2.5 rounded-[8px] text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-[#635BFF] hover:bg-slate-200/50 dark:hover:bg-white/5">Documentation</Link>
+                    <Link to="/faq" onClick={() => setResourcesOpen(false)} className="block px-4 py-2.5 rounded-[8px] text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-[#635BFF] hover:bg-slate-200/50 dark:hover:bg-white/5">FAQ</Link>
+                    <Link to="/search" onClick={() => setResourcesOpen(false)} className="block px-4 py-2.5 rounded-[8px] text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-[#635BFF] hover:bg-slate-200/50 dark:hover:bg-white/5">Search</Link>
+                  </div>
                 </div>
               )}
             </div>

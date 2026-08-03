@@ -762,6 +762,13 @@ function HomeView({ tgSession }) {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ channel_input: ch }),
       })
+      const ct = res.headers.get('content-type') || ''
+      if (!res.ok || !ct.includes('application/json')) {
+        const txt = await res.text().catch(() => '')
+        setFetchError(`Backend error (${res.status}): ${txt.slice(0, 100) || 'Invalid server response'}`)
+        setIsFetching(false)
+        return
+      }
       const data = await res.json()
       if (data.error) { setFetchError(data.error); setIsFetching(false); return }
       if (data.is_forum && data.topics?.length > 0) {
@@ -779,6 +786,12 @@ function HomeView({ tgSession }) {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ channel_input: ch, topic_id: selectedTopicId, limit: settings.initial_fetch_limit }),
       })
+      const ct = res.headers.get('content-type') || ''
+      if (!res.ok || !ct.includes('application/json')) {
+        const txt = await res.text().catch(() => '')
+        setFetchError(`Backend error (${res.status}): ${txt.slice(0, 100) || 'Invalid server response'}`)
+        return
+      }
       const data = await res.json()
       if (data.error) { setFetchError(data.error); return }
       setChannelInfo(data.channel || { title: ch })

@@ -125,6 +125,12 @@ export function DownloadProvider({ children }) {
         }),
       })
 
+      const contentType = res.headers.get('content-type') || ''
+      if (!res.ok || !contentType.includes('application/json')) {
+        const text = await res.text().catch(() => '')
+        updateJob(localId, { status: 'failed', error: `Server error (${res.status}): ${text.slice(0, 100) || 'Invalid server response'}` })
+        return null
+      }
       const data = await res.json()
       if (data.error) {
         updateJob(localId, { status: 'failed', error: data.error })
