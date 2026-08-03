@@ -97,6 +97,12 @@ PROGRESS_QUEUES: dict = {}
 # job_id → {str(msg_id): filepath} for completed downloads
 DOWNLOAD_FILES: dict = {}
 
+# job_id → set — jobs the user asked to cancel (checked by the worker)
+JOB_CANCEL_FLAGS: set = set()
+
+# job_id → {'total','completed','status','updated'} — authoritative job progress
+JOB_PROGRESS: dict = {}
+
 # Temp folder where downloaded files are stored until served
 DOWNLOAD_TEMP_DIR = os.path.join(os.path.dirname(__file__), 'downloads_temp')
 os.makedirs(DOWNLOAD_TEMP_DIR, exist_ok=True)
@@ -856,21 +862,14 @@ def download_file():
             file_size = os.path.getsize(file_path)
 
             def file_generator():
-                try:
-                    with open(file_path, 'rb') as f:
-                        while True:
-                            chunk = f.read(1024 * 256)  # 256 KB chunks
-                            if not chunk:
-                                break
-                            yield chunk
-                finally:
-                    # Clean up file after serving
-                    try:
-                        os.remove(file_path)
-                    except Exception:
-                        pass
-                    # Remove entry
-                    DOWNLOAD_FILES.get(job_id, {}).pop(msg_id_str, None)
+                # Files are kept on disk until the TTL cleaner removes them,
+                # so a browser retry / resume never hits a 404 mid-batch.
+                with open(file_path, 'rb') as f:
+                    while True:
+                        chunk = f.read(1024 * 256)  # 256 KB chunks
+                        if not chunk:
+                            break
+                        yield chunk
 
             return Response(
                 stream_with_context(file_generator()),
@@ -1001,103 +1000,135 @@ def start_download_job():
     os.makedirs(job_dir, exist_ok=True)
 
     async def _do_downloads():
-        await ensure_connected(client)
+        total = len(message_ids)
+        JOB_PROGRESS[job_id] = {'total': total, 'completed': 0, 'status': 'running', 'updated': time.time()}
         try:
-            entity = await get_cached_entity(client, channel_input)
-            if isinstance(entity, str) or not entity:
-                progress_queue.put({'type': 'error', 'msg': f"Cannot find channel: '{channel_input}'"})
+            await ensure_connected(client)
+            try:
+                entity = await get_cached_entity(client, channel_input)
+                if isinstance(entity, str) or not entity:
+                    progress_queue.put({'type': 'error', 'msg': f"Cannot find channel: '{channel_input}'"})
+                    return
+            except Exception as e:
+                progress_queue.put({'type': 'error', 'msg': f"Cannot find channel: {e}"})
                 return
-        except Exception as e:
-            progress_queue.put({'type': 'error', 'msg': f"Cannot find channel: {e}"})
-            return
 
-        total     = len(message_ids)
-        completed = 0
-        lock      = asyncio.Lock()
+            completed = 0
+            lock      = asyncio.Lock()
 
-        # Batch-fetch all message metadata in one API call
-        try:
-            all_msgs = await client.get_messages(entity, ids=[int(mid) for mid in message_ids])
-            msgs_map = {m.id: m for m in all_msgs if m}
-        except Exception:
-            msgs_map = {}
+            # Batch-fetch all message metadata in one API call
+            try:
+                all_msgs = await client.get_messages(entity, ids=[int(mid) for mid in message_ids])
+                msgs_map = {m.id: m for m in all_msgs if m}
+            except Exception:
+                msgs_map = {}
 
-        dl_sem = asyncio.Semaphore(concurrency)
+            dl_sem = asyncio.Semaphore(concurrency)
 
-        async def download_one(msg_id):
-            nonlocal completed
-            async with dl_sem:
-                msg = msgs_map.get(int(msg_id))
+            def _is_cancelled():
+                return job_id in JOB_CANCEL_FLAGS
 
-                if msg is None:
+            async def download_one(msg_id):
+                nonlocal completed
+                async with dl_sem:
+                    if _is_cancelled():
+                        return
+
+                    msg = msgs_map.get(int(msg_id))
+                    if msg is None:
+                        try:
+                            msg = await client.get_messages(entity, ids=int(msg_id))
+                        except Exception as e:
+                            async with lock:
+                                completed += 1
+                            JOB_PROGRESS[job_id]['completed'] = completed
+                            progress_queue.put({'type': 'file_error', 'msg_id': msg_id, 'error': str(e), 'completed': completed, 'total': total})
+                            return
+
+                    if not msg or not msg.media:
+                        async with lock:
+                            completed += 1
+                        JOB_PROGRESS[job_id]['completed'] = completed
+                        progress_queue.put({'type': 'file_skip', 'msg_id': msg_id, 'completed': completed, 'total': total})
+                        return
+
+                    fname     = filenames.get(str(msg_id), f"msg_{msg_id}")
+                    file_size = 0
+                    if hasattr(msg, 'file') and msg.file:
+                        file_size = getattr(msg.file, 'size', 0) or 0
+                    elif hasattr(msg, 'document') and msg.document:
+                        file_size = getattr(msg.document, 'size', 0) or 0
+
+                    progress_queue.put({
+                        'type': 'file_start', 'msg_id': msg_id,
+                        'filename': fname, 'size': file_size,
+                        'completed': completed, 'total': total,
+                    })
+
+                    # ── Unique destination path (prevent same-name collisions) ──
+                    safe_fname = os.path.basename(fname) or f'msg_{msg_id}'
+                    dest_path  = os.path.join(job_dir, safe_fname)
+                    if os.path.exists(dest_path):
+                        base, ext = os.path.splitext(safe_fname)
+                        i = 1
+                        while os.path.exists(dest_path):
+                            dest_path = os.path.join(job_dir, f'{base}_{i}{ext}')
+                            i += 1
+
+                    last_t  = [time.time()]
+                    last_b  = [0]
+
+                    def _progress(current, total_bytes):
+                        now     = time.time()
+                        elapsed = now - last_t[0]
+                        if elapsed > 0.3:
+                            speed_kb = ((current - last_b[0]) / elapsed) / 1024
+                            last_t[0] = now
+                            last_b[0] = current
+                            speed_str = (f"{speed_kb / 1024:.1f} MB/s" if speed_kb > 1024 else f"{int(speed_kb)} KB/s")
+                            progress_queue.put({
+                                'type': 'file_progress', 'msg_id': msg_id,
+                                'current': current, 'total': total_bytes or file_size,
+                                'speed': speed_str,
+                            })
+
                     try:
-                        msg = await client.get_messages(entity, ids=int(msg_id))
+                        await msg.download_media(file=dest_path, progress_callback=_progress)
+                        # Record the saved path
+                        DOWNLOAD_FILES[job_id][str(msg_id)] = dest_path
+                        async with lock:
+                            completed += 1
+                        JOB_PROGRESS[job_id]['completed'] = completed
+                        progress_queue.put({
+                            'type': 'file_complete', 'msg_id': msg_id,
+                            'filename': fname, 'size': file_size,
+                            'completed': completed, 'total': total,
+                            'job_id': job_id,
+                        })
                     except Exception as e:
                         async with lock:
                             completed += 1
-                        progress_queue.put({'type': 'file_error', 'msg_id': msg_id, 'error': str(e), 'completed': completed, 'total': total})
-                        return
-
-                if not msg or not msg.media:
-                    async with lock:
-                        completed += 1
-                    progress_queue.put({'type': 'file_skip', 'msg_id': msg_id, 'completed': completed, 'total': total})
-                    return
-
-                fname     = filenames.get(str(msg_id), f"msg_{msg_id}")
-                file_size = 0
-                if hasattr(msg, 'file') and msg.file:
-                    file_size = getattr(msg.file, 'size', 0) or 0
-                elif hasattr(msg, 'document') and msg.document:
-                    file_size = getattr(msg.document, 'size', 0) or 0
-
-                progress_queue.put({
-                    'type': 'file_start', 'msg_id': msg_id,
-                    'filename': fname, 'size': file_size,
-                    'completed': completed, 'total': total,
-                })
-
-                last_t  = [time.time()]
-                last_b  = [0]
-
-                def _progress(current, total_bytes):
-                    now     = time.time()
-                    elapsed = now - last_t[0]
-                    if elapsed > 0.3:
-                        speed_kb = ((current - last_b[0]) / elapsed) / 1024
-                        last_t[0] = now
-                        last_b[0] = current
-                        speed_str = (f"{speed_kb / 1024:.1f} MB/s" if speed_kb > 1024 else f"{int(speed_kb)} KB/s")
+                        JOB_PROGRESS[job_id]['completed'] = completed
                         progress_queue.put({
-                            'type': 'file_progress', 'msg_id': msg_id,
-                            'current': current, 'total': total_bytes or file_size,
-                            'speed': speed_str,
+                            'type': 'file_error', 'msg_id': msg_id,
+                            'error': str(e), 'completed': completed, 'total': total,
                         })
 
-                try:
-                    # Save file to disk in the job temp dir
-                    dest_path = os.path.join(job_dir, fname)
-                    await msg.download_media(file=dest_path, progress_callback=_progress)
-                    # Record the saved path
-                    DOWNLOAD_FILES[job_id][str(msg_id)] = dest_path
-                    async with lock:
-                        completed += 1
-                    progress_queue.put({
-                        'type': 'file_complete', 'msg_id': msg_id,
-                        'filename': fname, 'size': file_size,
-                        'completed': completed, 'total': total,
-                        'job_id': job_id,
-                    })
-                except Exception as e:
-                    async with lock:
-                        completed += 1
-                    progress_queue.put({
-                        'type': 'file_error', 'msg_id': msg_id,
-                        'error': str(e), 'completed': completed, 'total': total,
-                    })
-
-        await asyncio.gather(*[download_one(mid) for mid in message_ids])
-        progress_queue.put({'type': 'job_complete', 'total': total})
+            await asyncio.gather(*[download_one(mid) for mid in message_ids])
+        finally:
+            import shutil
+            cancelled = job_id in JOB_CANCEL_FLAGS
+            JOB_CANCEL_FLAGS.discard(job_id)
+            if cancelled:
+                progress_queue.put({'type': 'cancelled'})
+                JOB_PROGRESS[job_id]['status'] = 'cancelled'
+                # Cancelled job: temp files are no longer served — clean now.
+                shutil.rmtree(job_dir, ignore_errors=True)
+                DOWNLOAD_FILES.pop(job_id, None)
+            else:
+                progress_queue.put({'type': 'job_complete', 'total': total})
+                JOB_PROGRESS[job_id]['status'] = 'completed'
+            JOB_PROGRESS[job_id]['updated'] = time.time()
 
     # Schedule the async work on the background loop
     asyncio.run_coroutine_threadsafe(_do_downloads(), get_event_loop())
@@ -1107,29 +1138,57 @@ def start_download_job():
 
 @app.route('/api/telegram/cancel-job', methods=['POST'])
 def cancel_job():
-    """Cancel a running download job and clean up its temp files."""
+    """
+    Cancel a running download job.
+    Sets a cancel flag the worker checks between files; the worker's finally
+    block emits a 'cancelled' SSE event and performs the full temp-file cleanup.
+    """
     data   = request.json or {}
     job_id = data.get('job_id', '')
     if not job_id:
         return jsonify({'error': 'job_id required'}), 400
 
-    # Signal the SSE stream with a cancelled event
+    JOB_CANCEL_FLAGS.add(job_id)
+
+    # Immediately signal any open SSE stream so the UI reacts at once.
     q = PROGRESS_QUEUES.get(job_id)
     if q:
         q.put({'type': 'cancelled'})
-        del PROGRESS_QUEUES[job_id]
-
-    # Clean up temp files for this job
-    import shutil
-    job_dir = os.path.join(DOWNLOAD_TEMP_DIR, job_id)
-    if os.path.isdir(job_dir):
-        try:
-            shutil.rmtree(job_dir)
-        except Exception:
-            pass
-    DOWNLOAD_FILES.pop(job_id, None)
 
     return jsonify({'ok': True})
+
+
+@app.route('/api/telegram/job-status/<job_id>', methods=['GET'])
+def job_status(job_id):
+    """
+    Authoritative job status for SSE-recovery polling (frontend watchdog).
+    Returns:
+      running   — files still downloading (or queued)
+      completed — all files done (terminal)
+      cancelled — user cancelled
+      not_found — no record (job never existed or TTL expired)
+    """
+    if job_id in JOB_CANCEL_FLAGS:
+        return jsonify({'status': 'cancelled', 'job_id': job_id})
+
+    progress = JOB_PROGRESS.get(job_id)
+    if not progress:
+        return jsonify({'status': 'not_found', 'job_id': job_id})
+
+    files_map = DOWNLOAD_FILES.get(job_id, {})
+    # Only report files that still exist on disk
+    readable = {}
+    for k, v in list(files_map.items()):
+        if os.path.exists(v):
+            readable[k] = v
+
+    return jsonify({
+        'status':    progress.get('status', 'running'),
+        'job_id':    job_id,
+        'total':     progress.get('total', 0),
+        'completed': progress.get('completed', len(readable)),
+        'files':     readable,
+    })
 
 
 @app.route('/api/telegram/progress/<job_id>', methods=['GET'])
@@ -1142,13 +1201,15 @@ def progress_sse(job_id):
     def event_stream():
         while True:
             try:
-                event = pq.get(timeout=30)
+                event = pq.get(timeout=25)
                 yield f"data: {json.dumps(event)}\n\n"
-                if event.get('type') in ('job_complete', 'error'):
+                if event.get('type') in ('job_complete', 'error', 'cancelled'):
                     PROGRESS_QUEUES.pop(job_id, None)
                     break
             except queue.Empty:
-                yield ": keepalive\n\n"
+                # Real data ping (not a bare comment) so proxies don't strip it
+                # and the frontend watchdog sees the stream is alive.
+                yield f"data: {json.dumps({'type': 'ping'})}\n\n"
 
     return Response(
         stream_with_context(event_stream()),
@@ -1221,7 +1282,48 @@ def update_settings():
     return jsonify({'success': True})
 
 
+def _start_ttl_cleaner():
+    """
+    Background cleanup for download temp files and job-progress records.
+    Completed files are served to the browser on demand; once a job is older
+    than the TTL its files, job dir and progress record are removed.
+    """
+    import shutil
+
+    FILE_TTL_SECONDS   = 60 * 60      # 1 hour for served files
+    JOB_TTL_SECONDS    = 2 * 60 * 60  # 2 hours for progress records
+
+    def _clean():
+        while True:
+            try:
+                now = time.time()
+                # Remove stale download files + job dirs
+                for job_id in list(DOWNLOAD_FILES.keys()):
+                    job_dir = os.path.join(DOWNLOAD_TEMP_DIR, job_id)
+                    if not os.path.isdir(job_dir):
+                        continue
+                    try:
+                        stat_age = now - os.path.getmtime(job_dir)
+                    except Exception:
+                        stat_age = 0
+                    if stat_age > FILE_TTL_SECONDS:
+                        shutil.rmtree(job_dir, ignore_errors=True)
+                        DOWNLOAD_FILES.pop(job_id, None)
+
+                # Remove stale progress records
+                for job_id in list(JOB_PROGRESS.keys()):
+                    updated = JOB_PROGRESS[job_id].get('updated', 0)
+                    if now - updated > JOB_TTL_SECONDS:
+                        JOB_PROGRESS.pop(job_id, None)
+            except Exception:
+                pass
+            time.sleep(300)
+
+    t = threading.Thread(target=_clean, daemon=True)
+    t.start()
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
+    _start_ttl_cleaner()
     print(f"[TG Backend] Starting on port {port}")
     app.run(host='0.0.0.0', port=port, debug=False, threaded=True)

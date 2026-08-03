@@ -53,12 +53,9 @@ function buildDefaultJsonLd() {
           '@type': 'Offer',
           'price': '0',
           'priceCurrency': 'USD'
-        },
-        'aggregateRating': {
-          '@type': 'AggregateRating',
-          'ratingValue': '4.8',
-          'ratingCount': '1250'
         }
+        // NOTE: No AggregateRating — fabricated review/rating markup violates
+        // Google's structured data policies and can trigger manual actions.
       }
     ]
   }

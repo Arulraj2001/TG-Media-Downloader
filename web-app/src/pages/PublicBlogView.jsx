@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { Link, useParams } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import SeoMeta from '../components/SeoMeta'
 import { Search, BookOpen, Clock, Tag, Calendar, User, ArrowLeft, Share2, Terminal, Sparkles, ArrowRight, CheckCircle2, Zap, Layers } from 'lucide-react'
@@ -113,87 +114,110 @@ function FormattedBlogContent({ content }) {
   return <div className="space-y-2">{elements}</div>
 }
 
+// ─── SINGLE ARTICLE VIEW — PREMIUM READING UI ─────────────────────────────
+function ArticleView({ post }) {
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-10 space-y-8 animate-fade-in">
+      <SeoMeta
+        title={`${post.title} | TG Media Downloader Blog`}
+        description={post.metaDesc || post.excerpt}
+        keywords={post.keywords || 'telegram download tutorial, how to download telegram videos, telegram private group downloader guide'}
+        image={post.cover}
+        canonical={`https://tg-media-bulk-downloader.netlify.app/blog/${post.slug}`}
+        article={{
+          title: post.title,
+          description: post.metaDesc || post.excerpt,
+          image: post.cover,
+          author: post.author || 'TG Media Downloader Team',
+          datePublished: post.date,
+          dateModified: post.updatedDate || post.date,
+          category: post.category,
+          keywords: post.keywords,
+          url: `https://tg-media-bulk-downloader.netlify.app/blog/${post.slug}`,
+        }}
+        breadcrumbs={[
+          { name: 'Home', path: '/' },
+          { name: 'Blog & Guides', path: '/blog' },
+          { name: post.title, path: `/blog/${post.slug}` },
+        ]}
+      />
+
+      {/* Back Button */}
+      <Link
+        to="/blog"
+        className="inline-flex items-center gap-2 px-4 py-2 font-mono font-bold btn-fintech-secondary text-xs hover:scale-[1.02] transition-all"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        <span>Back to Articles</span>
+      </Link>
+
+      {/* Article Header */}
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center gap-3 text-xs font-mono">
+          <span className="px-3 py-1 rounded-full bg-[#635BFF]/15 text-[#635BFF] dark:text-indigo-300 border border-[#635BFF]/30 font-bold uppercase tracking-wider">
+            {post.category}
+          </span>
+          <span className="text-slate-400 font-bold flex items-center gap-1.5 bg-slate-200/50 dark:bg-white/5 px-2.5 py-1 rounded-full border border-slate-200 dark:border-white/10">
+            <Clock className="w-3.5 h-3.5 text-[#635BFF]" /> {post.readTime || 5} MIN READ
+          </span>
+        </div>
+
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-current leading-tight tracking-tight font-display">
+          {post.title}
+        </h1>
+
+        <div className="flex items-center gap-3 text-xs font-mono text-slate-500 dark:text-slate-400 pt-3 border-t border-slate-200/80 dark:border-white/10">
+          <div className="flex items-center gap-1.5 font-bold text-current">
+            <User className="w-4 h-4 text-[#635BFF]" />
+            <span>By {post.author || 'TG Downloader Team'}</span>
+          </div>
+          <span>•</span>
+          <div className="flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5" />
+            <span>Published {post.date}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Hero Cover Image */}
+      <div className="aspect-video w-full rounded-[20px] overflow-hidden border border-slate-200/80 dark:border-white/15 shadow-2xl relative">
+        <img
+          src={post.cover}
+          alt={post.title}
+          loading="lazy"
+          decoding="async"
+          width="1200"
+          height="675"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+      </div>
+
+      {/* Content Body with Rich UI Parser */}
+      <div className="glass-panel p-6 sm:p-10 rounded-[24px] text-current border border-slate-200/80 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+        <FormattedBlogContent content={post.content} />
+      </div>
+
+    </div>
+  )
+}
+
 export default function PublicBlogView() {
   const { blogPosts } = useApp()
-  const [selectedPost, setSelectedPost] = useState(null)
+  const { slug } = useParams()
   const [searchQuery, setSearchQuery] = useState('')
+
+  // ─── DEEP LINK HANDLING: /blog/:slug → render the article directly ───────
+  if (slug) {
+    const post = (blogPosts || []).find(p => p.slug === slug)
+    if (post) return <ArticleView post={post} />
+    // Unknown slug — fall through to the list (no 404 flash for users)
+  }
 
   const filteredPosts = (blogPosts || []).filter(post =>
     post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     post.category.toLowerCase().includes(searchQuery.toLowerCase())
   )
-
-  // ─── SINGLE ARTICLE VIEW — PREMIUM READING UI ─────────────────────────────
-  if (selectedPost) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-10 space-y-8 animate-fade-in">
-        <SeoMeta
-          title={selectedPost.title}
-          description={selectedPost.metaDesc || selectedPost.excerpt}
-          keywords={selectedPost.keywords || 'telegram download tutorial, how to download telegram videos, telegram private group downloader guide'}
-          image={selectedPost.cover}
-          jsonLd={{
-            "@context": "https://schema.org",
-            "@type": "BlogPosting",
-            "headline": selectedPost.title,
-            "description": selectedPost.metaDesc || selectedPost.excerpt,
-            "image": selectedPost.cover,
-            "author": { "@type": "Person", "name": selectedPost.author || "TG Downloader Team" },
-            "datePublished": selectedPost.date || "2026-07-30"
-          }}
-        />
-
-        {/* Back Button */}
-        <button
-          onClick={() => setSelectedPost(null)}
-          className="btn-fintech-secondary text-xs flex items-center gap-2 px-4 py-2 font-mono font-bold hover:scale-[1.02] transition-all"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Articles</span>
-        </button>
-
-        {/* Article Header */}
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-3 text-xs font-mono">
-            <span className="px-3 py-1 rounded-full bg-[#635BFF]/15 text-[#635BFF] dark:text-indigo-300 border border-[#635BFF]/30 font-bold uppercase tracking-wider">
-              {selectedPost.category}
-            </span>
-            <span className="text-slate-400 font-bold flex items-center gap-1.5 bg-slate-200/50 dark:bg-white/5 px-2.5 py-1 rounded-full border border-slate-200 dark:border-white/10">
-              <Clock className="w-3.5 h-3.5 text-[#635BFF]" /> {selectedPost.readTime || 5} MIN READ
-            </span>
-          </div>
-
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-current leading-tight tracking-tight font-display">
-            {selectedPost.title}
-          </h1>
-
-          <div className="flex items-center gap-3 text-xs font-mono text-slate-500 dark:text-slate-400 pt-3 border-t border-slate-200/80 dark:border-white/10">
-            <div className="flex items-center gap-1.5 font-bold text-current">
-              <User className="w-4 h-4 text-[#635BFF]" />
-              <span>By {selectedPost.author || 'TG Downloader Team'}</span>
-            </div>
-            <span>•</span>
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5" />
-              <span>Published {selectedPost.date}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Hero Cover Image */}
-        <div className="aspect-video w-full rounded-[20px] overflow-hidden border border-slate-200/80 dark:border-white/15 shadow-2xl relative">
-          <img src={selectedPost.cover} alt={selectedPost.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-        </div>
-
-        {/* Content Body with Rich UI Parser */}
-        <div className="glass-panel p-6 sm:p-10 rounded-[24px] text-current border border-slate-200/80 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
-          <FormattedBlogContent content={selectedPost.content} />
-        </div>
-
-      </div>
-    )
-  }
 
   // ─── ARTICLES LIST VIEW — COMPACT CARDS & PREMIUM UI ─────────────────────
   return (
@@ -237,23 +261,28 @@ export default function PublicBlogView() {
         {filteredPosts.map(post => (
           <article
             key={post.id}
-            onClick={() => setSelectedPost(post)}
             className="glass-panel rounded-[18px] overflow-hidden border border-slate-200/80 dark:border-white/10 hover:border-[#635BFF]/60 hover:shadow-[0_15px_35px_rgba(99,91,255,0.25)] transition-all duration-300 cursor-pointer flex flex-col justify-between group hover:-translate-y-1"
           >
             {/* Compact Thumbnail Container */}
-            <div className="h-44 sm:h-40 w-full overflow-hidden relative bg-slate-900">
-              <img
-                src={post.cover}
-                alt={post.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80"></div>
-              
-              {/* Category Badge overlay */}
-              <span className="absolute top-3 left-3 px-2.5 py-1 rounded-md text-[10px] font-mono font-bold bg-[#635BFF]/90 text-white backdrop-blur-md shadow-md">
-                {post.category}
-              </span>
-            </div>
+            <Link to={`/blog/${post.slug}`} className="block w-full">
+              <div className="h-44 sm:h-40 w-full overflow-hidden relative bg-slate-900">
+                <img
+                  src={post.cover}
+                  alt={post.title}
+                  loading="lazy"
+                  decoding="async"
+                  width="1200"
+                  height="675"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80"></div>
+
+                {/* Category Badge overlay */}
+                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-md text-[10px] font-mono font-bold bg-[#635BFF]/90 text-white backdrop-blur-md shadow-md">
+                  {post.category}
+                </span>
+              </div>
+            </Link>
 
             {/* Compact Content Details */}
             <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
@@ -265,9 +294,11 @@ export default function PublicBlogView() {
                   <span>{post.date}</span>
                 </div>
 
-                <h2 className="text-sm sm:text-base font-bold text-current group-hover:text-[#635BFF] transition-colors leading-snug line-clamp-2 font-display">
-                  {post.title}
-                </h2>
+                <Link to={`/blog/${post.slug}`}>
+                  <h2 className="text-sm sm:text-base font-bold text-current group-hover:text-[#635BFF] transition-colors leading-snug line-clamp-2 font-display">
+                    {post.title}
+                  </h2>
+                </Link>
 
                 <p className="text-slate-500 dark:text-slate-400 text-xs line-clamp-2 leading-relaxed">
                   {post.excerpt}
@@ -277,10 +308,10 @@ export default function PublicBlogView() {
               {/* Card Footer */}
               <div className="pt-3 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between text-xs font-mono">
                 <span className="text-slate-400 text-[11px]">By {post.author ? post.author.split(' ')[0] : 'Team'}</span>
-                <span className="text-[#635BFF] font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <Link to={`/blog/${post.slug}`} className="text-[#635BFF] font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                   <span>Read Guide</span>
                   <ArrowRight className="w-3.5 h-3.5" />
-                </span>
+                </Link>
               </div>
             </div>
           </article>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import SeoMeta from '../components/SeoMeta'
 import { Shield, Lock, Mail, Eye, EyeOff, ArrowLeft } from 'lucide-react'
 
 export default function AdminLoginView() {
@@ -28,6 +29,8 @@ export default function AdminLoginView() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4">
+      {/* This page must never be indexed by search engines */}
+      <SeoMeta title="Admin Login — TG Media Downloader" description="Administrator sign-in portal for TG Media Downloader." noIndex />
       {/* Background blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/8 rounded-full blur-3xl" />

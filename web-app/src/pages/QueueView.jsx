@@ -273,6 +273,7 @@ export default function QueueView() {
         title="Live Download Queue & Speed Monitor — Telegram Batch Downloader"
         description="Monitor active Telegram batch download jobs, real-time download speeds, file transfer progress, and history."
         keywords="telegram download queue, telegram batch transfer monitor, live telegram download speed, telegram file manager"
+        noIndex
       />
 
       {/* Page header */}

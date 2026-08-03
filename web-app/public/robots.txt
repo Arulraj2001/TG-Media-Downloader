@@ -1,6 +1,10 @@
 User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /login
 Disallow: /profile
+Disallow: /settings
+Disallow: /queue
+Disallow: /search
 
 Sitemap: https://tg-media-bulk-downloader.netlify.app/sitemap.xml

@@ -114,6 +114,7 @@ export default function SettingsView() {
       <SeoMeta
         title="Settings — TG Media Downloader"
         description="Configure download path, speed limits, proxy, and Telegram session settings."
+        noIndex
       />
 
       {/* Page header */}
