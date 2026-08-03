@@ -94,15 +94,34 @@ export function AuthProvider({ children }) {
     localStorage.setItem('tg_mtproto_session', JSON.stringify(tgSession))
   }, [tgSession])
 
+  // ─── Safe Fetch Helper ──────────────────────────────────────────────────────
+  const safeFetchJson = async (url, options) => {
+    const res = await fetch(url, options)
+    const contentType = res.headers.get('content-type') || ''
+    if (!res.ok) {
+      if (contentType.includes('application/json')) {
+        const errData = await res.json()
+        throw new Error(errData.error || errData.message || `Server error (${res.status})`)
+      } else {
+        const text = await res.text()
+        throw new Error(`Server returned status ${res.status}: ${text.slice(0, 100)}`)
+      }
+    }
+    if (!contentType.includes('application/json')) {
+      const text = await res.text()
+      throw new Error(`Unexpected non-JSON response (${res.status}): ${text.slice(0, 100)}`)
+    }
+    return await res.json()
+  }
+
   // ─── Telegram MTProto Actions ──────────────────────────────────────────────
   const startTelegramConnect = async (apiId, apiHash, phone) => {
     try {
-      const res = await fetch(`${BACKEND}/api/telegram/send-code`, {
+      const data = await safeFetchJson(`${BACKEND}/api/telegram/send-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ api_id: apiId, api_hash: apiHash, phone })
       })
-      const data = await res.json()
       if (data.error) return { error: data.error }
 
       if (data.connected) {
@@ -120,18 +139,17 @@ export function AuthProvider({ children }) {
       }))
       return { success: true, connected: false }
     } catch (err) {
-      return { error: `Cannot reach backend server. Is it running? (${err.message})` }
+      return { error: `Backend connection error: ${err.message}` }
     }
   }
 
   const verifyTelegramCode = async (code) => {
     try {
-      const res = await fetch(`${BACKEND}/api/telegram/verify-code`, {
+      const data = await safeFetchJson(`${BACKEND}/api/telegram/verify-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: tgSession.phone, code })
       })
-      const data = await res.json()
       if (data.error) return { error: data.error }
       if (data.requires_2fa) {
         setTgSession(prev => ({ ...prev, step: 3 }))
@@ -149,12 +167,11 @@ export function AuthProvider({ children }) {
 
   const verifyTelegram2FA = async (password) => {
     try {
-      const res = await fetch(`${BACKEND}/api/telegram/verify-2fa`, {
+      const data = await safeFetchJson(`${BACKEND}/api/telegram/verify-2fa`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: tgSession.phone, password })
       })
-      const data = await res.json()
       if (data.error) return { error: data.error }
       setTgSession(prev => ({
         ...prev, connected: true, step: 4,
@@ -168,12 +185,11 @@ export function AuthProvider({ children }) {
 
   const checkTelegramSession = async (phone) => {
     try {
-      const res = await fetch(`${BACKEND}/api/telegram/check-session`, {
+      const data = await safeFetchJson(`${BACKEND}/api/telegram/check-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: phone || tgSession.phone })
       })
-      const data = await res.json()
       if (data.authorized) {
         setTgSession(prev => ({
           ...prev, connected: true, step: 4,
@@ -190,7 +206,7 @@ export function AuthProvider({ children }) {
 
   const disconnectTelegram = async () => {
     try {
-      await fetch(`${BACKEND}/api/telegram/disconnect`, {
+      await safeFetchJson(`${BACKEND}/api/telegram/disconnect`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: tgSession.phone })
@@ -203,7 +219,7 @@ export function AuthProvider({ children }) {
 
   const _saveSessionMeta = async (phone, apiId, apiHash) => {
     try {
-      await fetch(`${BACKEND}/api/telegram/save-meta`, {
+      await safeFetchJson(`${BACKEND}/api/telegram/save-meta`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, api_id: apiId, api_hash: apiHash })

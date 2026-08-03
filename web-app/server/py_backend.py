@@ -97,21 +97,28 @@ DOWNLOAD_FILES: dict = {}
 DOWNLOAD_TEMP_DIR = os.path.join(os.path.dirname(__file__), 'downloads_temp')
 os.makedirs(DOWNLOAD_TEMP_DIR, exist_ok=True)
 
-# ─── Dedicated Asyncio Loop (runs in background thread) ──────────────────────
-_loop = asyncio.new_event_loop()
-asyncio.set_event_loop(_loop)
+# ─── Dedicated Asyncio Loop Manager (process & thread safe) ─────────────────
+_loop_lock = threading.Lock()
+_loop = None
 
-def _run_event_loop():
-    asyncio.set_event_loop(_loop)
-    _loop.run_forever()
+def get_event_loop():
+    """Ensure an active event loop is running in the current worker process thread."""
+    global _loop
+    with _loop_lock:
+        if _loop is None or not _loop.is_running():
+            _loop = asyncio.new_event_loop()
+            def _loop_worker(l):
+                asyncio.set_event_loop(l)
+                l.run_forever()
+            t = threading.Thread(target=_loop_worker, args=(_loop,), daemon=True)
+            t.start()
+    return _loop
 
-# Start the event loop in a daemon thread so scheduled coroutines (e.g. download jobs) execute
-threading.Thread(target=_run_event_loop, daemon=True).start()
-
-def run_async(coro):
-    """Schedule a coroutine on the background event loop and wait for the result."""
-    fut = asyncio.run_coroutine_threadsafe(coro, _loop)
-    return fut.result()
+def run_async(coro, timeout=60):
+    """Schedule a coroutine on the active process event loop and wait for the result."""
+    loop = get_event_loop()
+    fut = asyncio.run_coroutine_threadsafe(coro, loop)
+    return fut.result(timeout=timeout)
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
 def clean_phone_number(phone: str) -> str:
@@ -139,11 +146,30 @@ def get_any_authorized_client() -> TelegramClient | None:
             return c
     return None
 
+async def connect_client_safely(client: TelegramClient):
+    """Safely connect a TelegramClient, handling SQLite database lock conflicts with retries."""
+    if client.is_connected():
+        return
+    for attempt in range(3):
+        try:
+            await client.connect()
+            return
+        except Exception as e:
+            if 'database is locked' in str(e).lower() or 'locked' in str(e).lower():
+                print(f"[Telethon] SQLite lock detected (attempt {attempt+1}/3). Retrying...")
+                try:
+                    await client.disconnect()
+                except Exception:
+                    pass
+                await asyncio.sleep(0.5 * (attempt + 1))
+            else:
+                raise e
+    await client.connect()
+
 async def ensure_connected(client: TelegramClient) -> bool:
     """Reconnect client if disconnected, return True if authorized."""
     try:
-        if not client.is_connected():
-            await client.connect()
+        await connect_client_safely(client)
         return await client.is_user_authorized()
     except Exception:
         return False
@@ -233,6 +259,15 @@ def format_chat_message(msg) -> dict | None:
         'channel_id': '',
     }
 
+# ─── Error Handlers ──────────────────────────────────────────────────────────
+@app.errorhandler(500)
+def handle_internal_error(e):
+    return jsonify({'error': f'Internal Server Error: {str(e)}'}), 500
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    return jsonify({'error': f'Unhandled Server Error: {str(e)}'}), 500
+
 # ─── Routes ──────────────────────────────────────────────────────────────────
 
 @app.route('/api/health', methods=['GET'])
@@ -268,12 +303,13 @@ def send_code():
     session_name = f"session_{clean.replace('+', '')}"
     session_file = os.path.join(SESSION_DIR, session_name)
 
-    client = TelegramClient(session_file, api_id_int, api_hash_str, loop=_loop)
-
     async def _send():
+        client = get_client_for_phone(clean)
+        if not client:
+            client = TelegramClient(session_file, api_id_int, api_hash_str, loop=get_event_loop())
+
         try:
-            if not client.is_connected():
-                await client.connect()
+            await connect_client_safely(client)
 
             if await client.is_user_authorized():
                 me = await client.get_me()
@@ -319,6 +355,10 @@ def send_code():
             raise ValueError("This phone number is banned from Telegram.")
         except FloodWaitError as e:
             raise ValueError(f"Telegram flood wait: please wait {e.seconds} seconds.")
+        except Exception as e:
+            if 'database is locked' in str(e).lower():
+                raise ValueError("Session database is currently busy. Please try again in a few seconds.")
+            raise e
 
     try:
         result = run_async(_send())
@@ -350,8 +390,7 @@ def verify_code():
     phone_code_hash = session_info.get('phone_code_hash') if isinstance(session_info, dict) else None
 
     async def _verify():
-        if not client.is_connected():
-            await client.connect()
+        await connect_client_safely(client)
         try:
             await client.sign_in(clean, code.strip(), phone_code_hash=phone_code_hash)
         except SessionPasswordNeededError:
@@ -407,8 +446,7 @@ def verify_2fa():
         return jsonify({'error': 'No active session found.'}), 400
 
     async def _2fa():
-        if not client.is_connected():
-            await client.connect()
+        await connect_client_safely(client)
         await client.sign_in(password=password)
         me = await client.get_me()
         dialogs = []
@@ -458,16 +496,15 @@ def check_session():
         return jsonify({'authorized': False})
 
     async def _check():
-        # Need at least a dummy api_id/hash to reconnect saved session
-        # We store them alongside session
         meta_file = session_file + '.meta.json'
         if not os.path.exists(meta_file):
             return {'authorized': False}
         with open(meta_file, 'r') as f:
             meta = json.load(f)
-        client = TelegramClient(session_file, meta['api_id'], meta['api_hash'], loop=_loop)
-        if not client.is_connected():
-            await client.connect()
+        client = get_client_for_phone(clean)
+        if not client:
+            client = TelegramClient(session_file, meta['api_id'], meta['api_hash'], loop=get_event_loop())
+        await connect_client_safely(client)
         auth = await client.is_user_authorized()
         if auth:
             me = await client.get_me()
@@ -883,7 +920,7 @@ def download_file():
             finally:
                 done.set()
 
-        asyncio.run_coroutine_threadsafe(_download(), _loop)
+        asyncio.run_coroutine_threadsafe(_download(), get_event_loop())
 
         while not done.is_set() or not buf.empty():
             try:
@@ -1040,7 +1077,7 @@ def start_download_job():
         progress_queue.put({'type': 'job_complete', 'total': total})
 
     # Schedule the async work on the background loop
-    asyncio.run_coroutine_threadsafe(_do_downloads(), _loop)
+    asyncio.run_coroutine_threadsafe(_do_downloads(), get_event_loop())
 
     return jsonify({'job_id': job_id, 'total': len(message_ids)})
 
